@@ -1,0 +1,54 @@
+[
+  {
+    "id": "maze_beginner_1",
+    "title": "First Steps",
+    "difficulty": "beginner",
+    "grid": [
+      [0,1,0,0,0],
+      [0,1,0,1,0],
+      [0,0,0,1,0],
+      [1,1,0,1,0],
+      [0,0,0,0,0]
+    ],
+    "start": [0,0],
+    "end": [4,4],
+    "description": "A simple 5x5 maze to get started."
+  },
+  {
+    "id": "maze_beginner_2",
+    "title": "Winding Path",
+    "difficulty": "beginner",
+    "grid": [
+      [0,0,0,1,0,0,0],
+      [1,1,0,1,0,1,0],
+      [0,0,0,0,0,1,0],
+      [0,1,1,1,1,1,0],
+      [0,0,0,0,0,0,0],
+      [1,1,0,1,0,1,1],
+      [0,0,0,1,0,0,0]
+    ],
+    "start": [0,0],
+    "end": [6,6],
+    "description": "Navigate through a winding 7x7 maze."
+  },
+  {
+    "id": "maze_intermediate_1",
+    "title": "Dead End City",
+    "difficulty": "intermediate",
+    "grid": [
+      [0,0,0,1,0,0,0,1,0,0],
+      [1,1,0,1,0,1,0,1,0,1],
+      [0,0,0,0,0,1,0,0,0,1],
+      [0,1,1,1,1,1,1,1,0,1],
+      [0,0,0,0,0,0,0,1,0,0],
+      [1,1,0,1,0,1,0,1,1,0],
+      [0,0,0,1,0,1,0,0,0,0],
+      [0,1,1,1,0,1,1,1,1,0],
+      [0,0,0,0,0,0,0,0,0,0],
+      [1,1,1,1,1,1,1,1,0,0]
+    ],
+    "start": [0,0],
+    "end": [9,9],
+    "description": "Multiple dead ends challenge you in this 10x10 maze."
+  }
+]

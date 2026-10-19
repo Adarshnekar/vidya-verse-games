@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+*.local
+.DS_Store
+database/vidyaverse.json
+apps/web/dist/
+apps/web/.vite/
+*.tsbuildinfo

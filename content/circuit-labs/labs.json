@@ -1,0 +1,150 @@
+[
+  {
+    "id": "lab_ohms_law",
+    "title": "Ohm's Law Explorer",
+    "difficulty": "beginner",
+    "estimatedTime": "15 minutes",
+    "grade": "6-8",
+    "objectives": [
+      "Understand the relationship V = I × R",
+      "Measure voltage and current in a simple circuit",
+      "Calculate resistance using Ohm's Law",
+      "See how changing resistance affects current"
+    ],
+    "description": "Ohm's Law is one of the fundamental laws of electronics. It states that the current through a conductor is directly proportional to the voltage and inversely proportional to the resistance.",
+    "formula": "V = I × R  (Voltage = Current × Resistance)",
+    "components": ["DC Battery (9V)", "Resistor (1kΩ)", "Resistor (2kΩ)", "Ammeter", "Voltmeter"],
+    "steps": [
+      "Place a 9V battery in the circuit",
+      "Connect a 1kΩ resistor",
+      "Add an ammeter in series to measure current",
+      "Add a voltmeter in parallel to measure voltage",
+      "Run the simulation and record V and I",
+      "Calculate R = V/I and verify it matches 1kΩ",
+      "Replace with 2kΩ resistor and repeat"
+    ],
+    "questions": [
+      "If voltage is 9V and resistance is 1000Ω, what is the current in mA?",
+      "How does current change when you double the resistance?",
+      "What happens to voltage if you increase current while resistance stays constant?"
+    ],
+    "circuitUrl": "https://www.falstad.com/circuit/circuitjs.html?ctz=CQAgjCAMB0l3BWcBmWBOA7AFgOwFYsBmMABgDYwBOMcmkAtoawFMBKAWgDMBzVkASkI8AnMEgQYSHmn5QAbg1gcwEOiH6RIsGCFbJVcbRoiaMFMKmC78UbHyA"
+  },
+  {
+    "id": "lab_led_resistor",
+    "title": "LED & Current-Limiting Resistor",
+    "difficulty": "beginner",
+    "estimatedTime": "10 minutes",
+    "grade": "7-9",
+    "objectives": [
+      "Understand why LEDs need a current-limiting resistor",
+      "Calculate the correct resistor value for an LED",
+      "Observe what happens without a resistor"
+    ],
+    "description": "LEDs (Light Emitting Diodes) can be damaged by excess current. We use a resistor to limit the current to a safe level. The formula is R = (Vsupply - VLED) / ILED.",
+    "formula": "R = (Vsupply - VLED) / ILED",
+    "components": ["Battery (5V)", "LED (red, 2V forward voltage)", "Resistor (150Ω)", "Switch"],
+    "steps": [
+      "Place a 5V battery",
+      "Connect an LED directly — observe it lights up very bright (dangerous!)",
+      "Add a 150Ω resistor in series with the LED",
+      "Run simulation and observe safe current (~20mA)",
+      "Try different resistor values and observe LED brightness"
+    ],
+    "questions": [
+      "Why does an LED without a resistor risk burning out?",
+      "If supply is 5V, LED forward voltage is 2V, and max current is 20mA, what resistor do you need?",
+      "What happens to brightness when you increase the resistance?"
+    ]
+  },
+  {
+    "id": "lab_series_parallel",
+    "title": "Series vs Parallel Circuits",
+    "difficulty": "intermediate",
+    "estimatedTime": "20 minutes",
+    "grade": "8-10",
+    "objectives": [
+      "Compare series and parallel circuit configurations",
+      "Calculate total resistance in each configuration",
+      "Observe how each bulb's brightness changes",
+      "Understand current and voltage distribution"
+    ],
+    "description": "In a series circuit, components are connected end-to-end and the same current flows through all. In a parallel circuit, each component has its own path and the same voltage appears across all.",
+    "formulas": [
+      "Series: Rtotal = R1 + R2 + R3",
+      "Parallel: 1/Rtotal = 1/R1 + 1/R2 + 1/R3"
+    ],
+    "components": ["Battery (12V)", "3× Resistors (100Ω each)", "3× LEDs or light bulbs", "Ammeter", "Voltmeter"],
+    "steps": [
+      "Build a series circuit with 3 LEDs",
+      "Measure total resistance and current",
+      "Observe LED brightness",
+      "Now build a parallel circuit with the same 3 LEDs",
+      "Compare measurements and brightness",
+      "Remove one LED from each circuit type — observe the difference"
+    ],
+    "questions": [
+      "Why do LEDs in parallel each glow brighter than in series?",
+      "What is the total resistance of three 100Ω resistors in series?",
+      "What happens in a series circuit when one component fails?",
+      "Why does a parallel circuit keep working when one branch fails?"
+    ]
+  },
+  {
+    "id": "lab_voltage_divider",
+    "title": "Voltage Divider",
+    "difficulty": "intermediate",
+    "estimatedTime": "15 minutes",
+    "grade": "9-11",
+    "objectives": [
+      "Understand the voltage divider principle",
+      "Calculate output voltage using the divider formula",
+      "Build a potentiometer-based volume control analogy",
+      "Measure output voltage for different resistor ratios"
+    ],
+    "description": "A voltage divider uses two resistors to produce an output voltage that is a fraction of the input voltage. This is used everywhere in electronics — sensor interfaces, audio volume controls, reference voltages.",
+    "formula": "Vout = Vin × R2 / (R1 + R2)",
+    "components": ["Battery (10V)", "R1 = 3kΩ", "R2 = 7kΩ", "Voltmeter"],
+    "steps": [
+      "Connect R1 and R2 in series from 10V to ground",
+      "Measure voltage across R2 (between the midpoint and ground)",
+      "Verify using formula: Vout = 10V × 7000/(3000+7000) = 7V",
+      "Change R2 to 3kΩ and predict new Vout before measuring",
+      "Try R1=R2=5kΩ — what is Vout?"
+    ],
+    "questions": [
+      "With Vin=10V, R1=4kΩ, R2=6kΩ, what is Vout?",
+      "How would you modify the circuit to get exactly 5V from a 10V supply?",
+      "How does a potentiometer act as a voltage divider?"
+    ]
+  },
+  {
+    "id": "lab_rc_circuit",
+    "title": "RC Charging & Discharging",
+    "difficulty": "advanced",
+    "estimatedTime": "25 minutes",
+    "grade": "11-12",
+    "objectives": [
+      "Understand capacitor charging and discharging behavior",
+      "Measure the time constant τ = RC",
+      "Plot the voltage vs time curve",
+      "Understand exponential growth and decay"
+    ],
+    "description": "When a capacitor charges through a resistor, the voltage rises exponentially. The time constant τ = R × C determines how fast this happens. At t = τ, the capacitor is 63.2% charged.",
+    "formula": "Vc(t) = Vs × (1 - e^(-t/τ)), where τ = R × C",
+    "components": ["Battery (5V)", "R = 10kΩ", "C = 100μF", "Switch", "Voltmeter across capacitor"],
+    "steps": [
+      "Connect the R-C series circuit with the switch open",
+      "Close the switch to start charging",
+      "Observe voltage across capacitor rising",
+      "Calculate τ = RC = 10000 × 0.0001 = 1 second",
+      "Verify capacitor reaches ~3.16V (63.2% of 5V) at t=1s",
+      "Open switch to discharge through R — observe decay"
+    ],
+    "questions": [
+      "What is the time constant if R = 47kΩ and C = 220μF?",
+      "How long does it take for the capacitor to reach 99% of full charge (≈5τ)?",
+      "In which real-world devices do you use RC circuits?"
+    ]
+  }
+]

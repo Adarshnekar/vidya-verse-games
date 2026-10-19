@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  html {
+    @apply scroll-smooth;
+  }
+  
+  body {
+    @apply bg-surface-900 text-surface-100 font-sans antialiased;
+    min-height: 100dvh;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-800;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-600 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-500;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface-900 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-brand-500 hover:bg-brand-600 text-white focus:ring-brand-500 shadow-md hover:shadow-glow-brand;
+  }
+  .btn-playlab {
+    @apply btn bg-playlab-500 hover:bg-playlab-600 text-white focus:ring-playlab-500 hover:shadow-glow-playlab;
+  }
+  .btn-circuit {
+    @apply btn bg-circuit-500 hover:bg-circuit-600 text-white focus:ring-circuit-500 hover:shadow-glow-circuit;
+  }
+  .btn-code {
+    @apply btn bg-code-500 hover:bg-code-600 text-white focus:ring-code-500 hover:shadow-glow-code;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent hover:bg-surface-700 text-surface-300 hover:text-surface-100 border border-surface-700;
+  }
+  .btn-icon {
+    @apply btn p-2 bg-surface-700 hover:bg-surface-600 text-surface-300 hover:text-surface-100 rounded-lg;
+  }
+  
+  .card {
+    @apply bg-surface-800 border border-surface-700 rounded-xl p-4 shadow-card;
+  }
+  .card-interactive {
+    @apply card cursor-pointer hover:border-surface-500 hover:shadow-game transition-all duration-200;
+  }
+  
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-playlab { @apply badge bg-playlab-900/50 text-playlab-400 border border-playlab-700/50; }
+  .badge-circuit { @apply badge bg-circuit-900/50 text-circuit-400 border border-circuit-700/50; }
+  .badge-code { @apply badge bg-code-900/50 text-code-400 border border-code-700/50; }
+  .badge-brand { @apply badge bg-brand-900/50 text-brand-400 border border-brand-700/50; }
+  
+  .glass {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10;
+  }
+  
+  .section-title {
+    @apply font-display text-2xl font-bold text-surface-50;
+  }
+  
+  .label {
+    @apply text-xs font-medium text-surface-400 uppercase tracking-wider;
+  }
+}
+
+@layer utilities {
+  .text-gradient-playlab {
+    @apply bg-gradient-to-r from-playlab-400 to-yellow-400 bg-clip-text text-transparent;
+  }
+  .text-gradient-circuit {
+    @apply bg-gradient-to-r from-circuit-400 to-brand-400 bg-clip-text text-transparent;
+  }
+  .text-gradient-code {
+    @apply bg-gradient-to-r from-code-400 to-pink-400 bg-clip-text text-transparent;
+  }
+  .text-gradient-brand {
+    @apply bg-gradient-to-r from-brand-400 to-code-400 bg-clip-text text-transparent;
+  }
+  
+  .no-select {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

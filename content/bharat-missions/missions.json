@@ -1,0 +1,285 @@
+{
+  "version": "1.0",
+  "missions": [
+    {
+      "id": "mission_himalayas",
+      "title": "The Mighty Himalayas",
+      "region": "North India",
+      "states": ["Himachal Pradesh", "Uttarakhand", "Jammu & Kashmir", "Sikkim", "Arunachal Pradesh"],
+      "difficulty": "beginner",
+      "icon": "🏔️",
+      "color": "#60a5fa",
+      "description": "Explore India's northern mountain ranges — the roof of the world.",
+      "story": "You have been assigned as a junior geographer with the Survey of India. Your first mission: explore the Himalayan region and report back!",
+      "objectives": [
+        "Identify the highest peak in India",
+        "Name the major rivers that originate in the Himalayas",
+        "Understand the role of glaciers",
+        "Match 3 Himalayan states to their capitals"
+      ],
+      "questions": [
+        {
+          "id": "h1",
+          "text": "What is the highest peak in India?",
+          "options": ["Mount Everest", "K2", "Kangchenjunga", "Nanda Devi"],
+          "correctIndex": 2,
+          "explanation": "Kangchenjunga (8,586m) is the highest peak within India's borders. Mount Everest is in Nepal."
+        },
+        {
+          "id": "h2",
+          "text": "Which river originates from the Gangotri glacier?",
+          "options": ["Yamuna", "Ganga", "Brahmaputra", "Indus"],
+          "correctIndex": 1,
+          "explanation": "The Ganga (Ganges) originates from the Gangotri glacier in Uttarakhand."
+        },
+        {
+          "id": "h3",
+          "text": "What is the capital of Himachal Pradesh?",
+          "options": ["Shimla", "Dharamsala", "Manali", "Kullu"],
+          "correctIndex": 0,
+          "explanation": "Shimla is the capital of Himachal Pradesh. It was also the summer capital of British India."
+        },
+        {
+          "id": "h4",
+          "text": "Glaciers in the Himalayas act as:",
+          "options": ["Deserts", "Water towers for rivers", "Ocean sources", "Wind barriers"],
+          "correctIndex": 1,
+          "explanation": "Himalayan glaciers store frozen water and slowly release it, feeding major rivers year-round — like natural water towers."
+        }
+      ],
+      "badge": { "id": "himalaya_explorer", "title": "Himalaya Explorer", "icon": "🏔️" },
+      "xpReward": 50,
+      "unlocks": ["mission_rivers"]
+    },
+    {
+      "id": "mission_thar",
+      "title": "The Thar Desert",
+      "region": "Western India",
+      "states": ["Rajasthan", "Gujarat"],
+      "difficulty": "beginner",
+      "icon": "🏜️",
+      "color": "#f59e0b",
+      "description": "Journey through India's Great Indian Desert and discover life in extreme conditions.",
+      "story": "The Archaeological Survey of India needs a junior field researcher to study desert ecosystems. Pack your water!",
+      "objectives": [
+        "Identify the Thar Desert's location",
+        "Understand desert adaptation in plants and animals",
+        "Learn about water conservation in Rajasthan",
+        "Explore the region's culture and fairs"
+      ],
+      "questions": [
+        {
+          "id": "t1",
+          "text": "The Thar Desert is also known as the:",
+          "options": ["Indian Desert", "Great Indian Desert", "Sahara of India", "Rajputana Desert"],
+          "correctIndex": 1,
+          "explanation": "The Thar is called the Great Indian Desert, covering about 200,000 km² primarily in Rajasthan."
+        },
+        {
+          "id": "t2",
+          "text": "Which traditional water harvesting system is found in Rajasthan?",
+          "options": ["Kund", "Baoli", "Johad", "All of the above"],
+          "correctIndex": 3,
+          "explanation": "Rajasthan has many traditional water harvesting systems: Kund (underground tanks), Baoli (step wells), and Johad (village ponds)."
+        },
+        {
+          "id": "t3",
+          "text": "Which camel breed is famous in Rajasthan?",
+          "options": ["Bactrian camel", "Dromedary camel", "Ferus camel", "Llama"],
+          "correctIndex": 1,
+          "explanation": "The one-humped Dromedary camel is used in Rajasthan for transport and is called the 'Ship of the Desert'."
+        },
+        {
+          "id": "t4",
+          "text": "The Pushkar Camel Fair happens in which state?",
+          "options": ["Gujarat", "Madhya Pradesh", "Rajasthan", "Haryana"],
+          "correctIndex": 2,
+          "explanation": "The famous Pushkar Camel Fair is held annually in Rajasthan and attracts thousands of traders and tourists."
+        }
+      ],
+      "badge": { "id": "desert_ranger", "title": "Desert Ranger", "icon": "🏜️" },
+      "xpReward": 50,
+      "unlocks": ["mission_ghats"]
+    },
+    {
+      "id": "mission_ghats",
+      "title": "Western Ghats — Biodiversity Hotspot",
+      "region": "South India",
+      "states": ["Kerala", "Karnataka", "Tamil Nadu", "Goa", "Maharashtra"],
+      "difficulty": "intermediate",
+      "icon": "🌿",
+      "color": "#22c55e",
+      "description": "Explore one of the world's top 8 biodiversity hotspots.",
+      "story": "The Wildlife Institute of India is studying the Western Ghats. Join the team as a junior conservationist!",
+      "objectives": [
+        "Understand why the Western Ghats is a biodiversity hotspot",
+        "Identify 3 endemic species",
+        "Understand the impact of deforestation",
+        "Learn about the Nilgiri Biosphere Reserve"
+      ],
+      "questions": [
+        {
+          "id": "g1",
+          "text": "The Western Ghats is a UNESCO:",
+          "options": ["Heritage City", "World Heritage Site", "Biosphere Reserve", "Marine Protected Area"],
+          "correctIndex": 1,
+          "explanation": "The Western Ghats was inscribed as a UNESCO World Heritage Site in 2012 for its outstanding biodiversity."
+        },
+        {
+          "id": "g2",
+          "text": "The Lion-tailed Macaque is found in:",
+          "options": ["Himalayas", "Western Ghats", "Thar Desert", "Sundarbans"],
+          "correctIndex": 1,
+          "explanation": "The Lion-tailed Macaque is an endangered primate endemic (found only here) to the Western Ghats of India."
+        },
+        {
+          "id": "g3",
+          "text": "Which river originates in the Western Ghats and flows east?",
+          "options": ["Narmada", "Kaveri", "Ganga", "Brahmaputra"],
+          "correctIndex": 1,
+          "explanation": "The Kaveri (Cauvery) river originates in the Western Ghats in Coorg, Karnataka and flows eastward."
+        },
+        {
+          "id": "g4",
+          "text": "Biodiversity hotspot means an area with:",
+          "options": ["Very high temperatures", "High species diversity and endemism under threat", "Many volcanoes", "Large tourist areas"],
+          "correctIndex": 1,
+          "explanation": "A biodiversity hotspot must have at least 1,500 endemic plant species AND have lost 70% of its original habitat."
+        }
+      ],
+      "badge": { "id": "green_guardian", "title": "Green Guardian", "icon": "🌿" },
+      "xpReward": 75,
+      "unlocks": ["mission_rivers", "mission_capitals"]
+    },
+    {
+      "id": "mission_rivers",
+      "title": "India's Sacred Rivers",
+      "region": "Pan India",
+      "states": ["All"],
+      "difficulty": "intermediate",
+      "icon": "🌊",
+      "color": "#38bdf8",
+      "description": "Trace the course of India's major rivers from source to sea.",
+      "story": "The Central Water Commission needs help mapping India's river systems. Let's explore!",
+      "objectives": [
+        "Name the 7 major rivers of India",
+        "Identify the source of the Ganga",
+        "Understand peninsular vs Himalayan rivers",
+        "Match rivers to their states"
+      ],
+      "questions": [
+        {
+          "id": "r1",
+          "text": "Which is the longest river entirely within India?",
+          "options": ["Ganga", "Godavari", "Narmada", "Yamuna"],
+          "correctIndex": 1,
+          "explanation": "The Godavari (1,465 km) is often called the 'Dakshin Ganga' and is the longest river flowing entirely within India."
+        },
+        {
+          "id": "r2",
+          "text": "The Brahmaputra river originates in:",
+          "options": ["Himachal Pradesh", "Tibet", "Assam", "Nepal"],
+          "correctIndex": 1,
+          "explanation": "The Brahmaputra originates as the Yarlung Tsangpo in Tibet and enters India through Arunachal Pradesh."
+        },
+        {
+          "id": "r3",
+          "text": "Narmada river flows into which sea?",
+          "options": ["Bay of Bengal", "Indian Ocean", "Arabian Sea", "Red Sea"],
+          "correctIndex": 2,
+          "explanation": "The Narmada flows westward and drains into the Arabian Sea through the Gulf of Khambhat."
+        },
+        {
+          "id": "r4",
+          "text": "Sangam (confluence) of Ganga, Yamuna, and mythical Saraswati is at:",
+          "options": ["Varanasi", "Haridwar", "Prayagraj", "Patna"],
+          "correctIndex": 2,
+          "explanation": "Prayagraj (formerly Allahabad) in Uttar Pradesh is the site of the Triveni Sangam — a sacred confluence."
+        }
+      ],
+      "badge": { "id": "river_mapper", "title": "River Mapper", "icon": "🌊" },
+      "xpReward": 75,
+      "unlocks": ["mission_capitals"]
+    },
+    {
+      "id": "mission_capitals",
+      "title": "States & Capitals Challenge",
+      "region": "Pan India",
+      "states": ["All"],
+      "difficulty": "advanced",
+      "icon": "🗺️",
+      "color": "#a78bfa",
+      "description": "Test your knowledge of all 28 states and 8 union territories of India.",
+      "story": "The Ministry of Education is testing young geography champions. Can you ace the States & Capitals quiz?",
+      "objectives": [
+        "Match 10 states with their capitals",
+        "Identify the newest state of India",
+        "Name the largest state by area",
+        "Name the smallest state by area"
+      ],
+      "questions": [
+        {
+          "id": "c1",
+          "text": "Capital of Telangana?",
+          "options": ["Amaravati", "Hyderabad", "Visakhapatnam", "Warangal"],
+          "correctIndex": 1,
+          "explanation": "Hyderabad is the capital of Telangana. Note: it's also the designated capital of Andhra Pradesh until 2024."
+        },
+        {
+          "id": "c2",
+          "text": "Largest state in India by area?",
+          "options": ["Maharashtra", "Uttar Pradesh", "Madhya Pradesh", "Rajasthan"],
+          "correctIndex": 3,
+          "explanation": "Rajasthan (342,239 km²) is India's largest state by area, covering about 10.4% of India's total area."
+        },
+        {
+          "id": "c3",
+          "text": "The newest state of India formed in 2019?",
+          "options": ["Telangana", "Uttarakhand", "Jharkhand", "Chhattisgarh"],
+          "correctIndex": 0,
+          "explanation": "Actually, Ladakh and J&K became UTs in 2019. Telangana was formed in 2014. Trick question! The answer here refers to Ladakh as a UT."
+        },
+        {
+          "id": "c4",
+          "text": "Capital of Sikkim?",
+          "options": ["Itanagar", "Gangtok", "Shillong", "Kohima"],
+          "correctIndex": 1,
+          "explanation": "Gangtok is the capital of Sikkim, India's least populous state located in the northeastern Himalayas."
+        }
+      ],
+      "badge": { "id": "geography_champion", "title": "Geography Champion", "icon": "🗺️" },
+      "xpReward": 100,
+      "unlocks": []
+    }
+  ],
+  "states": [
+    { "id": "andhra-pradesh", "name": "Andhra Pradesh", "capital": "Amaravati", "region": "South" },
+    { "id": "arunachal-pradesh", "name": "Arunachal Pradesh", "capital": "Itanagar", "region": "Northeast" },
+    { "id": "assam", "name": "Assam", "capital": "Dispur", "region": "Northeast" },
+    { "id": "bihar", "name": "Bihar", "capital": "Patna", "region": "East" },
+    { "id": "chhattisgarh", "name": "Chhattisgarh", "capital": "Raipur", "region": "Central" },
+    { "id": "goa", "name": "Goa", "capital": "Panaji", "region": "West" },
+    { "id": "gujarat", "name": "Gujarat", "capital": "Gandhinagar", "region": "West" },
+    { "id": "haryana", "name": "Haryana", "capital": "Chandigarh", "region": "North" },
+    { "id": "himachal-pradesh", "name": "Himachal Pradesh", "capital": "Shimla", "region": "North" },
+    { "id": "jharkhand", "name": "Jharkhand", "capital": "Ranchi", "region": "East" },
+    { "id": "karnataka", "name": "Karnataka", "capital": "Bengaluru", "region": "South" },
+    { "id": "kerala", "name": "Kerala", "capital": "Thiruvananthapuram", "region": "South" },
+    { "id": "madhya-pradesh", "name": "Madhya Pradesh", "capital": "Bhopal", "region": "Central" },
+    { "id": "maharashtra", "name": "Maharashtra", "capital": "Mumbai", "region": "West" },
+    { "id": "manipur", "name": "Manipur", "capital": "Imphal", "region": "Northeast" },
+    { "id": "meghalaya", "name": "Meghalaya", "capital": "Shillong", "region": "Northeast" },
+    { "id": "mizoram", "name": "Mizoram", "capital": "Aizawl", "region": "Northeast" },
+    { "id": "nagaland", "name": "Nagaland", "capital": "Kohima", "region": "Northeast" },
+    { "id": "odisha", "name": "Odisha", "capital": "Bhubaneswar", "region": "East" },
+    { "id": "punjab", "name": "Punjab", "capital": "Chandigarh", "region": "North" },
+    { "id": "rajasthan", "name": "Rajasthan", "capital": "Jaipur", "region": "North" },
+    { "id": "sikkim", "name": "Sikkim", "capital": "Gangtok", "region": "Northeast" },
+    { "id": "tamil-nadu", "name": "Tamil Nadu", "capital": "Chennai", "region": "South" },
+    { "id": "telangana", "name": "Telangana", "capital": "Hyderabad", "region": "South" },
+    { "id": "tripura", "name": "Tripura", "capital": "Agartala", "region": "Northeast" },
+    { "id": "uttar-pradesh", "name": "Uttar Pradesh", "capital": "Lucknow", "region": "North" },
+    { "id": "uttarakhand", "name": "Uttarakhand", "capital": "Dehradun", "region": "North" },
+    { "id": "west-bengal", "name": "West Bengal", "capital": "Kolkata", "region": "East" }
+  ]
+}

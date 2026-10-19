@@ -1,0 +1,30 @@
+{
+  "users": [
+    {
+      "id": "0bb1e804-30bc-4346-9172-deb22f142632",
+      "username": "arjun_class9",
+      "passwordHash": "$2a$10$Kk0mKfLgKZttakOOaKrg/.shjp4hKxLAyirEpeHa8p8Iv4zsVoUOK",
+      "grade": 9,
+      "xp": 50,
+      "level": 1,
+      "createdAt": "2026-10-19T10:20:03.395Z"
+    }
+  ],
+  "progress": [],
+  "achievements": [],
+  "gameSessions": [
+    {
+      "id": "b4c7ab90-8a97-4500-867a-ed9fb8a9cdcb",
+      "roomCode": "49C0L6",
+      "gameType": "ludo",
+      "state": "waiting",
+      "config": {
+        "grade": 9,
+        "difficulty": "medium"
+      },
+      "createdAt": "2026-10-19T10:20:15.732Z",
+      "expiresAt": "2026-10-19T12:20:15.732Z"
+    }
+  ],
+  "codeSubmissions": []
+}
