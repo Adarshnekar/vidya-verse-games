@@ -254,10 +254,10 @@ export const PlayLabPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: index * 0.08 }}
-            className={`group relative flex flex-col sm:flex-row card rounded-2xl overflow-hidden transition-all duration-300 ${game.colorTheme.border} ${game.colorTheme.glow} shadow-soft hover:shadow-card-hover`}
+            className={`group relative flex flex-col sm:flex-row sm:h-[235px] card rounded-2xl overflow-hidden transition-all duration-300 ${game.colorTheme.border} ${game.colorTheme.glow} shadow-soft hover:shadow-card-hover`}
           >
             {/* Left: Guaranteed 1:1 Perfect Square Illustration Image */}
-            <div className="relative w-full aspect-square sm:w-56 sm:h-56 md:w-60 md:h-60 lg:w-52 lg:h-52 xl:w-60 xl:h-60 shrink-0 overflow-hidden bg-[#F5F5FA] dark:bg-[#12121A] border-b sm:border-b-0 sm:border-r border-border">
+            <div className="relative w-full aspect-square sm:w-[235px] sm:h-[235px] shrink-0 overflow-hidden bg-[#F5F5FA] dark:bg-[#12121A] border-b sm:border-b-0 sm:border-r border-border">
               <img
                 src={game.image}
                 alt={game.title}
@@ -285,22 +285,25 @@ export const PlayLabPage: React.FC = () => {
             </div>
 
             {/* Right: Description & Action Area */}
-            <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between min-w-0">
-              <div className="space-y-3">
+            <div className="flex-1 p-5 flex flex-col justify-between min-w-0 h-full">
+              <div className="space-y-1.5">
                 {/* Title */}
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold font-display text-text-primary group-hover:text-[#F5A623] transition-colors truncate">
-                    {game.title}
-                  </h2>
-                </div>
+                <h2 className="text-xl sm:text-2xl font-bold font-display text-text-primary group-hover:text-[#F5A623] transition-colors truncate">
+                  {game.title}
+                </h2>
+
+                {/* Subtitle */}
+                <p className="text-xs sm:text-sm font-semibold text-text-primary/90 line-clamp-1">
+                  {game.subtitle}
+                </p>
 
                 {/* Description */}
-                <p className="text-xs sm:text-sm text-text-muted leading-relaxed line-clamp-3">
+                <p className="text-xs text-text-muted leading-relaxed line-clamp-2">
                   {game.description}
                 </p>
 
                 {/* Metadata Tags */}
-                <div className="flex flex-wrap items-center gap-2.5 pt-0.5 text-xs text-text-muted font-medium">
+                <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs text-text-muted font-medium">
                   <span className="inline-flex items-center gap-1">
                     <Users className="w-3.5 h-3.5 text-text-muted/70" />
                     {game.players}
@@ -319,7 +322,7 @@ export const PlayLabPage: React.FC = () => {
               </div>
 
               {/* Action Button */}
-              <div className="pt-3">
+              <div className="pt-2">
                 <button
                   onClick={() => navigate(game.path)}
                   className="w-full btn-primary py-2.5 font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 group/btn shadow-sm"
