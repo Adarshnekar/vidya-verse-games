@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,112 +6,311 @@
 
 @layer base {
   :root {
+    /* Default Light Mode (Purple & Lavender Pedagogical Theme) */
+    --canvas: #F5F5FA;
+    --card: #FFFFFF;
+    --sidebar-bg: #FFFFFF;
+    --sidebar-border: #E7E7EF;
+    --sidebar-text: #26263A;
+    --sidebar-muted: #77778D;
+    
+    --primary: #6541F5;
+    --primary-deep: #5230E8;
+    --primary-tint: #EAE7FF;
+    --primary-dark: #7C5CFA;
+    
+    --text-primary: #26263A;
+    --text-muted: #77778D;
+    --border: #E7E7EF;
+    
+    /* Semantic Subject & Status Accents */
+    --math: #42A5E8;
+    --math-badge: #DDF2FC;
+    --science: #19B99A;
+    --science-badge: #DDF8EE;
+    --streak: #E95778;
+    --streak-badge: #FCE5EB;
+    --quest: #F5A623;
+    --quest-badge: #FFF0D5;
+    --success: #28B987;
+    --destructive: #F43F5E;
+
+    /* Surface tokens mapped for compatibility */
+    --surface-50: #26263A;
+    --surface-100: #33334B;
+    --surface-200: #55556E;
+    --surface-300: #6B6B83;
+    --surface-400: #77778D;
+    --surface-500: #9D9DB5;
+    --surface-600: #CBCBD9;
+    --surface-700: #E7E7EF;
+    --surface-800: #F0F0F7;
+    --surface-900: #F5F5FA;
+
+    color-scheme: light;
+  }
+
+  .dark {
+    /* Charcoal Dark Mode (Activated via .dark class) */
+    --canvas: #12121A;
+    --card: #1C1C2A;
+    --sidebar-bg: #161624;
+    --sidebar-border: #2A2A3E;
+    --sidebar-text: #F0F0FA;
+    --sidebar-muted: #9D9DB5;
+    
+    --primary: #7C5CFA;
+    --primary-deep: #6541F5;
+    --primary-tint: #26233E;
+    --primary-dark: #7C5CFA;
+    
+    --text-primary: #F0F0FA;
+    --text-muted: #9D9DB5;
+    --border: #2A2A3E;
+    
+    /* Semantic Badges in Dark Mode */
+    --math: #42A5E8;
+    --math-badge: #13273D;
+    --science: #19B99A;
+    --science-badge: #0D2E26;
+    --streak: #E95778;
+    --streak-badge: #381521;
+    --quest: #F5A623;
+    --quest-badge: #35250D;
+    --success: #28B987;
+    --destructive: #F43F5E;
+
+    /* Surface tokens mapped for compatibility */
+    --surface-50: #F0F0FA;
+    --surface-100: #E2E2F0;
+    --surface-200: #CBCBD9;
+    --surface-300: #B3B3C8;
+    --surface-400: #9D9DB5;
+    --surface-500: #74748C;
+    --surface-600: #424258;
+    --surface-700: #2A2A3E;
+    --surface-800: #1C1C2A;
+    --surface-900: #12121A;
+
     color-scheme: dark;
   }
-  
+
+  /* Enlarged Text Mode: Support scaling root font size to 112.5% */
+  html.text-enlarged,
+  body.text-enlarged {
+    font-size: 112.5%;
+  }
+
   * {
     box-sizing: border-box;
   }
-  
+
   html {
     @apply scroll-smooth;
-  }
-  
-  body {
-    @apply bg-surface-900 text-surface-100 font-sans antialiased;
-    min-height: 100dvh;
+    background-color: var(--canvas);
+    color: var(--text-primary);
   }
 
+  body {
+    background-color: var(--canvas);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom Clean Scrollbars */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-surface-800;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-surface-600 rounded-full;
+    background: var(--border);
+    border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-surface-500;
+    background: var(--text-muted);
+  }
+
+  /* High Visibility Focus States */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary), 0 0 0 4px var(--card);
   }
 }
 
 @layer components {
+  /* Buttons */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface-900 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6541F5] focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
+  
   .btn-primary {
-    @apply btn bg-brand-500 hover:bg-brand-600 text-white focus:ring-brand-500 shadow-md hover:shadow-glow-brand;
+    @apply btn bg-[#6541F5] hover:bg-[#5230E8] text-white shadow-sm shadow-[#6541F5]/25;
   }
+
+  .btn-secondary {
+    @apply btn bg-[#EAE7FF] text-[#5230E8] hover:bg-[#D4CEFD] dark:bg-[#26233E] dark:text-[#C4B5FD] dark:hover:bg-[#342F55];
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] border border-[var(--border)];
+  }
+
+  .btn-icon {
+    @apply inline-flex items-center justify-center p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6541F5];
+  }
+
+  /* Subject specific button aliases */
   .btn-playlab {
-    @apply btn bg-playlab-500 hover:bg-playlab-600 text-white focus:ring-playlab-500 hover:shadow-glow-playlab;
+    @apply btn bg-[#F5A623] hover:bg-[#E09419] text-white shadow-sm shadow-[#F5A623]/25;
   }
   .btn-circuit {
-    @apply btn bg-circuit-500 hover:bg-circuit-600 text-white focus:ring-circuit-500 hover:shadow-glow-circuit;
+    @apply btn bg-[#19B99A] hover:bg-[#159F84] text-white shadow-sm shadow-[#19B99A]/25;
   }
   .btn-code {
-    @apply btn bg-code-500 hover:bg-code-600 text-white focus:ring-code-500 hover:shadow-glow-code;
+    @apply btn bg-[#6541F5] hover:bg-[#5230E8] text-white shadow-sm shadow-[#6541F5]/25;
   }
-  .btn-ghost {
-    @apply btn bg-transparent hover:bg-surface-700 text-surface-300 hover:text-surface-100 border border-surface-700;
-  }
-  .btn-icon {
-    @apply btn p-2 bg-surface-700 hover:bg-surface-600 text-surface-300 hover:text-surface-100 rounded-lg;
-  }
-  
+
+  /* Cards */
   .card {
-    @apply bg-surface-800 border border-surface-700 rounded-xl p-4 shadow-card;
+    @apply rounded-2xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-primary)] shadow-soft;
   }
+
   .card-interactive {
-    @apply card cursor-pointer hover:border-surface-500 hover:shadow-game transition-all duration-200;
+    @apply card cursor-pointer transition-all duration-200;
   }
-  
+  .card-interactive:hover {
+    border-color: var(--primary);
+    box-shadow: 0 8px 24px -4px rgba(101, 65, 245, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Badges & Pills */
   .badge {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold;
   }
-  .badge-playlab { @apply badge bg-playlab-900/50 text-playlab-400 border border-playlab-700/50; }
-  .badge-circuit { @apply badge bg-circuit-900/50 text-circuit-400 border border-circuit-700/50; }
-  .badge-code { @apply badge bg-code-900/50 text-code-400 border border-code-700/50; }
-  .badge-brand { @apply badge bg-brand-900/50 text-brand-400 border border-brand-700/50; }
-  
-  .glass {
-    @apply bg-white/5 backdrop-blur-sm border border-white/10;
+
+  .badge-purple {
+    @apply badge text-[#6541F5] bg-[#EAE7FF] dark:text-[#C4B5FD] dark:bg-[#2A244D];
   }
-  
-  .section-title {
-    @apply font-display text-2xl font-bold text-surface-50;
+
+  .badge-math {
+    @apply badge text-[#42A5E8] bg-[#DDF2FC] dark:bg-[#13273D];
   }
-  
-  .label {
-    @apply text-xs font-medium text-surface-400 uppercase tracking-wider;
+
+  .badge-science {
+    @apply badge text-[#19B99A] bg-[#DDF8EE] dark:bg-[#0D2E26];
+  }
+
+  .badge-streak {
+    @apply badge text-[#E95778] bg-[#FCE5EB] dark:bg-[#381521];
+  }
+
+  .badge-quest {
+    @apply badge text-[#F5A623] bg-[#FFF0D5] dark:bg-[#35250D];
+  }
+
+  .badge-online {
+    @apply badge text-[#28B987] bg-[#DDF8EE] dark:bg-[#0D2E26];
+  }
+
+  /* Legacy aliases for sub-pages */
+  .badge-playlab { @apply badge-quest; }
+  .badge-circuit { @apply badge-science; }
+  .badge-code { @apply badge-purple; }
+  .badge-brand { @apply badge-purple; }
+
+  /* Typography Classes */
+  .display-h1 {
+    font-family: 'Lexend', 'Inter', sans-serif;
+    @apply text-[28px] sm:text-[32px] font-bold leading-tight;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  .section-h2 {
+    font-family: 'Lexend', 'Inter', sans-serif;
+    @apply text-[20px] sm:text-[24px] font-bold leading-snug;
+    letter-spacing: -0.015em;
+    color: var(--text-primary);
+  }
+
+  .card-h3 {
+    font-family: 'Inter', sans-serif;
+    @apply text-[15px] sm:text-[16px] font-semibold leading-normal;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+
+  .body-standard {
+    @apply text-[14px] font-normal leading-relaxed;
+    color: var(--text-primary);
+  }
+
+  .body-meta {
+    @apply text-[12px] sm:text-[13px] font-medium;
+    color: var(--text-muted);
+  }
+
+  .tag-label {
+    @apply text-[10px] sm:text-[11px] font-bold uppercase;
+    letter-spacing: 0.04em;
   }
 }
 
 @layer utilities {
-  .text-gradient-playlab {
-    @apply bg-gradient-to-r from-playlab-400 to-yellow-400 bg-clip-text text-transparent;
-  }
-  .text-gradient-circuit {
-    @apply bg-gradient-to-r from-circuit-400 to-brand-400 bg-clip-text text-transparent;
-  }
-  .text-gradient-code {
-    @apply bg-gradient-to-r from-code-400 to-pink-400 bg-clip-text text-transparent;
+  /* Gradient text */
+  .text-gradient-purple {
+    @apply bg-gradient-to-r from-[#6541F5] to-[#5230E8] bg-clip-text text-transparent;
   }
   .text-gradient-brand {
-    @apply bg-gradient-to-r from-brand-400 to-code-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-[#6541F5] to-[#9D8AF8] bg-clip-text text-transparent;
   }
-  
+  .text-gradient-playlab {
+    @apply bg-gradient-to-r from-[#F5A623] to-[#F7B74A] bg-clip-text text-transparent;
+  }
+  .text-gradient-circuit {
+    @apply bg-gradient-to-r from-[#19B99A] to-[#42A5E8] bg-clip-text text-transparent;
+  }
+  .text-gradient-code {
+    @apply bg-gradient-to-r from-[#6541F5] to-[#E95778] bg-clip-text text-transparent;
+  }
+
+  /* Featured Hero "Continue Learning" gradient banner */
+  .bg-hero-continue {
+    background: linear-gradient(135deg, #5230E8 0%, #6541F5 60%, #7C5CFA 100%);
+  }
+
+  /* Soft Lavender Accent Glow */
+  .shadow-soft {
+    box-shadow: 0 2px 8px 0 rgba(101, 65, 245, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  }
+
+  /* Hide scrollbar for mobile horizontal tabs */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   .no-select {
     user-select: none;
     -webkit-user-select: none;
   }
-  
+
+  /* Reduced Motion Accessibility */
   @media (prefers-reduced-motion: reduce) {
     *, ::before, ::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 }

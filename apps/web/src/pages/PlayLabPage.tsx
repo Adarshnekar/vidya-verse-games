@@ -463,15 +463,7 @@ export const PlayLabPage: React.FC = () => {
       : GAMES.filter((game) => game.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-surface-900 text-surface-100 selection:bg-playlab-500/30 selection:text-playlab-200">
-      {/* Background ambient lighting */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-playlab-500/10 rounded-full blur-[120px]" />
-        <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-brand-500/10 rounded-full blur-[140px]" />
-        <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-code-500/10 rounded-full blur-[150px]" />
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="space-y-6">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center space-x-2 text-sm text-surface-400">
           <button
@@ -563,10 +555,10 @@ export const PlayLabPage: React.FC = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: index * 0.12 }}
-              className={`group relative flex flex-col bg-surface-800/90 backdrop-blur-md rounded-2xl border border-surface-700/70 overflow-hidden transition-all duration-300 ${game.colorTheme.border} ${game.colorTheme.glow} shadow-xl`}
+              className={`group relative flex flex-col card rounded-2xl overflow-hidden transition-all duration-300 ${game.colorTheme.border} ${game.colorTheme.glow} shadow-soft hover:shadow-card-hover`}
             >
               {/* Illustration Header Area */}
-              <div className="relative h-48 sm:h-52 w-full overflow-hidden border-b border-surface-700/50 bg-surface-900">
+              <div className="relative h-48 sm:h-52 w-full overflow-hidden border-b border-border bg-canvas">
                 {game.renderIllustration()}
                 <div
                   className={`absolute inset-0 bg-gradient-to-t ${game.colorTheme.bgGradient} pointer-events-none`}
@@ -583,7 +575,7 @@ export const PlayLabPage: React.FC = () => {
                   </span>
 
                   {/* Offline Ready Badge */}
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-surface-900/85 backdrop-blur-md text-emerald-400 border border-emerald-500/30">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-canvas/85 backdrop-blur-md text-emerald-500 border border-emerald-500/30">
                     <WifiOff className="w-3.5 h-3.5" />
                     <span>Works Offline</span>
                   </span>
@@ -596,7 +588,7 @@ export const PlayLabPage: React.FC = () => {
                   {/* Title & Subtitle */}
                   <div>
                     <div className="flex items-center justify-between gap-2">
-                      <h2 className="text-2xl font-bold font-display text-white group-hover:text-playlab-400 transition-colors">
+                      <h2 className="text-2xl font-bold font-display text-text-primary group-hover:text-playlab-400 transition-colors">
                         {game.title}
                       </h2>
                     </div>
@@ -686,7 +678,6 @@ export const PlayLabPage: React.FC = () => {
           </div>
         </section>
       </div>
-    </div>
   );
 };
 

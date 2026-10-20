@@ -824,7 +824,7 @@ export const CircuitVersePage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-surface-900 text-surface-100 font-sans overflow-hidden select-none">
+    <div className="flex flex-col h-[calc(100vh-8.5rem)] rounded-2xl border border-border bg-card text-text-primary font-sans overflow-hidden select-none shadow-soft">
       {/* 1. TOP WORKSTATION TOOLBAR */}
       <header className="h-14 border-b border-surface-700/80 bg-surface-800/95 px-4 flex items-center justify-between z-20 shadow-md">
         <div className="flex items-center gap-3">
