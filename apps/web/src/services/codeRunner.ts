@@ -170,6 +170,14 @@ export async function runWithPiston(
     const runtimeMs = Math.round(performance.now() - startTime);
 
     if (!response.ok) {
+      if (langKey === 'python') {
+        const local = executeLocalPython(code, stdin);
+        return { ...local, runtimeMs };
+      }
+      if (langKey === 'javascript') {
+        const local = executeLocalJavaScript(code, stdin);
+        return { ...local, runtimeMs };
+      }
       const errText = await response.text();
       return {
         stdout: '',
@@ -201,7 +209,23 @@ export async function runWithPiston(
     const runtimeMs = Math.round(performance.now() - startTime);
     const isAbort = err instanceof DOMException && err.name === 'AbortError';
 
-    // If Piston is blocked or offline, attempt in-browser JavaScript execution fallback
+    // If Piston is blocked or offline, attempt in-browser execution fallback
+    if (langKey === 'python') {
+      try {
+        const localResult = executeLocalPython(code, stdin);
+        return { ...localResult, runtimeMs };
+      } catch (e: unknown) {
+        return {
+          stdout: '',
+          stderr: String(e),
+          exitCode: 1,
+          runtimeMs,
+          isError: true,
+          statusMessage: 'Local Python Error',
+        };
+      }
+    }
+
     if (langKey === 'javascript') {
       try {
         const localResult = executeLocalJavaScript(code, stdin);
@@ -230,6 +254,185 @@ export async function runWithPiston(
       runtimeMs,
       isError: true,
       statusMessage: isAbort ? 'Time Limit Exceeded' : 'Execution Unavailable',
+    };
+  }
+}
+
+/**
+ * In-browser Python interpreter fallback for introductory lessons & challenges
+ */
+export function executeLocalPython(code: string, stdin: string = ''): ExecutionResult {
+  const logs: string[] = [];
+
+  try {
+    // 1. Emulate print function
+    const print = (...args: unknown[]) => {
+      logs.push(
+        args
+          .map((a) => {
+            if (typeof a === 'boolean') return a ? 'True' : 'False';
+            if (a === null || a === undefined) return 'None';
+            if (typeof a === 'object') return JSON.stringify(a);
+            return String(a);
+          })
+          .join(' ')
+      );
+    };
+
+    // 2. Emulate standard library builtins
+    const round = (val: number, decimals: number = 0) => {
+      const factor = Math.pow(10, decimals);
+      return Math.round((val + Number.EPSILON) * factor) / factor;
+    };
+    const len = (obj: any) => obj?.length ?? 0;
+    const type = (obj: any) => {
+      if (typeof obj === 'string') return "<class 'str'>";
+      if (typeof obj === 'number') return Number.isInteger(obj) ? "<class 'int'>" : "<class 'float'>";
+      if (typeof obj === 'boolean') return "<class 'bool'>";
+      return `<class '${typeof obj}'>`;
+    };
+    const range = (startOrStop: number, stop?: number, step: number = 1): number[] => {
+      let start = 0;
+      let end = startOrStop;
+      if (stop !== undefined) {
+        start = startOrStop;
+        end = stop;
+      }
+      const res: number[] = [];
+      if (step > 0) {
+        for (let i = start; i < end; i += step) res.push(i);
+      } else if (step < 0) {
+        for (let i = start; i > end; i += step) res.push(i);
+      }
+      return res;
+    };
+
+    // 3. Emulate input / stdin
+    const stdinTokens = (stdin || '').trim().split(/\s+/).filter(Boolean);
+    let stdinIdx = 0;
+    const input = (_prompt?: string) => stdinTokens[stdinIdx++] ?? '';
+
+    // 4. Parse Python code to runnable JavaScript
+    const lines = code.split('\n');
+    let jsCode = '';
+    const indentStack: number[] = [0];
+
+    for (let rawLine of lines) {
+      const trimmed = rawLine.trim();
+      if (!trimmed || trimmed.startsWith('#')) {
+        continue;
+      }
+
+      // Calculate leading spaces
+      const match = rawLine.match(/^(\s*)/);
+      const indent = match ? match[1].length : 0;
+
+      // Handle un-indentation: close braces
+      while (indent < indentStack[indentStack.length - 1]) {
+        indentStack.pop();
+        jsCode += '}\n';
+      }
+
+      let line = trimmed;
+
+      // Convert f-strings: f"Hello {name} score {score:.2f}" -> `Hello ${name} score ${(score).toFixed(2)}`
+      line = line.replace(/f"([^"]*)"/g, (_m, content) => {
+        const transformed = content.replace(/\{([^}:]+)(?::\.(\d+)f)?\}/g, (_sm: string, expr: string, decimals?: string) => {
+          if (decimals) {
+            return `\${Number(${expr.trim()}).toFixed(${decimals})}`;
+          }
+          return `\${${expr.trim()}}`;
+        });
+        return `\`${transformed}\``;
+      });
+      line = line.replace(/f'([^']*)'/g, (_m, content) => {
+        const transformed = content.replace(/\{([^}:]+)(?::\.(\d+)f)?\}/g, (_sm: string, expr: string, decimals?: string) => {
+          if (decimals) {
+            return `\${Number(${expr.trim()}).toFixed(${decimals})}`;
+          }
+          return `\${${expr.trim()}}`;
+        });
+        return `\`${transformed}\``;
+      });
+
+      // Syntax transforms
+      line = line
+        .replace(/\bTrue\b/g, 'true')
+        .replace(/\bFalse\b/g, 'false')
+        .replace(/\bNone\b/g, 'null')
+        .replace(/\band\b/g, '&&')
+        .replace(/\bor\b/g, '||')
+        .replace(/\bnot\b/g, '!')
+        .replace(/\bpass\b/g, '/* pass */');
+
+      // Functions: def foo(a, b):
+      if (/^def\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)\s*:/.test(line)) {
+        line = line.replace(/^def\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)\s*:/, 'function $1($2) {');
+        indentStack.push(indent + 1);
+        jsCode += line + '\n';
+        continue;
+      }
+
+      // For loops: for i in range(...):
+      if (/^for\s+([a-zA-Z0-9_]+)\s+in\s+range\(([^)]*)\)\s*:/.test(line)) {
+        line = line.replace(/^for\s+([a-zA-Z0-9_]+)\s+in\s+range\(([^)]*)\)\s*:/, 'for (let $1 of range($2)) {');
+        indentStack.push(indent + 1);
+        jsCode += line + '\n';
+        continue;
+      }
+
+      // Conditionals: if / elif / else
+      if (/^if\s+(.*):$/.test(line)) {
+        line = line.replace(/^if\s+(.*):$/, 'if ($1) {');
+        indentStack.push(indent + 1);
+        jsCode += line + '\n';
+        continue;
+      }
+      if (/^elif\s+(.*):$/.test(line)) {
+        line = line.replace(/^elif\s+(.*):$/, '} else if ($1) {');
+        jsCode += line + '\n';
+        continue;
+      }
+      if (/^else\s*:$/.test(line)) {
+        line = '} else {';
+        jsCode += line + '\n';
+        continue;
+      }
+
+      // Variable declaration helper: if variable assignment (x = ...), ensure variable is declared
+      if (/^[a-zA-Z_][a-zA-Z0-9_]*\s*=\s*/.test(line) && !line.startsWith('return ') && !line.startsWith('let ') && !line.startsWith('var ')) {
+        line = 'var ' + line;
+      }
+
+      jsCode += line + ';\n';
+    }
+
+    // Close remaining open indent blocks
+    while (indentStack.length > 1) {
+      indentStack.pop();
+      jsCode += '}\n';
+    }
+
+    // Execute generated function
+    const fn = new Function('print', 'round', 'range', 'len', 'type', 'input', jsCode);
+    fn(print, round, range, len, type, input);
+
+    return {
+      stdout: logs.join('\n'),
+      stderr: '',
+      exitCode: 0,
+      runtimeMs: 8,
+      isError: false,
+      statusMessage: 'Success (Local Engine)',
+    };
+  } catch (err: unknown) {
+    return {
+      stdout: logs.join('\n'),
+      stderr: err instanceof Error ? err.message : String(err),
+      exitCode: 1,
+      runtimeMs: 8,
+      isError: true,
+      statusMessage: 'Execution Error',
     };
   }
 }

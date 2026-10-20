@@ -643,9 +643,29 @@ export const CircuitVersePage: React.FC = () => {
 
   // Falstad Iframe ref & URL
   const falstadIframeRef = useRef<HTMLIFrameElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [falstadUrl, setFalstadUrl] = useState<string>(
     'https://www.falstad.com/circuit/circuitjs.html'
   );
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen?.();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen?.();
+      setIsFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
 
   // Stores
   const { markCompleted } = useProgressStore();
@@ -824,9 +844,14 @@ export const CircuitVersePage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full rounded-2xl border border-border bg-card text-text-primary font-sans overflow-hidden select-none shadow-soft">
+    <div
+      ref={containerRef}
+      className={`flex flex-col h-full w-full bg-card text-text-primary font-sans overflow-hidden select-none ${
+        viewMode === 'falstad' ? 'rounded-none border-0' : 'rounded-2xl border border-border shadow-soft'
+      }`}
+    >
       {/* 1. TOP WORKSTATION TOOLBAR */}
-      <header className="h-14 border-b border-border bg-card px-4 flex items-center justify-between z-20">
+      <header className="h-14 border-b border-border bg-card px-4 flex items-center justify-between z-20 shrink-0">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-xs text-text-muted">
             <span className="p-1.5 rounded-lg bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26]">
@@ -873,206 +898,226 @@ export const CircuitVersePage: React.FC = () => {
         </div>
 
         {/* Simulation Action Controls */}
-        <div className="flex items-center gap-2">
-          {/* Run / Pause */}
-          <button
-            onClick={() => setIsSimulating(!isSimulating)}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-all ${
-              isSimulating
-                ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm'
-                : 'bg-[#19B99A] hover:bg-[#159F84] text-white shadow-sm shadow-[#19B99A]/25'
-            }`}
-            title={isSimulating ? 'Pause Circuit Simulation' : 'Run Live SPICE Simulation'}
-          >
-            {isSimulating ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-            <span className="hidden sm:inline">{isSimulating ? 'Pause' : 'Simulate'}</span>
-          </button>
-
-          {/* Reset */}
-          <button
-            onClick={() => {
-              setIsSimulating(false);
-              setTimeout(() => setIsSimulating(true), 200);
-            }}
-            className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            title="Reset Simulation State"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
-
-          <div className="h-4 w-px bg-border mx-0.5 hidden sm:block" />
-
-          {/* Undo / Redo */}
-          <button
-            onClick={handleUndo}
-            disabled={history.length === 0}
-            className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-30 hidden sm:block"
-            title="Undo (Ctrl+Z)"
-          >
-            <Undo2 className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={handleRedo}
-            disabled={redoStack.length === 0}
-            className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-30 hidden sm:block"
-            title="Redo (Ctrl+Y)"
-          >
-            <Redo2 className="w-3.5 h-3.5" />
-          </button>
-
-          {/* Zoom controls for canvas */}
-          <div className="hidden md:flex items-center bg-canvas rounded-lg p-0.5 border border-border">
+        {viewMode === 'falstad' ? (
+          <div className="flex items-center gap-2">
+            {/* Experiment Guide Modal Button */}
             <button
-              onClick={() => setZoomLevel((z) => Math.max(0.6, z - 0.1))}
-              className="p-1 hover:text-text-primary text-text-muted"
-              title="Zoom Out"
+              onClick={() => setShowExperimentModal(true)}
+              className="px-2.5 py-1 text-xs rounded-lg bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26] hover:opacity-90 font-semibold border border-[#19B99A]/20 flex items-center gap-1.5 shadow-sm"
+              title="Select one of 10 Pre-built Experiments"
             >
-              <ZoomOut className="w-3.5 h-3.5" />
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>10 Labs</span>
             </button>
-            <span className="text-[10px] font-mono px-1.5 text-text-muted">
-              {Math.round(zoomLevel * 100)}%
-            </span>
-            <button
-              onClick={() => setZoomLevel((z) => Math.min(1.8, z + 0.1))}
-              className="p-1 hover:text-text-primary text-text-muted"
-              title="Zoom In"
+
+            {/* Open in New Tab */}
+            <a
+              href={falstadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-2.5 py-1 text-xs rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center gap-1.5 font-semibold"
+              title="Open Falstad simulator in a new browser tab"
             >
-              <ZoomIn className="w-3.5 h-3.5" />
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Open in New Tab</span>
+            </a>
+
+            {/* True Fullscreen Toggle */}
+            <button
+              onClick={toggleFullscreen}
+              className="px-3 py-1 text-xs rounded-lg bg-[#19B99A] hover:bg-[#159F84] text-white font-semibold flex items-center gap-1.5 shadow-sm shadow-[#19B99A]/25 transition-all"
+              title={isFullscreen ? 'Exit Full Screen' : 'Expand Falstad to 100% Full Screen'}
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+              <span>{isFullscreen ? 'Exit Full' : 'Full Screen'}</span>
             </button>
           </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            {/* Run / Pause */}
+            <button
+              onClick={() => setIsSimulating(!isSimulating)}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-all ${
+                isSimulating
+                  ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm'
+                  : 'bg-[#19B99A] hover:bg-[#159F84] text-white shadow-sm shadow-[#19B99A]/25'
+              }`}
+              title={isSimulating ? 'Pause Circuit Simulation' : 'Run Live SPICE Simulation'}
+            >
+              {isSimulating ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+              <span className="hidden sm:inline">{isSimulating ? 'Pause' : 'Simulate'}</span>
+            </button>
 
-          <div className="h-4 w-px bg-border mx-0.5" />
+            {/* Reset */}
+            <button
+              onClick={() => {
+                setIsSimulating(false);
+                setTimeout(() => setIsSimulating(true), 200);
+              }}
+              className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+              title="Reset Simulation State"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
 
-          {/* Save Project */}
-          <button
-            onClick={handleSaveProject}
-            className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-xs flex items-center gap-1.5"
-            title="Save circuit to LocalStorage"
-          >
-            <Save className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Save</span>
-          </button>
+            <div className="h-4 w-px bg-border mx-0.5 hidden sm:block" />
 
-          {/* Experiment Guide Modal Button */}
-          <button
-            onClick={() => setShowExperimentModal(true)}
-            className="px-2.5 py-1 text-xs rounded-lg bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26] hover:opacity-90 font-semibold border border-[#19B99A]/20 flex items-center gap-1.5"
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>10 Labs</span>
-          </button>
-        </div>
+            {/* Undo / Redo */}
+            <button
+              onClick={handleUndo}
+              disabled={history.length === 0}
+              className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-30 hidden sm:block"
+              title="Undo (Ctrl+Z)"
+            >
+              <Undo2 className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={handleRedo}
+              disabled={redoStack.length === 0}
+              className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-30 hidden sm:block"
+              title="Redo (Ctrl+Y)"
+            >
+              <Redo2 className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Zoom controls for canvas */}
+            <div className="hidden md:flex items-center bg-canvas rounded-lg p-0.5 border border-border">
+              <button
+                onClick={() => setZoomLevel((z) => Math.max(0.6, z - 0.1))}
+                className="p-1 hover:text-text-primary text-text-muted"
+                title="Zoom Out"
+              >
+                <ZoomOut className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] font-mono px-1.5 text-text-muted">
+                {Math.round(zoomLevel * 100)}%
+              </span>
+              <button
+                onClick={() => setZoomLevel((z) => Math.min(1.8, z + 0.1))}
+                className="p-1 hover:text-text-primary text-text-muted"
+                title="Zoom In"
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="h-4 w-px bg-border mx-0.5" />
+
+            {/* Save Project */}
+            <button
+              onClick={handleSaveProject}
+              className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-xs flex items-center gap-1.5"
+              title="Save circuit to LocalStorage"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Save</span>
+            </button>
+
+            {/* Experiment Guide Modal Button */}
+            <button
+              onClick={() => setShowExperimentModal(true)}
+              className="px-2.5 py-1 text-xs rounded-lg bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26] hover:opacity-90 font-semibold border border-[#19B99A]/20 flex items-center gap-1.5"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>10 Labs</span>
+            </button>
+          </div>
+        )}
       </header>
 
       {/* 2. MAIN 3-PANEL WORKBENCH */}
       <div className="flex flex-1 overflow-hidden relative">
-        {/* LEFT PANEL: SEARCHABLE COMPONENT PALETTE */}
-        <aside className="w-64 border-r border-border bg-card flex flex-col z-10 text-text-primary">
-          <div className="p-3 border-b border-border space-y-2">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-text-muted" />
-              <input
-                type="text"
-                placeholder="Search components..."
-                value={paletteSearch}
-                onChange={(e) => setPaletteSearch(e.target.value)}
-                className="w-full bg-canvas border border-border rounded-lg pl-8 pr-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-[#19B99A]"
-              />
-            </div>
-
-            {/* Category Filter Pills */}
-            <div className="flex flex-wrap gap-1">
-              {(['All', 'Sources', 'Passive', 'Active', 'Logic', 'Measurement'] as ComponentCategory[]).map(
-                (cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-semibold transition-colors ${
-                      activeCategory === cat
-                        ? 'bg-[#19B99A] text-white shadow-sm'
-                        : 'bg-canvas text-text-muted hover:text-text-primary border border-border'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                )
-              )}
-            </div>
-          </div>
-
-          {/* Component List */}
-          <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
-            <div className="text-[10px] font-bold tracking-wider text-text-muted uppercase px-2 py-1">
-              Click to Place on Workbench ({filteredPalette.length})
-            </div>
-
-            {filteredPalette.map((item) => (
-              <div
-                key={item.type}
-                onClick={() => handleAddComponent(item)}
-                className="group flex items-center justify-between p-2 rounded-xl bg-canvas hover:bg-[#DDF8EE]/40 dark:hover:bg-[#0D2E26]/40 border border-border hover:border-[#19B99A] cursor-pointer transition-all"
-                title={`${item.name}: ${item.description}`}
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-card flex items-center justify-center font-mono text-[#19B99A] text-sm border border-border group-hover:border-[#19B99A]/50 transition-colors shadow-sm">
-                    {item.symbol}
-                  </div>
-                  <div className="truncate">
-                    <div className="text-xs font-semibold text-text-primary group-hover:text-[#19B99A] truncate">
-                      {item.name}
-                    </div>
-                    <div className="text-[10px] text-text-muted">
-                      Default: {item.defaultValue} {item.defaultUnit}
-                    </div>
-                  </div>
-                </div>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-card border border-border text-text-muted group-hover:text-[#19B99A] font-mono shadow-sm">
-                  + Add
-                </span>
+        {/* LEFT PANEL: SEARCHABLE COMPONENT PALETTE (Hidden in Falstad mode) */}
+        {viewMode !== 'falstad' && (
+          <aside className="w-64 border-r border-border bg-card flex flex-col z-10 text-text-primary shrink-0">
+            <div className="p-3 border-b border-border space-y-2">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-text-muted" />
+                <input
+                  type="text"
+                  placeholder="Search components..."
+                  value={paletteSearch}
+                  onChange={(e) => setPaletteSearch(e.target.value)}
+                  className="w-full bg-canvas border border-border rounded-lg pl-8 pr-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-[#19B99A]"
+                />
               </div>
-            ))}
-          </div>
 
-          {/* Guided Lab Quick Selector */}
-          <div className="p-3 border-t border-border bg-canvas/40">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-bold text-[#19B99A]">Current Experiment:</span>
-              <span className="text-[10px] text-text-muted font-medium">{activeExperiment.grade}</span>
+              {/* Category Filter Pills */}
+              <div className="flex flex-wrap gap-1">
+                {(['All', 'Sources', 'Passive', 'Active', 'Logic', 'Measurement'] as ComponentCategory[]).map(
+                  (cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveCategory(cat)}
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-semibold transition-colors ${
+                        activeCategory === cat
+                          ? 'bg-[#19B99A] text-white shadow-sm'
+                          : 'bg-canvas text-text-muted hover:text-text-primary border border-border'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  )
+                )}
+              </div>
             </div>
-            <div className="text-xs font-semibold text-text-primary truncate">{activeExperiment.title}</div>
-            <div className="text-[10px] text-text-muted font-mono mt-0.5">{activeExperiment.formula}</div>
-          </div>
-        </aside>
+
+            {/* Component List */}
+            <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+              <div className="text-[10px] font-bold tracking-wider text-text-muted uppercase px-2 py-1">
+                Click to Place on Workbench ({filteredPalette.length})
+              </div>
+
+              {filteredPalette.map((item) => (
+                <div
+                  key={item.type}
+                  onClick={() => handleAddComponent(item)}
+                  className="group flex items-center justify-between p-2 rounded-xl bg-canvas hover:bg-[#DDF8EE]/40 dark:hover:bg-[#0D2E26]/40 border border-border hover:border-[#19B99A] cursor-pointer transition-all"
+                  title={`${item.name}: ${item.description}`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-card flex items-center justify-center font-mono text-[#19B99A] text-sm border border-border group-hover:border-[#19B99A]/50 transition-colors shadow-sm">
+                      {item.symbol}
+                    </div>
+                    <div className="truncate">
+                      <div className="text-xs font-semibold text-text-primary group-hover:text-[#19B99A] truncate">
+                        {item.name}
+                      </div>
+                      <div className="text-[10px] text-text-muted">
+                        Default: {item.defaultValue} {item.defaultUnit}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-card border border-border text-text-muted group-hover:text-[#19B99A] font-mono shadow-sm">
+                    + Add
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Guided Lab Quick Selector */}
+            <div className="p-3 border-t border-border bg-canvas/40">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-bold text-[#19B99A]">Current Experiment:</span>
+                <span className="text-[10px] text-text-muted font-medium">{activeExperiment.grade}</span>
+              </div>
+              <div className="text-xs font-semibold text-text-primary truncate">{activeExperiment.title}</div>
+              <div className="text-[10px] text-text-muted font-mono mt-0.5">{activeExperiment.formula}</div>
+            </div>
+          </aside>
+        )}
 
         {/* CENTER PANEL: WORKBENCH (SCHEMATIC SVG OR FALSTAD IFRAME) */}
         <main className="flex-1 flex flex-col relative bg-canvas overflow-hidden">
           {viewMode === 'falstad' ? (
-            /* FALSTAD CIRCUITJS1 IFRAME VIEW */
-            <div className="flex-1 flex flex-col w-full h-full relative">
-              <div className="bg-card px-4 py-2 border-b border-border flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2 text-text-muted">
-                  <Info className="w-4 h-4 text-[#19B99A]" />
-                  <span>
-                    Embedded Falstad CircuitJS1 engine. Interactive SPICE simulation running full analog & digital solvers.
-                  </span>
-                </div>
-                <a
-                  href={falstadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#19B99A] hover:opacity-80 flex items-center gap-1 font-semibold transition-opacity"
-                >
-                  Open in New Tab <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
-              <iframe
-                ref={falstadIframeRef}
-                src={falstadUrl}
-                title="Falstad Circuit Simulator"
-                className="w-full flex-1 border-none bg-canvas"
-                allow="fullscreen"
-              />
-            </div>
+            /* FALSTAD CIRCUITJS1 IFRAME VIEW - 100% FULL BLEED, ZERO CLUTTER */
+            <iframe
+              ref={falstadIframeRef}
+              src={falstadUrl}
+              title="Falstad Circuit Simulator"
+              className="w-full h-full flex-1 border-none bg-black"
+              allow="fullscreen"
+            />
           ) : (
             /* INTERACTIVE SVG WORKBENCH */
             <div className="flex-1 relative overflow-hidden bg-[#FAFAFC] dark:bg-[#0E0E17] cursor-crosshair">
@@ -1291,8 +1336,9 @@ export const CircuitVersePage: React.FC = () => {
           )}
         </main>
 
-        {/* RIGHT PANEL: PROPERTIES INSPECTOR & OHM'S CALCULATOR */}
-        <aside className="w-80 border-l border-border bg-card flex flex-col z-10 overflow-y-auto text-text-primary">
+        {/* RIGHT PANEL: PROPERTIES INSPECTOR & OHM'S CALCULATOR (Hidden in Falstad mode) */}
+        {viewMode !== 'falstad' && (
+          <aside className="w-80 border-l border-border bg-card flex flex-col z-10 overflow-y-auto text-text-primary shrink-0">
           {/* Header */}
           <div className="p-3 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -1485,7 +1531,8 @@ export const CircuitVersePage: React.FC = () => {
             </div>
           </div>
         </aside>
-      </div>
+      )}
+    </div>
 
       {/* 3. GUIDED EXPERIMENTS MODAL (10 FULL LABS) */}
       {showExperimentModal && (

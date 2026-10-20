@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import {
   BookOpen,
@@ -17,11 +17,34 @@ import {
   ExternalLink,
   Layers,
   ArrowRight,
+  AlertCircle,
+  Lightbulb,
+  FileCode,
+  Zap,
+  RefreshCw,
+  Flame,
+  CheckCircle,
 } from 'lucide-react';
 import { runWithPiston, buildHtmlSrcdoc, normalizeOutput } from '../../services/codeRunner';
 import { useProgressStore } from '../../stores/progressStore';
 import { useAuthStore } from '../../stores/authStore';
 import { useUIStore } from '../../stores/uiStore';
+
+export interface LessonSection {
+  title: string;
+  icon?: string;
+  badge?: string;
+  body: string;
+  codeSnippet?: string;
+  takeaway?: string;
+}
+
+export interface LessonQuiz {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
 
 export interface Lesson {
   id: string;
@@ -30,8 +53,10 @@ export interface Lesson {
   duration: string;
   language: 'python' | 'javascript' | 'html';
   summary: string;
-  explanation: string;
+  sections: LessonSection[];
+  quiz: LessonQuiz;
   exampleCode: string;
+  exampleExplanation?: string;
   exerciseGoal: string;
   exerciseCode: string;
   expectedOutput: string;
@@ -45,25 +70,48 @@ export const LESSONS: Lesson[] = [
     class: 'Class 6-8',
     duration: '10 mins',
     language: 'python',
-    summary: 'Learn dynamic variable declaration, standard primitive data types, and formatted print output.',
-    explanation: `### Variables & Dynamic Typing in Python
-
-In Python, **variables** are names that refer to values stored in computer memory. Unlike languages like C++ or Java, Python has no variable declaration keywords like \`int\` or \`var\`. A variable is created automatically the moment you assign a value to it using the assignment operator (\`=\`).
-
-#### Primary Data Types:
-- **String (\`str\`)**: Text enclosed in quotes, e.g., \`"Aarav"\`
-- **Integer (\`int\`)**: Whole numbers, e.g., \`42\`
-- **Float (\`float\`)**: Decimal numbers, e.g., \`3.14159\`
-- **Boolean (\`bool\`)**: Logical \`True\` or \`False\`
-
-#### Modern Print Formatting (f-strings):
-Prefixing a string literal with \`f\` allows you to embed expressions directly inside curly braces \`{...}\`:
-\`\`\`python
-name = "Vidya"
-score = 98.5
-print(f"Student: {name} scored {score}%")
-\`\`\`
-`,
+    summary: 'Master dynamic variable declaration, standard primitive data types, and formatted print output with f-strings.',
+    sections: [
+      {
+        title: 'Dynamic Variables & Memory Assignment',
+        icon: '📦',
+        badge: 'Core Concept',
+        body: 'In Python, a variable is an intuitive label pointing to a value stored in computer memory. Unlike C++ or Java, Python does not require variable type declarations like "int" or "var". Variables spring to life the exact moment you assign a value to them using the assignment operator (=).',
+        codeSnippet: `# Assigning values dynamically
+student_name = "Aarav"
+grade = 8
+is_active = True`,
+        takeaway: 'Variable names must start with a letter (a-z, A-Z) or underscore (_). They can never start with a digit!',
+      },
+      {
+        title: 'Fundamental Primitive Data Types',
+        icon: '🏷️',
+        badge: 'Types & Schema',
+        body: 'Python automatically infers data types based on the literal value you write. The four standard primitives used across all CBSE programs are String (str) for text, Integer (int) for whole numbers, Float (float) for decimals, and Boolean (bool) for True/False decisions.',
+        codeSnippet: `name = "Vidya"     # str (string)
+score = 98.5       # float (floating point decimal)
+roll_no = 24       # int (integer)
+enrolled = True    # bool (boolean)`,
+        takeaway: 'Use type(variable_name) anytime in Python to inspect the underlying data type.',
+      },
+      {
+        title: 'Modern Print Formatting with f-strings',
+        icon: '⚡',
+        badge: 'Output Engine',
+        body: 'Formatted string literals (f-strings) are the gold standard for output in modern Python. By prefixing your quotation marks with "f", you can seamlessly inject variables and calculations directly inside curly brackets {expression}.',
+        codeSnippet: `item = "Notebook"
+price = 45.0
+qty = 3
+print(f"Total cost for {qty} {item}s: Rs {price * qty}")`,
+        takeaway: 'Inside {value:.2f}, the ".2f" specifier formats decimal numbers rounded to exactly two decimal places.',
+      },
+    ],
+    quiz: {
+      question: 'Which of the following is an INVALID variable name in Python?',
+      options: ['user_score', '2nd_student', '_counter', 'totalScore'],
+      correctIndex: 1,
+      explanation: 'Variable names in Python cannot begin with a number (0-9). They must start with a letter or an underscore.',
+    },
     exampleCode: `# Python Variables and Print Formatting
 student_name = "Aarav"
 grade = 8
@@ -76,6 +124,7 @@ print(f"Class/Grade : {grade}")
 print(f"Exam Score  : {score}%")
 print(f"Enrolled    : {is_enrolled}")
 `,
+    exampleExplanation: 'Notice how f-strings cleanly concatenate text and variables without messy string conversions or plus signs.',
     exerciseGoal:
       'Given radius = 7 and pi = 3.14159, calculate the area of the circle using the formula (pi * radius^2). Print exactly: "Area of circle: 153.94" rounded to 2 decimal places.',
     exerciseCode: `# Task: Calculate and print the area of the circle
@@ -89,7 +138,7 @@ pi = 3.14159
     hints: [
       'In Python, the exponentiation operator is `**`. Example: `radius ** 2`.',
       'Use the built-in round function: `area = round(pi * (radius ** 2), 2)`.',
-      'Print with: `print(f"Area of circle: {area:.2f}")` or `print("Area of circle:", area)`.',
+      'Print with: `print(f"Area of circle: {area:.2f}")` or `print(f"Area of circle: {round(area, 2)}")`.',
     ],
   },
   {
@@ -99,25 +148,39 @@ pi = 3.14159
     duration: '15 mins',
     language: 'python',
     summary: 'Control program execution flow using Boolean decision branches, comparison operators, and indentation.',
-    explanation: `### Conditional Statements in Python
-
-Conditionals allow your code to make intelligent decisions based on runtime conditions.
-
-#### Syntax & Structure:
-\`\`\`python
-if condition:
-    # Executes if condition is True
-elif alternative_condition:
-    # Executes if previous was False and this is True
+    sections: [
+      {
+        title: 'Decision Branching & Indentation Rules',
+        icon: '🔀',
+        badge: 'Flow Control',
+        body: 'Programs need to make decisions based on changing conditions. Python uses "if", "elif" (else if), and "else" keywords. Unlike languages that use curly braces, Python relies strictly on 4 spaces of indentation to define code blocks.',
+        codeSnippet: `score = 82
+if score >= 90:
+    print("Grade: A+")
+elif score >= 75:
+    print("Grade: A")
 else:
-    # Executes if all above conditions were False
-\`\`\`
-
-#### Important Rules:
-1. **Indentation Matters**: Python uses 4 spaces (or 1 tab) of indentation to define a code block. Missing or uneven indentation results in an \`IndentationError\`.
-2. **Comparison Operators**: \`==\` (equals), \`!=\` (not equals), \`<\`, \`>\`, \`<=\`, \`>=\`.
-3. **Logical Operators**: \`and\` (both true), \`or\` (either true), \`not\` (inverts boolean).
-`,
+    print("Grade: B or below")`,
+        takeaway: 'Uneven or missing indentation produces an IndentationError. Always indent 4 spaces inside branches.',
+      },
+      {
+        title: 'Comparison & Logical Operators',
+        icon: '⚖️',
+        badge: 'Logic & Predicates',
+        body: 'Conditions evaluate to True or False. Use == (equality), != (not equal), <, >, <=, and >=. Combine multiple conditions using "and" (both true), "or" (at least one true), and "not" (inverts boolean).',
+        codeSnippet: `age = 16
+has_id = True
+if age >= 16 and has_id:
+    print("Eligible for student pass")`,
+        takeaway: 'In Python, chained comparisons like 20 <= temperature <= 35 are valid and encouraged for cleaner code!',
+      },
+    ],
+    quiz: {
+      question: 'What output is produced by: x = 15; if x > 20: print("A"); elif x > 10: print("B"); else: print("C")?',
+      options: ['A', 'B', 'C', 'Both B and C'],
+      correctIndex: 1,
+      explanation: 'Python evaluates conditions from top to bottom. Since x > 20 is False and x > 10 (15 > 10) is True, "B" is printed and the remaining else block is skipped.',
+    },
     exampleCode: `# Grade classification system
 marks = 85
 
@@ -132,17 +195,19 @@ else:
 
 print(f"Marks: {marks} => Assigned Grade: {grade}")
 `,
+    exampleExplanation: 'Experiment by changing `marks` above and running the code to see different branches execute in real time.',
     exerciseGoal:
       'Given `temperature = 28`, write an if/elif/else block: If temp > 35, print "Hot Day". If temp is between 20 and 35 (inclusive), print "Pleasant Day". Otherwise print "Cold Day".',
     exerciseCode: `# Task: Classify the weather based on temperature
 temperature = 28
 
 # Write your if / elif / else logic below:
+# Print: "Pleasant Day"
 `,
     expectedOutput: 'Pleasant Day',
     hints: [
       'Check the hottest temperature first: `if temperature > 35: print("Hot Day")`.',
-      'Check the middle range with: `elif temperature >= 20 and temperature <= 35: print("Pleasant Day")` or chained `elif 20 <= temperature <= 35:`.',
+      'Check the middle range with: `elif 20 <= temperature <= 35: print("Pleasant Day")`.',
       'Fallback with `else: print("Cold Day")`.',
     ],
   },
@@ -152,26 +217,36 @@ temperature = 28
     class: 'Class 9-10',
     duration: '15 mins',
     language: 'python',
-    summary: 'Iterate over sequences, generate ranges, and perform repetitive mathematical calculations.',
-    explanation: `### For Loops and the \`range()\` Function
-
-A \`for\` loop in Python iterates over members of a sequence in order.
-
-#### Using \`range()\`:
-The built-in \`range(start, stop, step)\` function generates a sequence of numbers:
-- \`range(5)\` => 0, 1, 2, 3, 4 (starts at 0, stops before 5)
-- \`range(1, 6)\` => 1, 2, 3, 4, 5
-- \`range(0, 10, 2)\` => 0, 2, 4, 6, 8 (steps by 2)
-
-#### Accumulation Pattern:
-To compute running sums or products, initialize an accumulator variable before the loop:
-\`\`\`python
-total = 0
-for n in range(1, 11):
+    summary: 'Iterate over sequences, generate arithmetic ranges, and master the accumulator calculation pattern.',
+    sections: [
+      {
+        title: 'Iterating with the range() Function',
+        icon: '🔄',
+        badge: 'Loops & Sequences',
+        body: 'A "for" loop in Python iterates over members of a sequence in order. The built-in range(start, stop, step) generates an arithmetic progression. Crucially, the "stop" value is strictly exclusive.',
+        codeSnippet: `# range(start, stop)
+for num in range(1, 5):
+    print(num)  # Prints: 1, 2, 3, 4 (5 is excluded)`,
+        takeaway: 'range(5) starts at 0 and stops before 5: 0, 1, 2, 3, 4.',
+      },
+      {
+        title: 'The Accumulator Pattern',
+        icon: '➕',
+        badge: 'Algorithm Pattern',
+        body: 'To compute running sums, factorials, or aggregates, initialize an accumulator variable before entering the loop. During each iteration, update the accumulator with += or *=.',
+        codeSnippet: `total = 0
+for n in range(1, 6):
     total += n
-print("Sum 1 to 10:", total)
-\`\`\`
-`,
+print(f"Sum of 1 to 5: {total}")  # 15`,
+        takeaway: 'Never re-initialize the accumulator inside the loop body, or it will reset on every iteration!',
+      },
+    ],
+    quiz: {
+      question: 'How many times does the loop "for i in range(2, 7):" execute?',
+      options: ['7 times', '5 times (numbers: 2, 3, 4, 5, 6)', '6 times', '4 times'],
+      correctIndex: 1,
+      explanation: 'The loop starts at 2 and stops strictly before 7. The values generated are 2, 3, 4, 5, and 6, which totals 5 iterations.',
+    },
     exampleCode: `# Calculate the sum of squares for numbers 1 to 5
 total = 0
 
@@ -182,6 +257,7 @@ for i in range(1, 6):
 
 print(f"Final Sum of Squares: {total}")
 `,
+    exampleExplanation: 'Observe how `total` accumulates the square of each index across 5 loop cycles.',
     exerciseGoal:
       'Use a for loop to calculate the factorial of 5 (1 * 2 * 3 * 4 * 5 = 120). Print exactly: "Factorial: 120".',
     exerciseCode: `# Task: Compute factorial of 5 using a for loop
@@ -205,24 +281,38 @@ factorial = 1
     duration: '20 mins',
     language: 'python',
     summary: 'Package reusable blocks of logic with parameters, return statements, and local scopes.',
-    explanation: `### Functions in Python
+    sections: [
+      {
+        title: 'Defining & Invoking Functions',
+        icon: '🧩',
+        badge: 'Modularity',
+        body: 'A function is an organized, reusable block of code designed to perform a distinct calculation. Functions make programs modular, readable, and testable. They are declared with the "def" keyword.',
+        codeSnippet: `def greet_student(name, school="VidyaVerse"):
+    return f"Welcome {name} to {school}!"
 
-A **function** is an organized, reusable block of code used to perform a single, related action. Functions make programs modular, readable, and easy to maintain.
+msg = greet_student("Priya")
+print(msg)`,
+        takeaway: 'Functions only run when they are called. Always include parentheses () when calling.',
+      },
+      {
+        title: 'Return Values vs Print Output',
+        icon: '📤',
+        badge: 'Scope & Return',
+        body: 'A critical distinction for students: print() outputs text to the screen, but return transmits data back to the calling statement so it can be stored in variables and used in further math calculations.',
+        codeSnippet: `def square(x):
+    return x * x
 
-#### Defining Functions:
-- Defined using the keyword \`def\`, followed by the function name, parentheses \`()\`, and a colon \`:\`.
-- **Parameters**: Variables listed inside parentheses in the function definition.
-- **Return Value**: The \`return\` statement exits the function and sends data back to the caller.
-
-\`\`\`python
-def calculate_area(length, width):
-    area = length * width
-    return area
-
-room_area = calculate_area(12, 10)
-print(f"Room area: {room_area} sq ft")
-\`\`\`
-`,
+res = square(5) + square(3)  # 25 + 9 = 34
+print(f"Sum of squares: {res}")`,
+        takeaway: 'If a function finishes without an explicit return statement, it implicitly returns None.',
+      },
+    ],
+    quiz: {
+      question: 'What does a Python function return if there is no explicit return statement?',
+      options: ['0', 'None', 'SyntaxError', 'False'],
+      correctIndex: 1,
+      explanation: 'In Python, all functions implicitly return the special "None" object if they terminate without hitting a return statement.',
+    },
     exampleCode: `# Reusable Temperature Conversion Functions
 def celsius_to_kelvin(celsius):
     return celsius + 273.15
@@ -233,6 +323,7 @@ def kelvin_to_celsius(kelvin):
 room_temp = 25
 print(f"{room_temp}°C in Kelvin is {celsius_to_kelvin(room_temp)}K")
 `,
+    exampleExplanation: 'The helper functions return raw numerical numbers that can be plugged into formulas or formatted cleanly.',
     exerciseGoal:
       'Define a function `celsius_to_fahrenheit(celsius)` using the formula `(celsius * 9/5) + 32`. Call it with celsius = 25 and print exactly: "Temperature in F: 77.0".',
     exerciseCode: `# Task: Define and call celsius_to_fahrenheit function
@@ -255,19 +346,36 @@ def celsius_to_fahrenheit(celsius):
     class: 'Class 11-12',
     duration: '20 mins',
     language: 'html',
-    summary: 'Interact dynamically with web pages by modifying HTML elements, styles, and handling click events.',
-    explanation: `### Document Object Model (DOM) Manipulation
-
-The **DOM** is a tree representation of the webpage. Using JavaScript, you can dynamically read, alter, style, and delete elements in real time.
-
-#### Essential DOM APIs:
-- \`document.getElementById("id")\`: Selects an element by unique ID.
-- \`element.textContent = "..."\`: Modifies the inner text content.
-- \`element.style.color = "..."\`: Changes CSS styles directly.
-- \`element.addEventListener("click", callback)\`: Executes code when user clicks.
-
-In this lesson, you can see your live HTML sandbox update directly in the browser!
-`,
+    summary: 'Interact dynamically with web pages by modifying HTML elements, CSS styles, and click event listeners.',
+    sections: [
+      {
+        title: 'The Document Object Model (DOM) Tree',
+        icon: '🌳',
+        badge: 'Web Standard',
+        body: 'The DOM is a structured tree representing every HTML tag on a webpage. Using JavaScript, your code can inspect, style, add, or delete elements in real time without refreshing the page.',
+        codeSnippet: `const heading = document.getElementById("title");
+heading.textContent = "Welcome to VidyaVerse!";
+heading.style.color = "#6541F5";`,
+        takeaway: 'document.getElementById() retrieves a single unique element node by its ID attribute.',
+      },
+      {
+        title: 'Event Listeners & User Interaction',
+        icon: '🖱️',
+        badge: 'Interactivity',
+        body: 'To make webpages respond when students click buttons or type, use element.addEventListener("click", callback). When the event fires, the browser runs your callback function automatically.',
+        codeSnippet: `const btn = document.getElementById("submit-btn");
+btn.addEventListener("click", () => {
+    alert("Button was pressed!");
+});`,
+        takeaway: 'addEventListener enables clean separation of logic without mixing JavaScript inside HTML onclick attributes.',
+      },
+    ],
+    quiz: {
+      question: 'Which DOM method correctly attaches an event handler without overwriting existing listeners?',
+      options: ['element.onClick = fn', 'element.addEventListener("click", fn)', 'element.attachListener(fn)', 'element.bind("click", fn)'],
+      correctIndex: 1,
+      explanation: 'addEventListener() is the standard W3C DOM method to attach one or more listeners to an element.',
+    },
     exampleCode: `<div style="font-family: sans-serif; text-align: center; padding: 24px; background: #111827; color: white; border-radius: 12px;">
   <h2 id="heading" style="color: #38bdf8;">VidyaVerse Interactive DOM</h2>
   <p id="status-text">Button clicks: <strong id="counter">0</strong></p>
@@ -289,6 +397,7 @@ In this lesson, you can see your live HTML sandbox update directly in the browse
   });
 </script>
 `,
+    exampleExplanation: 'Click the button in the live interactive sandbox preview below to watch the counter increment and color toggle!',
     exerciseGoal:
       'Modify the JavaScript to handle the button click: When clicked, change the heading text to "Success!" and color to "#22c55e" (green).',
     exerciseCode: `<div style="font-family: sans-serif; padding: 20px; background: #0f172a; color: white; border-radius: 10px;">
@@ -323,12 +432,22 @@ export const CodeLearnPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'explanation' | 'example' | 'exercise'>('explanation');
   const [userExerciseCode, setUserExerciseCode] = useState<string>(LESSONS[0].exerciseCode);
 
+  // Example runner state
+  const [sampleCode, setSampleCode] = useState<string>(LESSONS[0].exampleCode);
+  const [sampleRunning, setSampleRunning] = useState<boolean>(false);
+  const [sampleOutput, setSampleOutput] = useState<string>('');
+  const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
+
   // Exercise execution state
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [exerciseOutput, setExerciseOutput] = useState<string>('');
   const [exercisePassed, setExercisePassed] = useState<boolean | null>(null);
   const [showHints, setShowHints] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
+  const [copiedExample, setCopiedExample] = useState<boolean>(false);
+
+  // Quiz state: lessonId -> selected option index
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
+  const [quizSubmitted, setQuizSubmitted] = useState<Record<string, boolean>>({});
 
   // Stores
   const { markCompleted, items } = useProgressStore();
@@ -340,11 +459,13 @@ export const CodeLearnPage: React.FC = () => {
     (i) => i.module === 'codeverse_learn' && i.itemId === currentLesson.id && i.completed
   );
 
-  // Handle lesson change
+  // Synchronize state when switching lessons
   const handleSelectLesson = (index: number) => {
     setActiveLessonIndex(index);
     setActiveTab('explanation');
     setUserExerciseCode(LESSONS[index].exerciseCode);
+    setSampleCode(LESSONS[index].exampleCode);
+    setSampleOutput('');
     setExerciseOutput('');
     setExercisePassed(null);
     setShowHints(false);
@@ -387,11 +508,50 @@ export const CodeLearnPage: React.FC = () => {
     }
   };
 
-  const handleCopyExample = () => {
-    navigator.clipboard.writeText(currentLesson.exampleCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  // Run example sample code
+  const handleRunSample = async () => {
+    setSampleRunning(true);
+    try {
+      if (currentLesson.language === 'html') {
+        setSampleOutput('DOM active in preview sandbox frame.');
+        setSampleRunning(false);
+        return;
+      }
+
+      const res = await runWithPiston(currentLesson.language, sampleCode);
+      setSampleOutput(res.stdout || (res.stderr ? `Error:\n${res.stderr}` : 'Executed with 0 exit code (no stdout).'));
+    } catch (err: unknown) {
+      setSampleOutput(String(err));
+    } finally {
+      setSampleRunning(false);
+    }
   };
+
+  const handleCopyExample = () => {
+    navigator.clipboard.writeText(sampleCode);
+    setCopiedExample(true);
+    setTimeout(() => setCopiedExample(false), 2000);
+  };
+
+  const handleCopySnippet = (code: string, id: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedSnippet(id);
+    setTimeout(() => setCopiedSnippet(null), 2000);
+  };
+
+  const handleSelectQuizOption = (optionIdx: number) => {
+    setQuizAnswers((prev) => ({ ...prev, [currentLesson.id]: optionIdx }));
+    setQuizSubmitted((prev) => ({ ...prev, [currentLesson.id]: true }));
+
+    if (optionIdx === currentLesson.quiz.correctIndex) {
+      // Award XP for answering correctly
+      addXP(25);
+    }
+  };
+
+  const selectedAnswer = quizAnswers[currentLesson.id];
+  const isQuizDone = quizSubmitted[currentLesson.id];
+  const isAnswerCorrect = selectedAnswer === currentLesson.quiz.correctIndex;
 
   return (
     <div className="flex h-full w-full rounded-2xl border border-border bg-card text-text-primary font-sans overflow-hidden shadow-soft">
@@ -477,7 +637,7 @@ export const CodeLearnPage: React.FC = () => {
             <h1 className="font-display font-bold text-base text-text-primary">{currentLesson.title}</h1>
             {isLessonCompleted && (
               <span className="px-2 py-0.5 rounded-full bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26] text-[10px] font-semibold flex items-center gap-1">
-                <Check className="w-3 h-3" /> Completed
+                <Check className="w-3 h-3" /> Completed (+50 XP)
               </span>
             )}
           </div>
@@ -487,85 +647,276 @@ export const CodeLearnPage: React.FC = () => {
             <button
               onClick={() => setActiveTab('explanation')}
               className={`px-3 py-1 font-semibold rounded-lg transition-all ${
-                activeTab === 'explanation' ? 'bg-[#6541F5] text-white shadow-sm' : 'text-text-muted hover:text-text-primary'
+                activeTab === 'explanation'
+                  ? 'bg-[#6541F5] text-white shadow-sm'
+                  : 'text-text-muted hover:text-text-primary'
               }`}
             >
               📖 Concepts
             </button>
             <button
               onClick={() => setActiveTab('example')}
-              className={`px-3 py-1 font-semibold rounded-lg transition-all ${
-                activeTab === 'example' ? 'bg-[#6541F5] text-white shadow-sm' : 'text-text-muted hover:text-text-primary'
+              className={`px-3 py-1 font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
+                activeTab === 'example'
+                  ? 'bg-[#6541F5] text-white shadow-sm'
+                  : 'text-text-muted hover:text-text-primary'
               }`}
             >
-              💻 Example Code
+              <span>💻 Example Code</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#42A5E8]" />
             </button>
             <button
               onClick={() => setActiveTab('exercise')}
               className={`px-3 py-1 font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
-                activeTab === 'exercise' ? 'bg-[#19B99A] text-white shadow-sm' : 'text-text-muted hover:text-text-primary'
+                activeTab === 'exercise'
+                  ? 'bg-[#19B99A] text-white shadow-sm'
+                  : 'text-text-muted hover:text-text-primary'
               }`}
             >
               <span>🧪 Practice Exercise</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#19B99A] animate-pulse" />
             </button>
           </div>
         </div>
 
-        {/* Tab 1: Structured Explanation View */}
+        {/* Tab 1: Structured Explanation & Interactive Concept Reader */}
         {activeTab === 'explanation' && (
-          <div className="flex-1 overflow-y-auto p-8 max-w-4xl mx-auto w-full space-y-6">
-            <div className="p-4 rounded-2xl bg-[#EAE7FF]/40 dark:bg-[#26233E]/40 border border-[#6541F5]/20 text-xs text-text-primary leading-relaxed">
-              <strong className="text-[#6541F5] dark:text-[#C4B5FD]">Learning Objective:</strong> {currentLesson.summary}
+          <div className="flex-1 overflow-y-auto p-6 md:p-8 max-w-4xl mx-auto w-full space-y-6">
+            {/* Learning Objective Hero Banner */}
+            <div className="p-4 rounded-2xl bg-[#EAE7FF]/60 dark:bg-[#26233E]/60 border border-[#6541F5]/30 flex items-start gap-3 shadow-sm">
+              <span className="text-xl mt-0.5">🎯</span>
+              <div>
+                <div className="text-xs font-bold text-[#6541F5] dark:text-[#C4B5FD] uppercase tracking-wider mb-0.5">
+                  Pedagogical Objective
+                </div>
+                <p className="text-xs sm:text-sm text-text-primary font-medium leading-relaxed">
+                  {currentLesson.summary}
+                </p>
+              </div>
             </div>
 
-            <div className="card p-6 bg-card border border-border text-text-primary text-sm leading-relaxed space-y-4 shadow-soft">
-              <div className="whitespace-pre-wrap font-sans text-text-muted leading-relaxed">{currentLesson.explanation}</div>
+            {/* Concept Cards Breakdown */}
+            <div className="space-y-4">
+              {currentLesson.sections.map((sec, sIdx) => (
+                <div
+                  key={sIdx}
+                  className="card p-5 sm:p-6 bg-card border border-border rounded-2xl shadow-soft space-y-3.5 transition-all hover:border-[#6541F5]/40"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xl">{sec.icon || '📌'}</span>
+                      <h3 className="text-sm sm:text-base font-bold font-display text-text-primary">
+                        {sec.title}
+                      </h3>
+                    </div>
+                    {sec.badge && (
+                      <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-canvas border border-border text-text-muted">
+                        {sec.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
+                    {sec.body}
+                  </p>
+
+                  {/* Code Snippet Box (if provided) */}
+                  {sec.codeSnippet && (
+                    <div className="relative rounded-xl overflow-hidden border border-border bg-[#181824] dark:bg-[#0E0E17]">
+                      <div className="flex items-center justify-between px-3.5 py-1.5 bg-[#202030] dark:bg-[#151522] border-b border-white/5 text-[11px] text-slate-400 font-mono">
+                        <span className="flex items-center gap-1.5">
+                          <Code className="w-3.5 h-3.5 text-[#6541F5]" />
+                          <span>Syntax Demonstration</span>
+                        </span>
+                        <button
+                          onClick={() => handleCopySnippet(sec.codeSnippet!, `snip-${sIdx}`)}
+                          className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-white transition-colors"
+                        >
+                          {copiedSnippet === `snip-${sIdx}` ? (
+                            <>
+                              <Check className="w-3 h-3 text-[#19B99A]" />
+                              <span>Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3" />
+                              <span>Copy</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <pre className="p-3.5 text-xs font-mono text-emerald-400 dark:text-emerald-300 overflow-x-auto">
+                        <code>{sec.codeSnippet}</code>
+                      </pre>
+                    </div>
+                  )}
+
+                  {/* Takeaway / Exam Tip Alert */}
+                  {sec.takeaway && (
+                    <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 text-xs text-amber-800 dark:text-amber-300">
+                      <Lightbulb className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
+                      <div>
+                        <strong className="font-semibold">Curriculum Tip: </strong>
+                        <span>{sec.takeaway}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
 
-            <div className="pt-4 flex items-center gap-3">
+            {/* Interactive "Check Your Understanding" Mini Quiz */}
+            <div className="card p-6 bg-card border-2 border-[#6541F5]/30 rounded-2xl shadow-soft space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-[#EAE7FF] text-[#6541F5] dark:bg-[#26233E] flex items-center justify-center font-bold">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-text-primary">Check Your Understanding</h3>
+                    <p className="text-[11px] text-text-muted">Earn +25 XP by validating your knowledge</p>
+                  </div>
+                </div>
+                {isQuizDone && isAnswerCorrect && (
+                  <span className="px-2.5 py-1 rounded-full bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26] text-xs font-bold flex items-center gap-1 shadow-sm">
+                    <CheckCircle className="w-3.5 h-3.5" /> Correct! +25 XP
+                  </span>
+                )}
+              </div>
+
+              <div className="text-xs sm:text-sm font-semibold text-text-primary pt-1">
+                {currentLesson.quiz.question}
+              </div>
+
+              {/* Multiple Choice Options */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                {currentLesson.quiz.options.map((opt, optIdx) => {
+                  const isSelected = selectedAnswer === optIdx;
+                  const isCorrect = optIdx === currentLesson.quiz.correctIndex;
+
+                  let btnStyle = 'border-border bg-canvas hover:border-[#6541F5]/60 hover:bg-[#6541F5]/5 text-text-primary';
+                  if (isQuizDone) {
+                    if (isCorrect) {
+                      btnStyle = 'border-[#19B99A] bg-[#DDF8EE]/60 dark:bg-[#0D2E26]/60 text-[#19B99A] font-semibold';
+                    } else if (isSelected && !isCorrect) {
+                      btnStyle = 'border-red-500 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-semibold';
+                    }
+                  } else if (isSelected) {
+                    btnStyle = 'border-[#6541F5] bg-[#6541F5]/10 text-[#6541F5] font-semibold';
+                  }
+
+                  return (
+                    <button
+                      key={optIdx}
+                      onClick={() => handleSelectQuizOption(optIdx)}
+                      className={`p-3 rounded-xl border text-xs text-left transition-all flex items-center justify-between ${btnStyle}`}
+                    >
+                      <span>{opt}</span>
+                      {isQuizDone && isCorrect && <Check className="w-4 h-4 text-[#19B99A]" />}
+                      {isQuizDone && isSelected && !isCorrect && <AlertCircle className="w-4 h-4 text-red-500" />}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Quiz Feedback Explanation */}
+              {isQuizDone && (
+                <div
+                  className={`p-3.5 rounded-xl text-xs space-y-1 ${
+                    isAnswerCorrect
+                      ? 'bg-[#DDF8EE]/40 border border-[#19B99A]/40 text-text-primary'
+                      : 'bg-red-50 dark:bg-red-950/30 border border-red-300 dark:border-red-900/50 text-text-primary'
+                  }`}
+                >
+                  <div className="font-bold flex items-center gap-1.5">
+                    {isAnswerCorrect ? (
+                      <span className="text-[#19B99A]">🎉 Spot On!</span>
+                    ) : (
+                      <span className="text-red-500">❌ Not Quite Right</span>
+                    )}
+                  </div>
+                  <p className="text-text-muted leading-relaxed">
+                    {currentLesson.quiz.explanation}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="pt-2 pb-6 flex items-center justify-between gap-3">
               <button
                 onClick={() => setActiveTab('example')}
-                className="btn-primary px-4 py-2 text-xs font-semibold rounded-xl flex items-center gap-2"
+                className="btn-primary px-4 py-2.5 text-xs font-semibold rounded-xl flex items-center gap-2 shadow-sm"
               >
-                <span>View Example Code</span>
+                <span>Run Example Code</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
+
               <button
                 onClick={() => setActiveTab('exercise')}
-                className="px-4 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 bg-[#19B99A] hover:bg-[#159F84] text-white transition-colors shadow-sm"
+                className="px-4 py-2.5 text-xs font-semibold rounded-xl flex items-center gap-2 bg-[#19B99A] hover:bg-[#159F84] text-white transition-all shadow-sm"
               >
-                <span>Try Exercise Directly</span>
+                <span>Jump to Practice Exercise</span>
                 <Play className="w-3.5 h-3.5 fill-current" />
               </button>
             </div>
           </div>
         )}
 
-        {/* Tab 2: Example Code View */}
+        {/* Tab 2: Example Code View with Live Runner */}
         {activeTab === 'example' && (
-          <div className="flex-1 flex flex-col p-6 overflow-hidden">
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-xs text-text-muted">
-                Explore the working sample code. Click "Try it in Exercise" to practice modifying it.
+          <div className="flex-1 flex flex-col p-4 sm:p-6 overflow-hidden">
+            <div className="flex items-center justify-between mb-3 shrink-0">
+              <div>
+                <div className="text-xs font-semibold text-text-primary">Interactive Code Sandbox</div>
+                <div className="text-[11px] text-text-muted">
+                  Run the working sample code, experiment with values, and view the live console output.
+                </div>
               </div>
-              <button
-                onClick={handleCopyExample}
-                className="px-2.5 py-1 text-xs rounded-lg flex items-center gap-1.5 border border-border text-text-muted hover:text-text-primary hover:bg-canvas transition-colors"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-[#19B99A]" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Copied!' : 'Copy Code'}</span>
-              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setSampleCode(currentLesson.exampleCode);
+                    setSampleOutput('');
+                  }}
+                  className="px-2.5 py-1.5 text-xs rounded-xl flex items-center gap-1.5 border border-border text-text-muted hover:text-text-primary hover:bg-canvas transition-colors"
+                  title="Reset Sample Code to original"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Reset</span>
+                </button>
+
+                <button
+                  onClick={handleCopyExample}
+                  className="px-2.5 py-1.5 text-xs rounded-xl flex items-center gap-1.5 border border-border text-text-muted hover:text-text-primary hover:bg-canvas transition-colors"
+                >
+                  {copiedExample ? <Check className="w-3.5 h-3.5 text-[#19B99A]" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedExample ? 'Copied!' : 'Copy Code'}</span>
+                </button>
+
+                {/* RUN SAMPLE BUTTON */}
+                <button
+                  onClick={handleRunSample}
+                  disabled={sampleRunning}
+                  className="px-4 py-1.5 text-xs font-semibold rounded-xl flex items-center gap-2 bg-[#6541F5] hover:bg-[#5230E8] text-white shadow-sm transition-all disabled:opacity-50"
+                >
+                  <Play className={`w-3.5 h-3.5 fill-current ${sampleRunning ? 'animate-spin' : ''}`} />
+                  <span>{sampleRunning ? 'Executing...' : 'Run Sample Code'}</span>
+                </button>
+              </div>
             </div>
 
-            <div className="flex-1 border border-border rounded-xl overflow-hidden shadow-soft">
+            {/* Monaco Editor Frame */}
+            <div className="flex-1 border border-border rounded-2xl overflow-hidden shadow-soft flex flex-col min-h-[220px]">
               <Editor
                 height="100%"
                 theme={theme === 'dark' ? 'vs-dark' : 'vs'}
                 language={currentLesson.language === 'html' ? 'html' : 'python'}
-                value={currentLesson.exampleCode}
+                value={sampleCode}
+                onChange={(val) => setSampleCode(val || '')}
                 options={{
-                  readOnly: true,
+                  readOnly: false,
                   minimap: { enabled: false },
                   fontSize: 13,
                   lineNumbers: 'on',
@@ -577,20 +928,40 @@ export const CodeLearnPage: React.FC = () => {
 
             {/* If HTML, live preview frame */}
             {currentLesson.language === 'html' && (
-              <div className="h-48 mt-4 border border-border rounded-xl overflow-hidden bg-white">
+              <div className="h-44 mt-3 border border-border rounded-xl overflow-hidden bg-white shadow-soft shrink-0 flex flex-col">
+                <div className="bg-canvas px-3 py-1 text-[11px] font-semibold text-text-muted border-b border-border flex items-center justify-between">
+                  <span>Interactive HTML Sandbox</span>
+                  <span className="text-[10px] text-[#19B99A]">Live DOM Render</span>
+                </div>
                 <iframe
-                  srcDoc={buildHtmlSrcdoc(currentLesson.exampleCode)}
+                  srcDoc={buildHtmlSrcdoc(sampleCode)}
                   title="HTML Example Preview"
-                  className="w-full h-full border-none"
+                  className="w-full flex-1 border-none"
                   sandbox="allow-scripts"
                 />
               </div>
             )}
 
-            <div className="mt-4 flex justify-end">
+            {/* Live Terminal Output Drawer */}
+            {sampleOutput && (
+              <div className="mt-3 rounded-xl border border-border bg-[#0E0E17] text-slate-100 p-3 shrink-0 overflow-y-auto max-h-36 font-mono text-xs shadow-soft">
+                <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-white/10 text-[10px] text-slate-400">
+                  <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[#42A5E8]">
+                    <Terminal className="w-3.5 h-3.5" /> Output Console
+                  </span>
+                  <span className="text-emerald-400">Exit Code: 0</span>
+                </div>
+                <pre className="whitespace-pre-wrap leading-relaxed text-slate-200">{sampleOutput}</pre>
+              </div>
+            )}
+
+            <div className="mt-4 flex items-center justify-between shrink-0">
+              <span className="text-xs text-text-muted">
+                Tip: You can modify any number or string in the editor above and hit "Run Sample Code"!
+              </span>
               <button
                 onClick={() => setActiveTab('exercise')}
-                className="px-4 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 bg-[#19B99A] hover:bg-[#159F84] text-white transition-colors shadow-sm"
+                className="px-4 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 bg-[#19B99A] hover:bg-[#159F84] text-white transition-all shadow-sm"
               >
                 <span>Ready to Try the Exercise!</span>
                 <ArrowRight className="w-4 h-4" />
@@ -599,13 +970,13 @@ export const CodeLearnPage: React.FC = () => {
           </div>
         )}
 
-        {/* Tab 3: Interactive Practice Exercise */}
+        {/* Tab 3: Interactive Practice Exercise & Auto-Grader */}
         {activeTab === 'exercise' && (
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Goal Card */}
             <div className="p-4 bg-card border-b border-border shrink-0">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] font-semibold text-[#19B99A] uppercase tracking-wider flex items-center gap-1">
+                <span className="text-[11px] font-bold text-[#19B99A] uppercase tracking-wider flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5" /> Exercise Mission
                 </span>
                 <button
@@ -616,7 +987,9 @@ export const CodeLearnPage: React.FC = () => {
                   <span>{showHints ? 'Hide Hints' : 'Need a Hint?'}</span>
                 </button>
               </div>
-              <p className="text-xs text-text-primary">{currentLesson.exerciseGoal}</p>
+              <p className="text-xs sm:text-sm text-text-primary font-medium leading-relaxed">
+                {currentLesson.exerciseGoal}
+              </p>
 
               {/* Hints Accordion */}
               {showHints && (
@@ -653,8 +1026,9 @@ export const CodeLearnPage: React.FC = () => {
               {/* If HTML, live preview frame */}
               {currentLesson.language === 'html' && (
                 <div className="w-full md:w-1/2 border-t md:border-t-0 md:border-l border-border bg-white flex flex-col">
-                  <div className="bg-canvas text-text-muted px-3 py-1 text-[11px] border-b border-border">
-                    Live HTML / DOM Sandbox Preview
+                  <div className="bg-canvas text-text-muted px-3 py-1.5 text-[11px] font-semibold border-b border-border flex items-center justify-between">
+                    <span>Live Interactive HTML Sandbox</span>
+                    <span className="text-[#19B99A]">Realtime</span>
                   </div>
                   <iframe
                     srcDoc={buildHtmlSrcdoc(userExerciseCode)}
@@ -671,7 +1045,7 @@ export const CodeLearnPage: React.FC = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setUserExerciseCode(currentLesson.exerciseCode)}
-                  className="px-2.5 py-1 text-xs rounded-lg flex items-center gap-1 border border-border text-text-muted hover:text-text-primary hover:bg-canvas transition-colors"
+                  className="px-3 py-1.5 text-xs rounded-xl flex items-center gap-1.5 border border-border text-text-muted hover:text-text-primary hover:bg-canvas transition-colors"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Reset Starter</span>
@@ -680,33 +1054,64 @@ export const CodeLearnPage: React.FC = () => {
                 <button
                   onClick={handleRunExercise}
                   disabled={isRunning}
-                  className="px-4 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 bg-[#19B99A] hover:bg-[#159F84] text-white shadow-sm transition-colors disabled:opacity-50"
+                  className="px-4 py-1.5 text-xs font-semibold rounded-xl flex items-center gap-2 bg-[#19B99A] hover:bg-[#159F84] text-white shadow-sm transition-all disabled:opacity-50"
                 >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>{isRunning ? 'Executing...' : 'Run & Check Answer'}</span>
+                  <Play className={`w-3.5 h-3.5 fill-current ${isRunning ? 'animate-spin' : ''}`} />
+                  <span>{isRunning ? 'Grading Answer...' : 'Run & Check Answer'}</span>
                 </button>
               </div>
 
-              {/* Result Badge */}
+              {/* Result Badge / Next Action */}
               {exercisePassed !== null && (
-                <div
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                    exercisePassed
-                      ? 'bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26] border border-[#19B99A]/40'
-                      : 'bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400 border border-red-500/40'
-                  }`}
-                >
-                  {exercisePassed ? <CheckCircle2 className="w-4 h-4" /> : <Award className="w-4 h-4" />}
-                  <span>{exercisePassed ? 'Mission Passed! +50 XP' : 'Incorrect Output - Check Hints'}</span>
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                      exercisePassed
+                        ? 'bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26] border border-[#19B99A]/40'
+                        : 'bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400 border border-red-500/40'
+                    }`}
+                  >
+                    {exercisePassed ? <CheckCircle2 className="w-4 h-4" /> : <Award className="w-4 h-4" />}
+                    <span>{exercisePassed ? 'Mission Passed! +50 XP' : 'Incorrect Output - Check Hints'}</span>
+                  </div>
+
+                  {exercisePassed && activeLessonIndex < LESSONS.length - 1 && (
+                    <button
+                      onClick={() => handleSelectLesson(activeLessonIndex + 1)}
+                      className="px-3.5 py-1 text-xs font-semibold rounded-xl bg-[#6541F5] hover:bg-[#5230E8] text-white flex items-center gap-1.5 shadow-sm transition-all"
+                    >
+                      <span>Next Lesson</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               )}
             </div>
 
-            {/* Output Display */}
+            {/* Side-by-side Output Diff Comparison */}
             {exerciseOutput && (
-              <div className="h-28 border-t border-border bg-canvas p-3 overflow-y-auto text-xs font-mono">
-                <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Standard Output:</div>
-                <pre className="text-text-primary whitespace-pre-wrap">{exerciseOutput}</pre>
+              <div className="border-t border-border bg-canvas p-3 shrink-0 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono max-h-36 overflow-y-auto">
+                <div className="p-2.5 rounded-xl border border-border bg-card">
+                  <div className="text-[10px] text-text-muted font-bold uppercase tracking-wider mb-1">
+                    Your Actual Output:
+                  </div>
+                  <pre
+                    className={`whitespace-pre-wrap ${
+                      exercisePassed ? 'text-[#19B99A] font-semibold' : 'text-red-500'
+                    }`}
+                  >
+                    {exerciseOutput}
+                  </pre>
+                </div>
+
+                <div className="p-2.5 rounded-xl border border-border bg-card">
+                  <div className="text-[10px] text-text-muted font-bold uppercase tracking-wider mb-1">
+                    Expected Target Output:
+                  </div>
+                  <pre className="whitespace-pre-wrap text-[#19B99A] font-semibold">
+                    {currentLesson.expectedOutput}
+                  </pre>
+                </div>
               </div>
             )}
           </div>
@@ -717,20 +1122,20 @@ export const CodeLearnPage: React.FC = () => {
           <button
             onClick={() => handleSelectLesson(Math.max(0, activeLessonIndex - 1))}
             disabled={activeLessonIndex === 0}
-            className="px-3 py-1 text-xs rounded-lg flex items-center gap-1 border border-border text-text-muted hover:text-text-primary hover:bg-canvas transition-colors disabled:opacity-30"
+            className="px-3 py-1.5 text-xs rounded-xl flex items-center gap-1.5 border border-border text-text-muted hover:text-text-primary hover:bg-canvas transition-colors disabled:opacity-30"
           >
             <ChevronLeft className="w-4 h-4" />
             <span>Previous Lesson</span>
           </button>
 
-          <span className="text-xs text-text-muted font-mono">
+          <span className="text-xs text-text-muted font-mono font-medium">
             Lesson {activeLessonIndex + 1} of {LESSONS.length}
           </span>
 
           <button
             onClick={() => handleSelectLesson(Math.min(LESSONS.length - 1, activeLessonIndex + 1))}
             disabled={activeLessonIndex === LESSONS.length - 1}
-            className="px-3 py-1 text-xs rounded-lg flex items-center gap-1 bg-[#6541F5] hover:bg-[#5230E8] text-white shadow-sm transition-colors disabled:opacity-30"
+            className="px-3.5 py-1.5 text-xs rounded-xl flex items-center gap-1.5 bg-[#6541F5] hover:bg-[#5230E8] text-white shadow-sm transition-colors disabled:opacity-30"
           >
             <span>Next Lesson</span>
             <ChevronRight className="w-4 h-4" />

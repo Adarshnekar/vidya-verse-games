@@ -246,7 +246,7 @@ export const PlayLabPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2x2 Grid on Desktop / 1 Column on Mobile */}
+      {/* 2 Games in a Row: Image Square on Left, Description on Right */}
       <motion.div layout className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
         {filteredGames.map((game, index) => (
           <motion.div
@@ -254,10 +254,10 @@ export const PlayLabPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: index * 0.08 }}
-            className={`group relative flex flex-col card rounded-2xl overflow-hidden transition-all duration-300 ${game.colorTheme.border} ${game.colorTheme.glow} shadow-soft hover:shadow-card-hover`}
+            className={`group relative flex flex-col sm:flex-row card rounded-2xl overflow-hidden transition-all duration-300 ${game.colorTheme.border} ${game.colorTheme.glow} shadow-soft hover:shadow-card-hover`}
           >
-            {/* Real Illustration Image Header Area */}
-            <div className="relative h-56 sm:h-64 w-full overflow-hidden border-b border-border bg-[#F5F5FA] dark:bg-[#12121A]">
+            {/* Left: Guaranteed 1:1 Perfect Square Illustration Image */}
+            <div className="relative w-full aspect-square sm:w-56 sm:h-56 md:w-60 md:h-60 lg:w-52 lg:h-52 xl:w-60 xl:h-60 shrink-0 overflow-hidden bg-[#F5F5FA] dark:bg-[#12121A] border-b sm:border-b-0 sm:border-r border-border">
               <img
                 src={game.image}
                 alt={game.title}
@@ -266,67 +266,55 @@ export const PlayLabPage: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
-              {/* Top Badges Overlay */}
-              <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
+              {/* Badges Overlay */}
+              <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
                 {/* Category Pill */}
                 <span
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md shadow-sm ${game.colorTheme.badgeBg} ${game.colorTheme.badgeText}`}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold backdrop-blur-md shadow-sm ${game.colorTheme.badgeBg} ${game.colorTheme.badgeText}`}
                 >
-                  <Zap className="w-3.5 h-3.5" />
+                  <Zap className="w-3 h-3" />
                   {game.category}
                 </span>
 
                 {/* Offline Ready Badge */}
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-card/90 backdrop-blur-md text-[#28B987] border border-border shadow-sm">
-                  <WifiOff className="w-3.5 h-3.5" />
-                  <span>Works Offline</span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-card/90 backdrop-blur-md text-[#28B987] border border-border shadow-sm">
+                  <WifiOff className="w-3 h-3" />
+                  <span>Offline</span>
                 </span>
               </div>
             </div>
 
-            {/* Card Body */}
-            <div className="flex-1 p-6 flex flex-col justify-between space-y-5">
+            {/* Right: Description & Action Area */}
+            <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between min-w-0">
               <div className="space-y-3">
-                {/* Title & Subtitle */}
+                {/* Title */}
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold font-display text-text-primary group-hover:text-[#F5A623] transition-colors">
+                  <h2 className="text-xl sm:text-2xl font-bold font-display text-text-primary group-hover:text-[#F5A623] transition-colors truncate">
                     {game.title}
                   </h2>
-                  <p className="text-xs sm:text-sm font-medium text-text-muted mt-1">
-                    {game.subtitle}
-                  </p>
                 </div>
 
-                <p className="text-xs sm:text-sm text-text-muted leading-relaxed line-clamp-2">
+                {/* Description */}
+                <p className="text-xs sm:text-sm text-text-muted leading-relaxed line-clamp-3">
                   {game.description}
                 </p>
 
                 {/* Metadata Tags */}
-                <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-text-muted font-medium">
-                  <span className="inline-flex items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-2.5 pt-0.5 text-xs text-text-muted font-medium">
+                  <span className="inline-flex items-center gap-1">
                     <Users className="w-3.5 h-3.5 text-text-muted/70" />
                     {game.players}
                   </span>
                   <span>•</span>
-                  <span className="inline-flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5 text-text-muted/70" />
                     {game.playTime}
                   </span>
                   <span>•</span>
-                  <span className="inline-flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: game.colorTheme.primary }} />
                     {game.grades}
                   </span>
-                </div>
-
-                {/* Pedagogical Features List */}
-                <div className="pt-2 border-t border-border space-y-1.5">
-                  {game.features.map((feat, fIdx) => (
-                    <div key={fIdx} className="flex items-center gap-2 text-xs text-text-muted">
-                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: game.colorTheme.primary }} />
-                      <span className="truncate">{feat}</span>
-                    </div>
-                  ))}
                 </div>
               </div>
 
@@ -334,7 +322,7 @@ export const PlayLabPage: React.FC = () => {
               <div className="pt-3">
                 <button
                   onClick={() => navigate(game.path)}
-                  className="w-full btn-primary py-3 font-semibold text-sm rounded-xl flex items-center justify-center gap-2 group/btn"
+                  className="w-full btn-primary py-2.5 font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 group/btn shadow-sm"
                 >
                   <span>Launch {game.title}</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
