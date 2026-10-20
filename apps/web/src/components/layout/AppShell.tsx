@@ -13,6 +13,12 @@ export function AppShell() {
   const { applyDOMTokens } = useUIStore();
   const location = useLocation();
 
+  // Full-bleed workstation detection: routes requiring maximum canvas / IDE space
+  const isWorkstation =
+    location.pathname.startsWith('/circuitverse') ||
+    location.pathname.startsWith('/codeverse/challenge') ||
+    location.pathname.startsWith('/codeverse/learn');
+
   // Initialize online / offline listener
   useEffect(() => {
     const handleOnline = () => setOnline(true);
@@ -40,25 +46,31 @@ export function AppShell() {
         {/* Sticky Top Header Bar */}
         <AppHeader />
 
-        {/* Global Scrollable Viewport */}
-        <main className="flex-1 overflow-y-auto" id="main-content">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={location.pathname}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
-              >
-                <Outlet />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </main>
+        {/* Global Viewport: Workstation (Full-bleed) vs Document (Max-w-7xl) */}
+        {isWorkstation ? (
+          <main className="flex-1 overflow-hidden p-2 sm:p-3 flex flex-col" id="main-content">
+            <Outlet />
+          </main>
+        ) : (
+          <main className="flex-1 overflow-y-auto" id="main-content">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={location.pathname}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                >
+                  <Outlet />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </main>
+        )}
 
-        {/* Mobile Sticky Bottom Navigation Bar */}
-        <BottomNav />
+        {/* Mobile Sticky Bottom Navigation Bar (Hidden in full-bleed workstation modes) */}
+        {!isWorkstation && <BottomNav />}
       </div>
 
       {/* Floating Centered Command Palette */}

@@ -67,12 +67,12 @@ function generateMazeMatrix(size: number): number[][] {
 
   function carve(r: number, c: number) {
     grid[r][c] = 0;
-    const directions: Array<[number, number]> = [
+    const directions = ([
       [0, 2],
       [2, 0],
       [0, -2],
       [-2, 0],
-    ].sort(() => Math.random() - 0.5);
+    ] as [number, number][]).sort(() => Math.random() - 0.5);
 
     for (const [dr, dc] of directions) {
       const nr = r + dr;
@@ -254,7 +254,7 @@ export const MazeBotPage: React.FC = () => {
   const [manualWon, setManualWon] = useState<boolean>(false);
   const [manualStepsCount, setManualStepsCount] = useState<number>(0);
 
-  const playbackTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const playbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Regenerate Maze and Steps
   const initializeNewMaze = useCallback((size: number) => {

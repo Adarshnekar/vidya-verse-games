@@ -824,18 +824,16 @@ export const CircuitVersePage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8.5rem)] rounded-2xl border border-border bg-card text-text-primary font-sans overflow-hidden select-none shadow-soft">
+    <div className="flex flex-col h-full w-full rounded-2xl border border-border bg-card text-text-primary font-sans overflow-hidden select-none shadow-soft">
       {/* 1. TOP WORKSTATION TOOLBAR */}
-      <header className="h-14 border-b border-surface-700/80 bg-surface-800/95 px-4 flex items-center justify-between z-20 shadow-md">
+      <header className="h-14 border-b border-border bg-card px-4 flex items-center justify-between z-20">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 pr-3 border-r border-surface-700">
-            <span className="p-1.5 rounded-lg bg-circuit-500/20 text-circuit-400 border border-circuit-500/30">
-              <Zap className="w-5 h-5" />
+          <div className="flex items-center gap-2 text-xs text-text-muted">
+            <span className="p-1.5 rounded-lg bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26]">
+              <Zap className="w-4 h-4" />
             </span>
-            <span className="font-display font-bold text-lg tracking-wide text-surface-50">
-              Circuit<span className="text-circuit-400">Verse</span>
-            </span>
-            <span className="badge-circuit ml-1">Labs 2.0</span>
+            <span className="font-semibold text-text-primary hidden sm:inline">Circuit Workbench</span>
+            <span className="hidden sm:inline">/</span>
           </div>
 
           {/* Editable Project Name */}
@@ -844,33 +842,33 @@ export const CircuitVersePage: React.FC = () => {
               type="text"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
-              className="bg-surface-900/60 border border-surface-700 hover:border-surface-600 focus:border-circuit-500 rounded px-2.5 py-1 text-sm text-surface-200 focus:outline-none transition-colors w-64 md:w-80 font-medium"
+              className="bg-canvas border border-border hover:border-[#19B99A]/50 focus:border-[#19B99A] rounded-lg px-2.5 py-1 text-xs text-text-primary focus:outline-none transition-colors w-40 sm:w-60 font-semibold"
               title="Click to rename circuit project"
             />
           </div>
         </div>
 
         {/* View Mode Switcher */}
-        <div className="flex items-center bg-surface-900/80 p-0.5 rounded-lg border border-surface-700">
+        <div className="flex items-center bg-canvas p-0.5 rounded-xl border border-border">
           <button
             onClick={() => setViewMode('schematic')}
-            className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
+            className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
               viewMode === 'schematic'
-                ? 'bg-circuit-500 text-white shadow-glow-circuit'
-                : 'text-surface-400 hover:text-surface-200'
+                ? 'bg-[#19B99A] text-white shadow-sm'
+                : 'text-text-muted hover:text-text-primary'
             }`}
           >
-            🎨 Interactive Schematic
+            Schematic
           </button>
           <button
             onClick={() => setViewMode('falstad')}
-            className={`px-3 py-1 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
               viewMode === 'falstad'
-                ? 'bg-circuit-500 text-white shadow-glow-circuit'
-                : 'text-surface-400 hover:text-surface-200'
+                ? 'bg-[#19B99A] text-white shadow-sm'
+                : 'text-text-muted hover:text-text-primary'
             }`}
           >
-            ⚡ Falstad Simulator
+            SPICE Solver
           </button>
         </div>
 
@@ -879,15 +877,15 @@ export const CircuitVersePage: React.FC = () => {
           {/* Run / Pause */}
           <button
             onClick={() => setIsSimulating(!isSimulating)}
-            className={`btn px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 transition-all ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-all ${
               isSimulating
-                ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-sm'
-                : 'bg-circuit-500 hover:bg-circuit-600 text-white shadow-glow-circuit'
+                ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm'
+                : 'bg-[#19B99A] hover:bg-[#159F84] text-white shadow-sm shadow-[#19B99A]/25'
             }`}
             title={isSimulating ? 'Pause Circuit Simulation' : 'Run Live SPICE Simulation'}
           >
             {isSimulating ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-            {isSimulating ? 'Pause' : 'Simulate'}
+            <span className="hidden sm:inline">{isSimulating ? 'Pause' : 'Simulate'}</span>
           </button>
 
           {/* Reset */}
@@ -896,69 +894,69 @@ export const CircuitVersePage: React.FC = () => {
               setIsSimulating(false);
               setTimeout(() => setIsSimulating(true), 200);
             }}
-            className="btn-icon p-1.5"
+            className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             title="Reset Simulation State"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5" />
           </button>
 
-          <div className="h-4 w-px bg-surface-700 mx-1" />
+          <div className="h-4 w-px bg-border mx-0.5 hidden sm:block" />
 
           {/* Undo / Redo */}
           <button
             onClick={handleUndo}
             disabled={history.length === 0}
-            className="btn-icon p-1.5 disabled:opacity-30"
+            className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-30 hidden sm:block"
             title="Undo (Ctrl+Z)"
           >
-            <Undo2 className="w-4 h-4" />
+            <Undo2 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={handleRedo}
             disabled={redoStack.length === 0}
-            className="btn-icon p-1.5 disabled:opacity-30"
+            className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-30 hidden sm:block"
             title="Redo (Ctrl+Y)"
           >
-            <Redo2 className="w-4 h-4" />
+            <Redo2 className="w-3.5 h-3.5" />
           </button>
 
           {/* Zoom controls for canvas */}
-          <div className="flex items-center bg-surface-700/60 rounded-lg p-0.5 border border-surface-700">
+          <div className="hidden md:flex items-center bg-canvas rounded-lg p-0.5 border border-border">
             <button
               onClick={() => setZoomLevel((z) => Math.max(0.6, z - 0.1))}
-              className="p-1 hover:text-surface-100 text-surface-400"
+              className="p-1 hover:text-text-primary text-text-muted"
               title="Zoom Out"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
-            <span className="text-[11px] font-mono px-1.5 text-surface-300">
+            <span className="text-[10px] font-mono px-1.5 text-text-muted">
               {Math.round(zoomLevel * 100)}%
             </span>
             <button
               onClick={() => setZoomLevel((z) => Math.min(1.8, z + 0.1))}
-              className="p-1 hover:text-surface-100 text-surface-400"
+              className="p-1 hover:text-text-primary text-text-muted"
               title="Zoom In"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="h-4 w-px bg-surface-700 mx-1" />
+          <div className="h-4 w-px bg-border mx-0.5" />
 
           {/* Save Project */}
           <button
             onClick={handleSaveProject}
-            className="btn-ghost px-2.5 py-1 text-xs flex items-center gap-1.5"
+            className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-xs flex items-center gap-1.5"
             title="Save circuit to LocalStorage"
           >
             <Save className="w-3.5 h-3.5" />
-            <span>Save</span>
+            <span className="hidden sm:inline">Save</span>
           </button>
 
           {/* Experiment Guide Modal Button */}
           <button
             onClick={() => setShowExperimentModal(true)}
-            className="btn px-2.5 py-1 text-xs bg-circuit-900/60 hover:bg-circuit-800 text-circuit-300 border border-circuit-700/60 flex items-center gap-1.5"
+            className="px-2.5 py-1 text-xs rounded-lg bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26] hover:opacity-90 font-semibold border border-[#19B99A]/20 flex items-center gap-1.5"
           >
             <BookOpen className="w-3.5 h-3.5" />
             <span>10 Labs</span>
@@ -969,16 +967,16 @@ export const CircuitVersePage: React.FC = () => {
       {/* 2. MAIN 3-PANEL WORKBENCH */}
       <div className="flex flex-1 overflow-hidden relative">
         {/* LEFT PANEL: SEARCHABLE COMPONENT PALETTE */}
-        <aside className="w-64 border-r border-surface-700/80 bg-surface-800 flex flex-col z-10">
-          <div className="p-3 border-b border-surface-700/80">
-            <div className="relative mb-2">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-surface-400" />
+        <aside className="w-64 border-r border-border bg-card flex flex-col z-10 text-text-primary">
+          <div className="p-3 border-b border-border space-y-2">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-text-muted" />
               <input
                 type="text"
                 placeholder="Search components..."
                 value={paletteSearch}
                 onChange={(e) => setPaletteSearch(e.target.value)}
-                className="w-full bg-surface-900/80 border border-surface-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-surface-200 placeholder-surface-500 focus:outline-none focus:border-circuit-500"
+                className="w-full bg-canvas border border-border rounded-lg pl-8 pr-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-[#19B99A]"
               />
             </div>
 
@@ -989,10 +987,10 @@ export const CircuitVersePage: React.FC = () => {
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-medium transition-colors ${
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-semibold transition-colors ${
                       activeCategory === cat
-                        ? 'bg-circuit-500 text-white'
-                        : 'bg-surface-700/60 text-surface-400 hover:text-surface-200 hover:bg-surface-700'
+                        ? 'bg-[#19B99A] text-white shadow-sm'
+                        : 'bg-canvas text-text-muted hover:text-text-primary border border-border'
                     }`}
                   >
                     {cat}
@@ -1004,7 +1002,7 @@ export const CircuitVersePage: React.FC = () => {
 
           {/* Component List */}
           <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
-            <div className="text-[10px] font-semibold tracking-wider text-surface-400 uppercase px-2 py-1">
+            <div className="text-[10px] font-bold tracking-wider text-text-muted uppercase px-2 py-1">
               Click to Place on Workbench ({filteredPalette.length})
             </div>
 
@@ -1012,23 +1010,23 @@ export const CircuitVersePage: React.FC = () => {
               <div
                 key={item.type}
                 onClick={() => handleAddComponent(item)}
-                className="group flex items-center justify-between p-2 rounded-lg bg-surface-900/40 hover:bg-surface-700/60 border border-surface-700/50 hover:border-circuit-500/50 cursor-pointer transition-all"
+                className="group flex items-center justify-between p-2 rounded-xl bg-canvas hover:bg-[#DDF8EE]/40 dark:hover:bg-[#0D2E26]/40 border border-border hover:border-[#19B99A] cursor-pointer transition-all"
                 title={`${item.name}: ${item.description}`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-md bg-surface-800 flex items-center justify-center font-mono text-circuit-400 text-sm border border-surface-700 group-hover:border-circuit-500/40 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-card flex items-center justify-center font-mono text-[#19B99A] text-sm border border-border group-hover:border-[#19B99A]/50 transition-colors shadow-sm">
                     {item.symbol}
                   </div>
                   <div className="truncate">
-                    <div className="text-xs font-medium text-surface-200 group-hover:text-circuit-300 truncate">
+                    <div className="text-xs font-semibold text-text-primary group-hover:text-[#19B99A] truncate">
                       {item.name}
                     </div>
-                    <div className="text-[10px] text-surface-500">
+                    <div className="text-[10px] text-text-muted">
                       Default: {item.defaultValue} {item.defaultUnit}
                     </div>
                   </div>
                 </div>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-800 text-surface-400 font-mono">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-card border border-border text-text-muted group-hover:text-[#19B99A] font-mono shadow-sm">
                   + Add
                 </span>
               </div>
@@ -1036,24 +1034,24 @@ export const CircuitVersePage: React.FC = () => {
           </div>
 
           {/* Guided Lab Quick Selector */}
-          <div className="p-3 border-t border-surface-700/80 bg-surface-900/40">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] font-semibold text-circuit-400">Current Experiment:</span>
-              <span className="text-[10px] text-surface-400">{activeExperiment.grade}</span>
+          <div className="p-3 border-t border-border bg-canvas/40">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[11px] font-bold text-[#19B99A]">Current Experiment:</span>
+              <span className="text-[10px] text-text-muted font-medium">{activeExperiment.grade}</span>
             </div>
-            <div className="text-xs font-medium text-surface-200 truncate">{activeExperiment.title}</div>
-            <div className="text-[10px] text-surface-400 font-mono mt-0.5">{activeExperiment.formula}</div>
+            <div className="text-xs font-semibold text-text-primary truncate">{activeExperiment.title}</div>
+            <div className="text-[10px] text-text-muted font-mono mt-0.5">{activeExperiment.formula}</div>
           </div>
         </aside>
 
         {/* CENTER PANEL: WORKBENCH (SCHEMATIC SVG OR FALSTAD IFRAME) */}
-        <main className="flex-1 flex flex-col relative bg-surface-950 overflow-hidden">
+        <main className="flex-1 flex flex-col relative bg-canvas overflow-hidden">
           {viewMode === 'falstad' ? (
             /* FALSTAD CIRCUITJS1 IFRAME VIEW */
             <div className="flex-1 flex flex-col w-full h-full relative">
-              <div className="bg-surface-800 px-4 py-2 border-b border-surface-700 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2 text-surface-300">
-                  <Info className="w-4 h-4 text-circuit-400" />
+              <div className="bg-card px-4 py-2 border-b border-border flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2 text-text-muted">
+                  <Info className="w-4 h-4 text-[#19B99A]" />
                   <span>
                     Embedded Falstad CircuitJS1 engine. Interactive SPICE simulation running full analog & digital solvers.
                   </span>
@@ -1062,7 +1060,7 @@ export const CircuitVersePage: React.FC = () => {
                   href={falstadUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-circuit-400 hover:text-circuit-300 flex items-center gap-1 font-medium"
+                  className="text-[#19B99A] hover:opacity-80 flex items-center gap-1 font-semibold transition-opacity"
                 >
                   Open in New Tab <ExternalLink className="w-3 h-3" />
                 </a>
@@ -1071,22 +1069,22 @@ export const CircuitVersePage: React.FC = () => {
                 ref={falstadIframeRef}
                 src={falstadUrl}
                 title="Falstad Circuit Simulator"
-                className="w-full flex-1 border-none bg-surface-950"
+                className="w-full flex-1 border-none bg-canvas"
                 allow="fullscreen"
               />
             </div>
           ) : (
             /* INTERACTIVE SVG WORKBENCH */
-            <div className="flex-1 relative overflow-hidden bg-[#070b14] cursor-crosshair">
+            <div className="flex-1 relative overflow-hidden bg-[#FAFAFC] dark:bg-[#0E0E17] cursor-crosshair">
               {/* Fine Snap-Grid Background Pattern */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none">
                 <defs>
                   <pattern id="smallGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <circle cx="10" cy="10" r="1" fill="#1e293b" />
+                    <circle cx="10" cy="10" r="1" className="fill-slate-300 dark:fill-slate-800" />
                   </pattern>
                   <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
                     <rect width="100" height="100" fill="url(#smallGrid)" />
-                    <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#334155" strokeWidth="0.5" strokeOpacity="0.4" />
+                    <path d="M 100 0 L 0 0 0 100" fill="none" className="stroke-slate-200 dark:stroke-slate-800/80" strokeWidth="0.75" />
                   </pattern>
                 </defs>
                 <rect width="100%" height="100%" fill="url(#grid)" />
@@ -1094,12 +1092,12 @@ export const CircuitVersePage: React.FC = () => {
 
               {/* Wiring Mode Notification Banner */}
               {wireStart && (
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-circuit-900/90 text-circuit-300 px-4 py-1.5 rounded-full border border-circuit-500/50 text-xs shadow-lg flex items-center gap-2 z-30">
-                  <span className="w-2 h-2 rounded-full bg-circuit-400 animate-ping" />
-                  <span>Wiring Mode Active: Click a second component terminal to complete wire</span>
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-card/95 text-[#19B99A] px-4 py-1.5 rounded-full border border-[#19B99A]/40 text-xs shadow-soft flex items-center gap-2 z-30 backdrop-blur-sm">
+                  <span className="w-2 h-2 rounded-full bg-[#19B99A] animate-ping" />
+                  <span className="font-medium">Wiring Mode Active: Click a second component terminal to complete wire</span>
                   <button
                     onClick={() => setWireStart(null)}
-                    className="ml-2 underline text-[11px] text-circuit-200 hover:text-white"
+                    className="ml-2 underline text-[11px] text-text-muted hover:text-text-primary"
                   >
                     Cancel
                   </button>
@@ -1172,11 +1170,11 @@ export const CircuitVersePage: React.FC = () => {
                     <div
                       key={comp.id}
                       onClick={() => setSelectedComponentId(comp.id)}
-                      className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-move p-2 rounded-xl transition-shadow ${
+                      className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-move p-2.5 rounded-xl transition-all select-none ${
                         isSelected
-                          ? 'ring-2 ring-circuit-400 bg-surface-800/95 shadow-glow-circuit'
-                          : 'bg-surface-800/80 hover:bg-surface-800 hover:ring-1 hover:ring-surface-500'
-                      } border border-surface-700/80`}
+                          ? 'ring-2 ring-[#19B99A] bg-card shadow-card-hover border-[#19B99A]'
+                          : 'bg-card hover:border-[#19B99A]/50 shadow-soft'
+                      } border border-border`}
                       style={{
                         left: `${comp.x}px`,
                         top: `${comp.y}px`,
@@ -1184,11 +1182,11 @@ export const CircuitVersePage: React.FC = () => {
                     >
                       {/* Component Header / Symbol */}
                       <div className="flex flex-col items-center min-w-[70px]">
-                        <div className="font-mono text-circuit-400 font-bold text-base select-none">
+                        <div className="font-mono text-[#19B99A] font-bold text-base select-none">
                           {def?.symbol || '⚡'}
                         </div>
-                        <div className="text-[11px] font-semibold text-surface-200 mt-0.5">{comp.name}</div>
-                        <div className="text-[10px] text-circuit-300 font-mono">
+                        <div className="text-[11px] font-semibold text-text-primary mt-0.5">{comp.name}</div>
+                        <div className="text-[10px] text-text-muted font-mono">
                           {comp.value} {comp.unit}
                         </div>
 
@@ -1206,8 +1204,8 @@ export const CircuitVersePage: React.FC = () => {
                             }}
                             className={`mt-1 text-[9px] px-2 py-0.5 rounded font-bold transition-all ${
                               comp.state
-                                ? 'bg-circuit-500 text-white shadow-glow-circuit'
-                                : 'bg-surface-700 text-surface-400'
+                                ? 'bg-[#19B99A] text-white shadow-sm'
+                                : 'bg-canvas text-text-muted border border-border'
                             }`}
                           >
                             {comp.state ? 'CLOSED (ON)' : 'OPEN (OFF)'}
@@ -1230,8 +1228,8 @@ export const CircuitVersePage: React.FC = () => {
                           }}
                           className={`absolute w-3.5 h-3.5 rounded-full border-2 transition-transform hover:scale-125 cursor-pointer flex items-center justify-center ${
                             wireStart?.componentId === comp.id && wireStart.terminalId === term.id
-                              ? 'bg-circuit-400 border-white ring-2 ring-circuit-400 scale-125'
-                              : 'bg-surface-900 border-circuit-400 hover:bg-circuit-500'
+                              ? 'bg-[#19B99A] border-white ring-2 ring-[#19B99A] scale-125'
+                              : 'bg-card border-[#19B99A] hover:bg-[#19B99A]'
                           }`}
                           style={{
                             left: `calc(50% + ${term.x}px - 7px)`,
@@ -1239,7 +1237,7 @@ export const CircuitVersePage: React.FC = () => {
                           }}
                           title={`Terminal ${term.name} - Click to wire`}
                         >
-                          <span className="text-[7px] text-white font-mono">{term.name[0]}</span>
+                          <span className="text-[7px] text-text-primary font-mono group-hover:text-white">{term.name[0]}</span>
                         </div>
                       ))}
                     </div>
@@ -1248,29 +1246,29 @@ export const CircuitVersePage: React.FC = () => {
               </div>
 
               {/* Bottom Workbench Telemetry Bar */}
-              <div className="absolute bottom-3 left-4 right-4 bg-surface-800/90 backdrop-blur-md rounded-xl p-3 border border-surface-700 shadow-xl flex items-center justify-between z-10 text-xs">
+              <div className="absolute bottom-3 left-4 right-4 bg-card/95 backdrop-blur-md rounded-xl p-3 border border-border shadow-soft flex items-center justify-between z-10 text-xs">
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
                     <span
                       className={`w-2.5 h-2.5 rounded-full ${
-                        isSimulating ? 'bg-circuit-400 animate-pulse' : 'bg-surface-500'
+                        isSimulating ? 'bg-[#19B99A] animate-pulse' : 'bg-text-muted/40'
                       }`}
                     />
-                    <span className="font-semibold text-surface-200">
-                      Solver Status: {isSimulating ? 'Active SPICE Engine' : 'Paused'}
+                    <span className="font-semibold text-text-primary">
+                      Solver: {isSimulating ? 'Active SPICE Engine' : 'Paused'}
                     </span>
                   </div>
-                  <div className="text-surface-400">
-                    Placed Components:{' '}
-                    <span className="text-surface-100 font-mono font-medium">{components.length}</span>
+                  <div className="text-text-muted">
+                    Components:{' '}
+                    <span className="text-text-primary font-mono font-semibold">{components.length}</span>
                   </div>
-                  <div className="text-surface-400">
-                    Active Net Wires:{' '}
-                    <span className="text-surface-100 font-mono font-medium">{wires.length}</span>
+                  <div className="text-text-muted">
+                    Wires:{' '}
+                    <span className="text-text-primary font-mono font-semibold">{wires.length}</span>
                   </div>
-                  <div className="text-surface-400">
-                    Ohmic Dissipation:{' '}
-                    <span className="text-circuit-400 font-mono font-medium">
+                  <div className="text-text-muted">
+                    Power:{' '}
+                    <span className="text-[#19B99A] font-mono font-semibold">
                       {calculatedTelemetry?.powerMw || '0.00'} mW
                     </span>
                   </div>
@@ -1282,7 +1280,7 @@ export const CircuitVersePage: React.FC = () => {
                       setComponents([]);
                       setWires([]);
                     }}
-                    className="text-surface-400 hover:text-red-400 flex items-center gap-1 transition-colors px-2 py-1 rounded"
+                    className="text-text-muted hover:text-red-500 flex items-center gap-1 transition-colors px-2 py-1 rounded"
                     title="Clear All Components"
                   >
                     <Trash2 className="w-3.5 h-3.5" /> Clear Workbench
@@ -1294,17 +1292,17 @@ export const CircuitVersePage: React.FC = () => {
         </main>
 
         {/* RIGHT PANEL: PROPERTIES INSPECTOR & OHM'S CALCULATOR */}
-        <aside className="w-80 border-l border-surface-700/80 bg-surface-800 flex flex-col z-10 overflow-y-auto">
+        <aside className="w-80 border-l border-border bg-card flex flex-col z-10 overflow-y-auto text-text-primary">
           {/* Header */}
-          <div className="p-3 border-b border-surface-700/80 flex items-center justify-between">
+          <div className="p-3 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-circuit-400" />
-              <span className="font-display font-semibold text-sm text-surface-100">Properties Inspector</span>
+              <Sliders className="w-4 h-4 text-[#19B99A]" />
+              <span className="font-display font-semibold text-sm text-text-primary">Properties Inspector</span>
             </div>
             {selectedComp && (
               <button
                 onClick={handleDeleteSelected}
-                className="text-surface-400 hover:text-red-400 p-1 rounded"
+                className="text-text-muted hover:text-red-500 p-1 rounded transition-colors"
                 title="Delete Component"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -1313,17 +1311,19 @@ export const CircuitVersePage: React.FC = () => {
           </div>
 
           {/* Component Property Editor */}
-          <div className="p-4 border-b border-surface-700/80 space-y-3">
+          <div className="p-4 border-b border-border space-y-3">
             {selectedComp ? (
               <>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-surface-200">{selectedComp.name}</span>
-                  <span className="badge-circuit uppercase text-[10px]">{selectedComp.type}</span>
+                  <span className="text-xs font-semibold text-text-primary">{selectedComp.name}</span>
+                  <span className="px-2 py-0.5 rounded-full bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26] font-mono uppercase text-[10px] font-semibold">
+                    {selectedComp.type}
+                  </span>
                 </div>
 
                 {/* Name field */}
                 <div>
-                  <label className="text-[11px] font-medium text-surface-400 mb-1 block">Label / Designator</label>
+                  <label className="text-[11px] font-medium text-text-muted mb-1 block">Label / Designator</label>
                   <input
                     type="text"
                     value={selectedComp.name}
@@ -1333,15 +1333,15 @@ export const CircuitVersePage: React.FC = () => {
                         prev.map((c) => (c.id === selectedComp.id ? { ...c, name: val } : c))
                       );
                     }}
-                    className="w-full bg-surface-900 border border-surface-700 rounded px-2.5 py-1 text-xs text-surface-100 focus:outline-none focus:border-circuit-500"
+                    className="w-full bg-canvas border border-border rounded-lg px-2.5 py-1 text-xs text-text-primary focus:outline-none focus:border-[#19B99A]"
                   />
                 </div>
 
                 {/* Value field with Unit */}
                 <div>
-                  <div className="flex justify-between text-[11px] text-surface-400 mb-1">
+                  <div className="flex justify-between text-[11px] text-text-muted mb-1">
                     <span>Component Value</span>
-                    <span className="font-mono text-circuit-400 font-semibold">{selectedComp.unit}</span>
+                    <span className="font-mono text-[#19B99A] font-semibold">{selectedComp.unit}</span>
                   </div>
                   <input
                     type="number"
@@ -1353,32 +1353,32 @@ export const CircuitVersePage: React.FC = () => {
                         prev.map((c) => (c.id === selectedComp.id ? { ...c, value: val } : c))
                       );
                     }}
-                    className="w-full bg-surface-900 border border-surface-700 rounded px-2.5 py-1 text-xs font-mono text-surface-100 focus:outline-none focus:border-circuit-500"
+                    className="w-full bg-canvas border border-border rounded-lg px-2.5 py-1 text-xs font-mono text-text-primary focus:outline-none focus:border-[#19B99A]"
                   />
                 </div>
 
                 {/* Real-time Telemetry Cards */}
                 {calculatedTelemetry && (
                   <div className="pt-2">
-                    <div className="text-[11px] font-semibold text-surface-400 uppercase tracking-wider mb-2">
+                    <div className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2">
                       Live Electrical Telemetry
                     </div>
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="bg-surface-900 p-2 rounded-lg border border-surface-700 text-center">
-                        <div className="text-[10px] text-surface-400">Voltage</div>
-                        <div className="text-xs font-mono font-bold text-sky-400">
+                      <div className="bg-canvas p-2 rounded-lg border border-border text-center">
+                        <div className="text-[10px] text-text-muted">Voltage</div>
+                        <div className="text-xs font-mono font-bold text-sky-500">
                           {calculatedTelemetry.voltage} V
                         </div>
                       </div>
-                      <div className="bg-surface-900 p-2 rounded-lg border border-surface-700 text-center">
-                        <div className="text-[10px] text-surface-400">Current</div>
-                        <div className="text-xs font-mono font-bold text-circuit-400">
+                      <div className="bg-canvas p-2 rounded-lg border border-border text-center">
+                        <div className="text-[10px] text-text-muted">Current</div>
+                        <div className="text-xs font-mono font-bold text-[#19B99A]">
                           {calculatedTelemetry.currentMa} mA
                         </div>
                       </div>
-                      <div className="bg-surface-900 p-2 rounded-lg border border-surface-700 text-center">
-                        <div className="text-[10px] text-surface-400">Power</div>
-                        <div className="text-xs font-mono font-bold text-amber-400">
+                      <div className="bg-canvas p-2 rounded-lg border border-border text-center">
+                        <div className="text-[10px] text-text-muted">Power</div>
+                        <div className="text-xs font-mono font-bold text-amber-500">
                           {calculatedTelemetry.powerMw} mW
                         </div>
                       </div>
@@ -1387,41 +1387,41 @@ export const CircuitVersePage: React.FC = () => {
                 )}
               </>
             ) : (
-              <div className="py-6 text-center text-xs text-surface-400">
+              <div className="py-6 text-center text-xs text-text-muted">
                 Click on any component on the workbench to inspect and tune its electrical parameters.
               </div>
             )}
           </div>
 
           {/* INTERACTIVE OHM'S LAW CALCULATOR */}
-          <div className="p-4 border-b border-surface-700/80">
+          <div className="p-4 border-b border-border">
             <div
               className="flex items-center justify-between cursor-pointer mb-2"
               onClick={() => setShowOhmCalculator(!showOhmCalculator)}
             >
-              <div className="flex items-center gap-1.5 font-display font-semibold text-xs text-surface-200">
-                <Sparkles className="w-3.5 h-3.5 text-circuit-400" />
+              <div className="flex items-center gap-1.5 font-display font-semibold text-xs text-text-primary">
+                <Sparkles className="w-3.5 h-3.5 text-[#19B99A]" />
                 <span>Ohm's Law Calculator (V = I × R)</span>
               </div>
-              {showOhmCalculator ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              {showOhmCalculator ? <ChevronUp className="w-3.5 h-3.5 text-text-muted" /> : <ChevronDown className="w-3.5 h-3.5 text-text-muted" />}
             </div>
 
             {showOhmCalculator && (
               <div className="space-y-2.5 pt-1">
                 {/* Triangular Formula Graphic */}
-                <div className="bg-surface-900/80 p-2 rounded-lg border border-surface-700 text-center">
-                  <div className="text-[11px] font-mono text-circuit-300 font-bold">
+                <div className="bg-canvas p-2.5 rounded-lg border border-border text-center">
+                  <div className="text-[11px] font-mono text-[#19B99A] font-bold">
                     V = {(calcCurrent * calcResistance).toFixed(2)} Volts
                   </div>
-                  <div className="text-[10px] text-surface-400 mt-0.5">
+                  <div className="text-[10px] text-text-muted mt-0.5">
                     I = {(calcCurrent * 1000).toFixed(1)} mA &nbsp;|&nbsp; R = {calcResistance} Ω
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-surface-400 flex justify-between">
+                  <label className="text-[10px] text-text-muted flex justify-between mb-1">
                     <span>Voltage (V)</span>
-                    <span className="font-mono text-circuit-400">{calcVoltage} V</span>
+                    <span className="font-mono text-[#19B99A] font-semibold">{calcVoltage} V</span>
                   </label>
                   <input
                     type="range"
@@ -1430,14 +1430,14 @@ export const CircuitVersePage: React.FC = () => {
                     step="0.5"
                     value={calcVoltage}
                     onChange={(e) => handleOhmCalcChange('V', parseFloat(e.target.value))}
-                    className="w-full accent-circuit-500 h-1.5 bg-surface-700 rounded-lg cursor-pointer"
+                    className="w-full accent-[#19B99A] h-1.5 bg-canvas rounded-lg cursor-pointer"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-surface-400 flex justify-between">
+                  <label className="text-[10px] text-text-muted flex justify-between mb-1">
                     <span>Resistance (R)</span>
-                    <span className="font-mono text-circuit-400">{calcResistance} Ω</span>
+                    <span className="font-mono text-[#19B99A] font-semibold">{calcResistance} Ω</span>
                   </label>
                   <input
                     type="range"
@@ -1446,13 +1446,13 @@ export const CircuitVersePage: React.FC = () => {
                     step="100"
                     value={calcResistance}
                     onChange={(e) => handleOhmCalcChange('R', parseFloat(e.target.value))}
-                    className="w-full accent-circuit-500 h-1.5 bg-surface-700 rounded-lg cursor-pointer"
+                    className="w-full accent-[#19B99A] h-1.5 bg-canvas rounded-lg cursor-pointer"
                   />
                 </div>
 
-                <div className="bg-circuit-900/20 border border-circuit-700/40 p-2 rounded text-[10px] text-circuit-300">
+                <div className="bg-[#DDF8EE]/50 dark:bg-[#0D2E26]/50 border border-[#19B99A]/30 p-2 rounded-lg text-[10px] text-text-primary">
                   Calculated Current:{' '}
-                  <strong className="text-white">{(calcCurrent * 1000).toFixed(2)} mA</strong> (Power:{' '}
+                  <strong className="text-[#19B99A]">{(calcCurrent * 1000).toFixed(2)} mA</strong> (Power:{' '}
                   {(calcVoltage * calcCurrent).toFixed(3)} W)
                 </div>
               </div>
@@ -1461,22 +1461,22 @@ export const CircuitVersePage: React.FC = () => {
 
           {/* Educational Lab Guide & Formula Box */}
           <div className="p-4 flex-1">
-            <div className="flex items-center gap-1.5 font-display font-semibold text-xs text-surface-200 mb-2">
-              <BookOpen className="w-3.5 h-3.5 text-circuit-400" />
+            <div className="flex items-center gap-1.5 font-display font-semibold text-xs text-text-primary mb-2">
+              <BookOpen className="w-3.5 h-3.5 text-[#19B99A]" />
               <span>Experiment Notes & Theory</span>
             </div>
-            <div className="p-3 rounded-lg bg-surface-900/60 border border-surface-700 text-xs text-surface-300 space-y-2">
-              <div className="font-semibold text-circuit-300">{activeExperiment.title}</div>
-              <p className="text-[11px] leading-relaxed text-surface-400">{activeExperiment.theory}</p>
-              <div className="p-1.5 rounded bg-surface-800 font-mono text-[10px] text-amber-300 text-center border border-surface-700">
+            <div className="p-3 rounded-xl bg-canvas border border-border text-xs text-text-muted space-y-2">
+              <div className="font-semibold text-text-primary">{activeExperiment.title}</div>
+              <p className="text-[11px] leading-relaxed">{activeExperiment.theory}</p>
+              <div className="p-1.5 rounded-lg bg-card font-mono text-[10px] text-amber-600 dark:text-amber-400 text-center border border-border font-semibold">
                 {activeExperiment.formula}
               </div>
 
               <div className="pt-1">
-                <span className="text-[10px] font-semibold text-surface-300 uppercase tracking-wider block mb-1">
+                <span className="text-[10px] font-semibold text-text-primary uppercase tracking-wider block mb-1">
                   Procedure:
                 </span>
-                <ul className="text-[11px] space-y-1 list-disc pl-3 text-surface-400">
+                <ul className="text-[11px] space-y-1 list-disc pl-3 text-text-muted">
                   {activeExperiment.steps.slice(0, 3).map((st, i) => (
                     <li key={i}>{st}</li>
                   ))}
@@ -1489,19 +1489,19 @@ export const CircuitVersePage: React.FC = () => {
 
       {/* 3. GUIDED EXPERIMENTS MODAL (10 FULL LABS) */}
       {showExperimentModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-surface-800 border border-surface-700 w-full max-w-4xl max-h-[85vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-card border border-border w-full max-w-4xl max-h-[85vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
             {/* Modal Header */}
-            <div className="p-4 border-b border-surface-700 flex items-center justify-between bg-surface-800">
+            <div className="p-4 border-b border-border flex items-center justify-between bg-card">
               <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-circuit-400" />
-                <h2 className="font-display font-bold text-lg text-surface-50">
+                <BookOpen className="w-5 h-5 text-[#19B99A]" />
+                <h2 className="font-display font-bold text-lg text-text-primary">
                   VidyaVerse Circuit Labs: 10 Guided Experiments
                 </h2>
               </div>
               <button
                 onClick={() => setShowExperimentModal(false)}
-                className="text-surface-400 hover:text-surface-100 p-1.5 rounded-lg hover:bg-surface-700"
+                className="text-text-muted hover:text-text-primary p-1.5 rounded-lg hover:bg-canvas transition-colors"
               >
                 ✕
               </button>
@@ -1514,18 +1514,20 @@ export const CircuitVersePage: React.FC = () => {
                   key={exp.id}
                   className={`card-interactive p-4 flex flex-col justify-between border ${
                     activeExperiment.id === exp.id
-                      ? 'border-circuit-500 bg-surface-800/90 ring-1 ring-circuit-500'
-                      : 'border-surface-700 bg-surface-900/60'
+                      ? 'border-[#19B99A] bg-[#DDF8EE]/20 dark:bg-[#0D2E26]/20 ring-1 ring-[#19B99A]'
+                      : 'border-border bg-card'
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="badge-circuit">{exp.grade}</span>
-                      <span className="text-[10px] text-surface-400 font-mono">{exp.category}</span>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26]">
+                        {exp.grade}
+                      </span>
+                      <span className="text-[10px] text-text-muted font-mono">{exp.category}</span>
                     </div>
-                    <h3 className="font-bold text-sm text-surface-100 mb-1">{exp.title}</h3>
-                    <p className="text-xs text-surface-400 line-clamp-2 mb-2">{exp.summary}</p>
-                    <div className="bg-surface-800 px-2.5 py-1 rounded font-mono text-[11px] text-amber-300 border border-surface-700 inline-block mb-3">
+                    <h3 className="font-bold text-sm text-text-primary mb-1">{exp.title}</h3>
+                    <p className="text-xs text-text-muted line-clamp-2 mb-2">{exp.summary}</p>
+                    <div className="bg-canvas px-2.5 py-1 rounded font-mono text-[11px] text-amber-600 dark:text-amber-400 border border-border inline-block mb-3 font-semibold">
                       {exp.formula}
                     </div>
                   </div>
@@ -1535,7 +1537,7 @@ export const CircuitVersePage: React.FC = () => {
                       handleLoadExperiment(exp);
                       setShowExperimentModal(false);
                     }}
-                    className="btn-circuit w-full py-1.5 text-xs font-semibold flex items-center justify-center gap-1.5"
+                    className="w-full py-1.5 text-xs font-semibold rounded-xl bg-[#19B99A] hover:bg-[#159F84] text-white flex items-center justify-center gap-1.5 transition-colors shadow-sm"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
                     <span>Load into Workbench</span>

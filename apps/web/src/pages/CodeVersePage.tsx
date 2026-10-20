@@ -1,22 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Code,
+  Code2,
   BookOpen,
   Trophy,
-  Flame,
-  Award,
-  Terminal,
   ArrowRight,
   Play,
   Sparkles,
-  CheckCircle2,
-  Clock,
-  Compass,
-  FileCode,
-  Layers,
   ChevronRight,
-  Cpu,
+  Home,
+  CheckCircle2,
+  Layers,
+  Terminal,
 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { useProgressStore } from '../stores/progressStore';
@@ -26,10 +21,9 @@ interface LanguageCard {
   name: string;
   version: string;
   category: string;
+  group: 'web' | 'systems' | 'data';
   icon: string;
-  color: string;
-  bgGradient: string;
-  borderColor: string;
+  accent: string;
   description: string;
   tags: string[];
 }
@@ -40,10 +34,9 @@ const LANGUAGES: LanguageCard[] = [
     name: 'Python',
     version: '3.10',
     category: 'CBSE Class 11-12 & AI',
+    group: 'web',
     icon: '🐍',
-    color: '#38bdf8',
-    bgGradient: 'from-sky-950/40 via-surface-900 to-surface-900',
-    borderColor: 'hover:border-sky-500/50',
+    accent: '#42A5E8',
     description: 'The preferred language for Indian school curriculums, data science, and AI development.',
     tags: ['CBSE Aligned', 'Easy to Read', 'Data Science'],
   },
@@ -52,10 +45,9 @@ const LANGUAGES: LanguageCard[] = [
     name: 'JavaScript',
     version: 'ES2023',
     category: 'Full-Stack Web',
+    group: 'web',
     icon: '⚡',
-    color: '#facc15',
-    bgGradient: 'from-amber-950/40 via-surface-900 to-surface-900',
-    borderColor: 'hover:border-amber-500/50',
+    accent: '#F5A623',
     description: 'The engine of the modern web. Master DOM manipulation, events, and asynchronous programming.',
     tags: ['Web Native', 'Interactive DOM', 'Full-Stack'],
   },
@@ -64,10 +56,9 @@ const LANGUAGES: LanguageCard[] = [
     name: 'C++',
     version: 'GCC 10.2',
     category: 'Competitive Programming',
+    group: 'systems',
     icon: '⚡',
-    color: '#818cf8',
-    bgGradient: 'from-indigo-950/40 via-surface-900 to-surface-900',
-    borderColor: 'hover:border-indigo-500/50',
+    accent: '#6541F5',
     description: 'Blazing-fast execution, Standard Template Library (STL), and algorithmic problem solving.',
     tags: ['High Speed', 'STL Vectors', 'Competitions'],
   },
@@ -76,10 +67,9 @@ const LANGUAGES: LanguageCard[] = [
     name: 'Java',
     version: 'OpenJDK 15',
     category: 'ICSE Syllabus & OOP',
+    group: 'systems',
     icon: '☕',
-    color: '#f97316',
-    bgGradient: 'from-orange-950/40 via-surface-900 to-surface-900',
-    borderColor: 'hover:border-orange-500/50',
+    accent: '#E95778',
     description: 'Strict object-oriented foundations, encapsulation, inheritance, and ICSE Class 9/10 syllabus.',
     tags: ['ICSE Board', 'OOP Principles', 'Robust Typing'],
   },
@@ -88,10 +78,9 @@ const LANGUAGES: LanguageCard[] = [
     name: 'C Language',
     version: 'C17',
     category: 'Systems & Hardware',
+    group: 'systems',
     icon: '⚙️',
-    color: '#94a3b8',
-    bgGradient: 'from-slate-900/60 via-surface-900 to-surface-900',
-    borderColor: 'hover:border-slate-500/50',
+    accent: '#77778D',
     description: 'Understand memory addresses, pointers, binary manipulation, and how computers run code.',
     tags: ['Pointers', 'Low-level', 'Memory Model'],
   },
@@ -100,10 +89,9 @@ const LANGUAGES: LanguageCard[] = [
     name: 'HTML & CSS',
     version: 'HTML5 / CSS3',
     category: 'Visual Web Design',
+    group: 'web',
     icon: '🎨',
-    color: '#ec4899',
-    bgGradient: 'from-pink-950/40 via-surface-900 to-surface-900',
-    borderColor: 'hover:border-pink-500/50',
+    accent: '#E95778',
     description: 'Design beautiful, responsive web interfaces with live instant sandbox rendering.',
     tags: ['Live Sandbox', 'Flexbox & Grid', 'Responsive'],
   },
@@ -112,10 +100,9 @@ const LANGUAGES: LanguageCard[] = [
     name: 'SQL',
     version: 'PostgreSQL / SQLite',
     category: 'Relational Databases',
+    group: 'data',
     icon: '🗄️',
-    color: '#2dd4bf',
-    bgGradient: 'from-teal-950/40 via-surface-900 to-surface-900',
-    borderColor: 'hover:border-teal-500/50',
+    accent: '#19B99A',
     description: 'Query, join, filter, and analyze relational data tables with declarative queries.',
     tags: ['Data Tables', 'SELECT / JOIN', 'CBSE Informatics'],
   },
@@ -124,387 +111,226 @@ const LANGUAGES: LanguageCard[] = [
 export const CodeVersePage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { items, streak } = useProgressStore();
+  const { items } = useProgressStore();
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'web' | 'systems' | 'data'>('all');
 
   const codeverseItems = items.filter((i) => i.module === 'codeverse');
   const completedCount = codeverseItems.filter((i) => i.completed).length;
 
+  const filteredLanguages = selectedFilter === 'all'
+    ? LANGUAGES
+    : LANGUAGES.filter((l) => l.group === selectedFilter);
+
   return (
-    <div className="min-h-screen bg-surface-900 text-surface-100 flex flex-col font-sans">
-      {/* 1. TOP HERO HEADER */}
-      <section className="relative overflow-hidden border-b border-surface-800 bg-gradient-to-b from-surface-900 via-surface-800/40 to-surface-900 py-10 px-6 sm:px-12">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="p-2 rounded-xl bg-code-500/20 text-code-400 border border-code-500/30 shadow-glow-code">
-                  <Terminal className="w-6 h-6" />
-                </span>
-                <span className="font-display font-extrabold text-2xl tracking-wide text-surface-50">
-                  VidyaVerse Code<span className="text-code-400">Verse</span>
-                </span>
-                <span className="badge-code ml-1.5 text-xs">Labs 2.0</span>
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-display font-bold text-surface-50 tracking-tight">
-                Master Coding through Interactive Lessons & Challenges
-              </h1>
-              <p className="mt-2 text-surface-400 max-w-2xl text-sm sm:text-base leading-relaxed">
-                Learn Python, C++, Java, and Web Development with live Piston code execution, automated unit test
-                verdicts, and hands-on playgrounds designed for Indian school curriculums.
-              </p>
-            </div>
+    <div className="space-y-6">
+      {/* Breadcrumb Navigation */}
+      <nav className="flex items-center space-x-2 text-xs sm:text-sm text-text-muted">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-1.5 hover:text-text-primary transition-colors"
+        >
+          <Home className="w-4 h-4" />
+          <span>Home</span>
+        </button>
+        <ChevronRight className="w-3.5 h-3.5 text-text-muted/60" />
+        <span className="text-[#6541F5] dark:text-[#7C5CFA] font-semibold flex items-center gap-1.5">
+          <Code2 className="w-4 h-4" />
+          CodeVerse
+        </span>
+      </nav>
 
-            {/* User Progress Stats Card */}
-            <div className="bg-surface-800/80 backdrop-blur-md border border-surface-700/80 rounded-2xl p-4 sm:p-5 flex items-center gap-6 shadow-xl shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                  <Flame className="w-6 h-6 fill-current animate-pulse" />
-                </div>
-                <div>
-                  <div className="text-xs text-surface-400">Streak</div>
-                  <div className="text-xl font-bold font-display text-surface-100">
-                    {streak || user?.streak || 6} Days
-                  </div>
-                </div>
-              </div>
-
-              <div className="h-10 w-px bg-surface-700" />
-
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-code-500/10 border border-code-500/20 flex items-center justify-center text-code-400">
-                  <Trophy className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="text-xs text-surface-400">Challenges Solved</div>
-                  <div className="text-xl font-bold font-display text-code-400">
-                    {completedCount} <span className="text-xs font-normal text-surface-400">/ 10</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="h-10 w-px bg-surface-700" />
-
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-circuit-500/10 border border-circuit-500/20 flex items-center justify-center text-circuit-400">
-                  <Award className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="text-xs text-surface-400">Total XP</div>
-                  <div className="text-xl font-bold font-display text-circuit-400">{user?.xp || 1450} XP</div>
-                </div>
-              </div>
-            </div>
+      {/* Page Header */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-6">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAE7FF] text-[#6541F5] dark:bg-[#26233E] dark:text-[#C4B5FD] text-xs font-semibold uppercase tracking-wider mb-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            Interactive Code Studio • Piston Compiler
           </div>
-
-          {/* Quick Start Action Buttons */}
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => navigate('/codeverse/learn')}
-              className="btn-code px-4 py-2 text-sm font-semibold flex items-center gap-2 rounded-xl shadow-glow-code"
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>Resume Last Lesson</span>
-            </button>
-            <button
-              onClick={() => navigate('/codeverse/challenge')}
-              className="btn px-4 py-2 text-sm font-semibold bg-surface-800 hover:bg-surface-700 text-surface-100 border border-surface-600 rounded-xl flex items-center gap-2"
-            >
-              <Trophy className="w-4 h-4 text-amber-400" />
-              <span>Daily Challenge: Palindrome Check</span>
-            </button>
-            <button
-              onClick={() => navigate('/codeverse/challenge?free=true')}
-              className="btn-ghost px-4 py-2 text-sm rounded-xl flex items-center gap-2"
-            >
-              <Play className="w-4 h-4 text-circuit-400" />
-              <span>Free Code Sandbox</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. TWO PRIMARY MODES: LEARN MODE VS CHALLENGE MODE */}
-      <section className="py-10 px-6 sm:px-12 max-w-7xl mx-auto w-full">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-display font-bold text-surface-50">
-              Choose Your Learning Path
-            </h2>
-            <p className="text-xs sm:text-sm text-surface-400 mt-0.5">
-              Build foundational intuition in Learn Mode, then sharpen your algorithmic prowess in Challenge Mode.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Mode 1: Learn Mode Card */}
-          <div
-            onClick={() => navigate('/codeverse/learn')}
-            className="group relative rounded-2xl bg-gradient-to-br from-surface-800/90 to-surface-800/40 border border-surface-700 hover:border-code-500/60 p-6 sm:p-8 cursor-pointer transition-all duration-300 hover:shadow-glow-code overflow-hidden flex flex-col justify-between"
-          >
-            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-              <BookOpen className="w-40 h-40 text-code-400 -mr-8 -mt-8" />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="badge-code text-xs px-2.5 py-1">Interactive Curriculum</span>
-                <span className="text-xs text-surface-400 font-medium">5 Complete Modules</span>
-              </div>
-              <h3 className="text-2xl font-display font-bold text-surface-50 group-hover:text-code-300 transition-colors">
-                Learn Mode
-              </h3>
-              <p className="mt-2 text-sm text-surface-400 leading-relaxed">
-                Step-by-step interactive lessons with structured explanations, readable syntax breakdowns, live Monaco
-                editor examples, and instant practice exercises with progressive hints.
-              </p>
-
-              {/* Feature Highlights */}
-              <div className="mt-6 space-y-2.5">
-                <div className="flex items-center gap-2.5 text-xs text-surface-300">
-                  <CheckCircle2 className="w-4 h-4 text-code-400 shrink-0" />
-                  <span>Python Basics: Variables, Dynamic Typing & Print Formats</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs text-surface-300">
-                  <CheckCircle2 className="w-4 h-4 text-code-400 shrink-0" />
-                  <span>Control Flow: If-Else Conditionals & Relational Operators</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs text-surface-300">
-                  <CheckCircle2 className="w-4 h-4 text-code-400 shrink-0" />
-                  <span>Loops & Iterations: For Loops, Range Sequences & Lists</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs text-surface-300">
-                  <CheckCircle2 className="w-4 h-4 text-code-400 shrink-0" />
-                  <span>Modular Code: Functions, Return Values & Scope</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs text-surface-300">
-                  <CheckCircle2 className="w-4 h-4 text-code-400 shrink-0" />
-                  <span>JavaScript Web: DOM Manipulation & Live Iframe Previews</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 pt-4 border-t border-surface-700/60 flex items-center justify-between">
-              <span className="text-xs font-semibold text-code-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                Launch Lessons <ArrowRight className="w-4 h-4" />
-              </span>
-              <span className="text-xs text-surface-500 font-mono">Classes 6 - 12</span>
-            </div>
-          </div>
-
-          {/* Mode 2: Challenge Mode Card */}
-          <div
-            onClick={() => navigate('/codeverse/challenge')}
-            className="group relative rounded-2xl bg-gradient-to-br from-surface-800/90 to-surface-800/40 border border-surface-700 hover:border-amber-500/60 p-6 sm:p-8 cursor-pointer transition-all duration-300 hover:shadow-[0_0_25px_rgba(245,158,11,0.2)] overflow-hidden flex flex-col justify-between"
-          >
-            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Trophy className="w-40 h-40 text-amber-400 -mr-8 -mt-8" />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="badge bg-amber-900/50 text-amber-400 border border-amber-700/50 text-xs px-2.5 py-1">
-                  Algorithmic Battle Arena
-                </span>
-                <span className="text-xs text-surface-400 font-medium">10 Built-In Problems</span>
-              </div>
-              <h3 className="text-2xl font-display font-bold text-surface-50 group-hover:text-amber-300 transition-colors">
-                Challenge Mode
-              </h3>
-              <p className="mt-2 text-sm text-surface-400 leading-relaxed">
-                Competitive coding environment powered by Monaco Editor and Piston API. Solve problems across Python,
-                C++, C, Java, and JavaScript with automated visible & hidden test cases.
-              </p>
-
-              {/* Feature Highlights */}
-              <div className="mt-6 space-y-2.5">
-                <div className="flex items-center gap-2.5 text-xs text-surface-300">
-                  <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>10 Graded Problems: Hello World, FizzBuzz, Fibonacci, Binary Search</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs text-surface-300">
-                  <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Multi-Language Starter Code: Python 3, C++ 20, Java, C, JS</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs text-surface-300">
-                  <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Automated Testing: Pass/Fail Breakdown, Runtime (ms), Memory</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs text-surface-300">
-                  <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Instant Submission Verdicts: Accepted, Wrong Answer, TLE, Runtime Error</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs text-surface-300">
-                  <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Submission History & Progress Tracking with XP Rewards</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 pt-4 border-t border-surface-700/60 flex items-center justify-between">
-              <span className="text-xs font-semibold text-amber-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                Enter Arena <ArrowRight className="w-4 h-4" />
-              </span>
-              <span className="text-xs text-surface-500 font-mono">Easy • Medium • Hard</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. LANGUAGE TILES (7 SUPPORTED LANGUAGES) */}
-      <section className="py-10 px-6 sm:px-12 max-w-7xl mx-auto w-full">
-        <div className="mb-6">
-          <h2 className="text-xl sm:text-2xl font-display font-bold text-surface-50">
-            Explore by Programming Language
-          </h2>
-          <p className="text-xs sm:text-sm text-surface-400 mt-0.5">
-            VidyaVerse supports the most in-demand academic and industry programming languages.
+          <h1 className="display-h1">
+            VidyaVerse <span className="text-gradient-purple">CodeVerse</span>
+          </h1>
+          <p className="mt-2 text-sm sm:text-base text-text-muted max-w-2xl leading-relaxed">
+            Master coding through guided interactive lessons and algorithmic challenges. Execute Python,
+            JavaScript, C++, Java, and SQL with instant test case verdicts.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {LANGUAGES.map((lang) => (
-            <div
-              key={lang.id}
-              onClick={() => navigate(`/codeverse/challenge?lang=${lang.id}`)}
-              className={`group card-interactive p-4 bg-gradient-to-br ${lang.bgGradient} border border-surface-700 ${lang.borderColor} flex flex-col justify-between`}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl">{lang.icon}</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-800 text-surface-300 border border-surface-700">
-                    {lang.version}
-                  </span>
-                </div>
+        {/* Quick Actions */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            onClick={() => navigate('/codeverse/learn')}
+            className="btn-primary flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-xl"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>Resume Lesson</span>
+          </button>
+          <button
+            onClick={() => navigate('/codeverse/challenge')}
+            className="btn-secondary flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-xl"
+          >
+            <Trophy className="w-4 h-4 text-[#F5A623]" />
+            <span>Challenge Arena</span>
+          </button>
+        </div>
+      </header>
 
-                <h3 className="font-display font-bold text-base text-surface-100 group-hover:text-surface-50">
-                  {lang.name}
-                </h3>
-                <div className="text-[11px] text-surface-400 font-medium mb-2">{lang.category}</div>
-                <p className="text-xs text-surface-400 leading-relaxed mb-4">{lang.description}</p>
+      {/* 2 PRIMARY LEARNING PATHS: LEARN MODE VS CHALLENGE MODE */}
+      <section className="space-y-3">
+        <h2 className="section-h2 text-lg sm:text-xl">Choose Your Learning Path</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Path 1: Learn Mode */}
+          <div
+            onClick={() => navigate('/codeverse/learn')}
+            className="card p-6 hover:border-[#6541F5] hover:shadow-card-hover transition-all duration-200 cursor-pointer flex flex-col justify-between group"
+          >
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-[#EAE7FF] text-[#6541F5] dark:bg-[#26233E] dark:text-[#C4B5FD] flex items-center justify-center shadow-sm">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <span className="badge-purple">Step-by-Step Curriculum</span>
               </div>
-
-              <div>
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {lang.tags.map((t, idx) => (
-                    <span
-                      key={idx}
-                      className="text-[9px] px-1.5 py-0.5 rounded bg-surface-800/80 text-surface-400 border border-surface-700/50"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-surface-700/50 text-xs font-semibold text-surface-300 group-hover:text-white transition-colors">
-                  <span>Start Coding</span>
-                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                </div>
+              <h3 className="card-h3 text-xl group-hover:text-[#6541F5] dark:group-hover:text-[#7C5CFA] transition-colors">
+                Interactive Learn Mode
+              </h3>
+              <p className="body-standard text-xs sm:text-sm text-text-muted leading-relaxed">
+                Build rock-solid foundations from scratch. Concept breakdowns, visual code tracing, interactive
+                multiple-choice checks, and incremental code builders for beginners.
+              </p>
+              <div className="flex items-center gap-3 pt-2 text-xs text-text-muted">
+                <span className="flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#28B987]" /> 8 Languages
+                </span>
+                <span>•</span>
+                <span>Beginner to Advanced</span>
+                <span>•</span>
+                <span>Self-Paced</span>
               </div>
             </div>
-          ))}
+
+            <div className="pt-5 flex items-center justify-between text-xs font-semibold text-[#6541F5] dark:text-[#7C5CFA]">
+              <span>Explore curriculum lessons</span>
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </div>
+          </div>
+
+          {/* Path 2: Challenge Arena */}
+          <div
+            onClick={() => navigate('/codeverse/challenge')}
+            className="card p-6 hover:border-[#F5A623] hover:shadow-card-hover transition-all duration-200 cursor-pointer flex flex-col justify-between group"
+          >
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-[#FFF0D5] text-[#F5A623] dark:bg-[#35250D] flex items-center justify-center shadow-sm">
+                  <Trophy className="w-6 h-6" />
+                </div>
+                <span className="badge-quest">Automated Judge</span>
+              </div>
+              <h3 className="card-h3 text-xl group-hover:text-[#F5A623] transition-colors">
+                Code Challenge Arena
+              </h3>
+              <p className="body-standard text-xs sm:text-sm text-text-muted leading-relaxed">
+                Sharpen algorithmic thinking with LeetCode-style problems. Live multi-language code editor with Monaco,
+                Piston compiler backend, hidden edge test cases, and execution benchmarks.
+              </p>
+              <div className="flex items-center gap-3 pt-2 text-xs text-text-muted">
+                <span className="flex items-center gap-1">
+                  <Trophy className="w-3.5 h-3.5 text-[#F5A623]" /> 10 Built-in Problems
+                </span>
+                <span>•</span>
+                <span>Easy, Medium & Hard</span>
+                <span>•</span>
+                <span>XP Rewards</span>
+              </div>
+            </div>
+
+            <div className="pt-5 flex items-center justify-between text-xs font-semibold text-[#F5A623]">
+              <span>Enter challenge arena</span>
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* 4. RECENT ACTIVITY & RECOMMENDED CHALLENGES */}
-      <section className="py-10 px-6 sm:px-12 max-w-7xl mx-auto w-full border-t border-surface-800">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Quick Problem List */}
-          <div className="lg:col-span-2 bg-surface-800/60 rounded-2xl p-6 border border-surface-700">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-display font-bold text-lg text-surface-100">Featured Challenges</h3>
-              <button
-                onClick={() => navigate('/codeverse/challenge')}
-                className="text-xs text-code-400 hover:text-code-300 font-semibold flex items-center gap-1"
-              >
-                View all 10 problems <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+      {/* LANGUAGE CATALOG */}
+      <section className="space-y-4 pt-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="section-h2 text-lg sm:text-xl">Supported Languages & Stacks</h2>
+            <p className="text-xs sm:text-sm text-text-muted">
+              Choose your stack to practice coding or solve algorithmic challenges.
+            </p>
+          </div>
 
-            <div className="space-y-2.5">
-              {[
-                { id: 'prob-1', title: '1. Hello World', diff: 'Easy', tag: 'Basics', points: 50 },
-                { id: 'prob-2', title: '2. Sum of Two Numbers', diff: 'Easy', tag: 'Math', points: 50 },
-                { id: 'prob-3', title: '3. FizzBuzz Classic', diff: 'Easy', tag: 'Logic', points: 75 },
-                { id: 'prob-4', title: '4. Fibonacci Sequence', diff: 'Easy', tag: 'Recursion', points: 100 },
-                { id: 'prob-5', title: '5. Palindrome String Check', diff: 'Medium', tag: 'Strings', points: 150 },
-              ].map((p) => (
-                <div
-                  key={p.id}
-                  onClick={() => navigate(`/codeverse/challenge?id=${p.id}`)}
-                  className="flex items-center justify-between p-3 rounded-xl bg-surface-900/60 hover:bg-surface-700/60 border border-surface-700/60 cursor-pointer transition-all group"
+          {/* Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
+            {[
+              { id: 'all', label: 'All Stacks' },
+              { id: 'web', label: 'Web & Python' },
+              { id: 'systems', label: 'Systems & C++' },
+              { id: 'data', label: 'Data & SQL' },
+            ].map((tab) => {
+              const active = selectedFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedFilter(tab.id as any)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                    active
+                      ? 'bg-[#6541F5] text-white shadow-sm'
+                      : 'bg-card text-text-muted hover:text-text-primary border border-border'
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full bg-circuit-400" />
-                    <span className="font-medium text-xs sm:text-sm text-surface-200 group-hover:text-white">
-                      {p.title}
-                    </span>
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded font-semibold ${
-                        p.diff === 'Easy'
-                          ? 'bg-circuit-900/60 text-circuit-400'
-                          : 'bg-amber-900/60 text-amber-400'
-                      }`}
-                    >
-                      {p.diff}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className="text-[11px] text-surface-400 font-mono">+{p.points} XP</span>
-                    <button className="btn-icon p-1 text-surface-400 group-hover:text-code-400">
-                      <Play className="w-3.5 h-3.5 fill-current" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
+        </div>
 
-          {/* Progress Tracker Card */}
-          <div className="bg-surface-800/60 rounded-2xl p-6 border border-surface-700 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display font-bold text-lg text-surface-100">Your Progress</h3>
-                <span className="text-xs text-circuit-400 font-mono">Level 4 Student</span>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="mb-4">
-                <div className="flex justify-between text-xs text-surface-400 mb-1.5">
-                  <span>Curriculum Completion</span>
-                  <span className="font-semibold text-surface-200">
-                    {Math.round((completedCount / 10) * 100)}%
-                  </span>
-                </div>
-                <div className="w-full h-2.5 bg-surface-900 rounded-full overflow-hidden border border-surface-700">
-                  <div
-                    className="h-full bg-gradient-to-r from-code-500 to-circuit-400 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.max(15, (completedCount / 10) * 100)}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Next Milestone */}
-              <div className="p-3.5 rounded-xl bg-surface-900/70 border border-surface-700/80 mb-4">
-                <div className="flex items-center gap-2 text-xs font-semibold text-amber-400 mb-1">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Next Milestone</span>
-                </div>
-                <div className="text-xs text-surface-300">
-                  Solve 2 more medium problems to unlock the <strong>"Logic Master"</strong> profile badge!
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => navigate('/codeverse/learn')}
-              className="btn-code w-full py-2.5 text-xs font-semibold rounded-xl flex items-center justify-center gap-2"
+        {/* Languages Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredLanguages.map((lang) => (
+            <div
+              key={lang.id}
+              onClick={() => navigate(`/codeverse/challenge?lang=${lang.id}`)}
+              className="card p-5 hover:border-[#6541F5] hover:shadow-card-hover transition-all duration-150 cursor-pointer flex flex-col justify-between group"
             >
-              <span>Continue Learning</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl">{lang.icon}</span>
+                    <div>
+                      <h4 className="font-bold text-sm text-text-primary group-hover:text-[#6541F5] dark:group-hover:text-[#7C5CFA] transition-colors">
+                        {lang.name}
+                      </h4>
+                      <span className="text-[10px] text-text-muted font-mono">{lang.version}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-text-muted leading-relaxed line-clamp-2">
+                  {lang.description}
+                </p>
+
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {lang.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-canvas border border-border text-text-muted"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4 flex items-center justify-between border-t border-border mt-3 text-xs font-semibold text-[#6541F5] dark:text-[#7C5CFA]">
+                <span>Practice {lang.name}</span>
+                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>

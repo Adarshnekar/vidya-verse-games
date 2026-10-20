@@ -668,7 +668,7 @@ export const BharatExplorerPage: React.FC = () => {
 
             <div className="grid grid-cols-3 gap-2 text-center">
               {EXPEDITIONS.map((exp) => {
-                const isUnlocked = user?.badges.includes(exp.id) || totalStars > 5;
+                const isUnlocked = Boolean(user?.badges?.includes(exp.id)) || totalStars > 5;
                 return (
                   <div
                     key={exp.id}

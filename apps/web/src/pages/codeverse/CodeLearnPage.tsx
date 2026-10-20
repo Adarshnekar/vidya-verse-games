@@ -21,6 +21,7 @@ import {
 import { runWithPiston, buildHtmlSrcdoc, normalizeOutput } from '../../services/codeRunner';
 import { useProgressStore } from '../../stores/progressStore';
 import { useAuthStore } from '../../stores/authStore';
+import { useUIStore } from '../../stores/uiStore';
 
 export interface Lesson {
   id: string;
@@ -332,6 +333,7 @@ export const CodeLearnPage: React.FC = () => {
   // Stores
   const { markCompleted, items } = useProgressStore();
   const { addXP } = useAuthStore();
+  const { theme } = useUIStore();
 
   const currentLesson = LESSONS[activeLessonIndex];
   const isLessonCompleted = items.some(
@@ -392,17 +394,17 @@ export const CodeLearnPage: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-surface-900 text-surface-100 font-sans overflow-hidden">
+    <div className="flex h-full w-full rounded-2xl border border-border bg-card text-text-primary font-sans overflow-hidden shadow-soft">
       {/* 1. LEFT SIDEBAR: CURRICULUM TREE */}
-      <aside className="w-80 border-r border-surface-700 bg-surface-800 flex flex-col z-10 shrink-0">
-        <div className="p-4 border-b border-surface-700 bg-surface-800">
+      <aside className="w-80 border-r border-border bg-card flex flex-col z-10 shrink-0 text-text-primary">
+        <div className="p-4 border-b border-border bg-card">
           <div className="flex items-center gap-2 mb-1">
-            <span className="p-1 rounded bg-code-500/20 text-code-400 border border-code-500/30">
+            <span className="p-1 rounded-lg bg-[#EAE7FF] text-[#6541F5] dark:bg-[#26233E] dark:text-[#C4B5FD]">
               <BookOpen className="w-4 h-4" />
             </span>
-            <span className="font-display font-bold text-sm text-surface-100">Learn Mode Curriculum</span>
+            <span className="font-display font-bold text-sm text-text-primary">Learn Mode Curriculum</span>
           </div>
-          <p className="text-xs text-surface-400">Step-by-step NCERT & CBSE aligned interactive coding lessons.</p>
+          <p className="text-xs text-text-muted">Step-by-step NCERT & CBSE aligned interactive coding lessons.</p>
         </div>
 
         {/* Lesson List */}
@@ -419,39 +421,41 @@ export const CodeLearnPage: React.FC = () => {
                 onClick={() => handleSelectLesson(idx)}
                 className={`p-3 rounded-xl border cursor-pointer transition-all ${
                   isSelected
-                    ? 'bg-code-500/15 border-code-500/80 shadow-glow-code'
-                    : 'bg-surface-900/60 border-surface-700/60 hover:border-surface-600 hover:bg-surface-700/40'
+                    ? 'bg-[#6541F5]/10 border-[#6541F5] shadow-sm'
+                    : 'bg-canvas border-border hover:border-[#6541F5]/40 hover:bg-[#6541F5]/5'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="badge-code text-[10px]">{lesson.class}</span>
-                  <div className="flex items-center gap-1.5 text-[10px] text-surface-400 font-mono">
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#EAE7FF] text-[#6541F5] dark:bg-[#26233E] dark:text-[#C4B5FD]">
+                    {lesson.class}
+                  </span>
+                  <div className="flex items-center gap-1.5 text-[10px] text-text-muted font-mono">
                     <span>{lesson.duration}</span>
-                    {completed && <CheckCircle2 className="w-3.5 h-3.5 text-circuit-400 fill-circuit-400/20" />}
+                    {completed && <CheckCircle2 className="w-3.5 h-3.5 text-[#19B99A]" />}
                   </div>
                 </div>
 
-                <div className="text-xs font-semibold text-surface-100 mb-1">{lesson.title}</div>
-                <div className="text-[11px] text-surface-400 line-clamp-1">{lesson.summary}</div>
+                <div className="text-xs font-semibold text-text-primary mb-1">{lesson.title}</div>
+                <div className="text-[11px] text-text-muted line-clamp-1">{lesson.summary}</div>
               </div>
             );
           })}
         </div>
 
         {/* Curriculum Progress Footer */}
-        <div className="p-3 border-t border-surface-700 bg-surface-900/40 text-xs">
-          <div className="flex justify-between text-surface-400 mb-1 text-[11px]">
+        <div className="p-3 border-t border-border bg-canvas/40 text-xs">
+          <div className="flex justify-between text-text-muted mb-1 text-[11px]">
             <span>Course Progress</span>
-            <span className="font-mono text-circuit-400 font-bold">
+            <span className="font-mono text-[#6541F5] dark:text-[#C4B5FD] font-bold">
               {Math.round(
                 (items.filter((i) => i.module === 'codeverse_learn' && i.completed).length / LESSONS.length) * 100
               )}
               %
             </span>
           </div>
-          <div className="w-full h-1.5 bg-surface-700 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-canvas rounded-full overflow-hidden border border-border">
             <div
-              className="h-full bg-circuit-500 rounded-full transition-all duration-300"
+              className="h-full bg-[#6541F5] rounded-full transition-all duration-300"
               style={{
                 width: `${
                   (items.filter((i) => i.module === 'codeverse_learn' && i.completed).length / LESSONS.length) * 100
@@ -463,47 +467,47 @@ export const CodeLearnPage: React.FC = () => {
       </aside>
 
       {/* 2. MAIN LESSON VIEWER */}
-      <main className="flex-1 flex flex-col overflow-hidden bg-surface-950">
+      <main className="flex-1 flex flex-col overflow-hidden bg-canvas">
         {/* Top Lesson Header */}
-        <div className="h-14 border-b border-surface-700 bg-surface-800 px-6 flex items-center justify-between shrink-0">
+        <div className="h-14 border-b border-border bg-card px-6 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <span className="text-xs font-mono px-2 py-0.5 rounded bg-surface-900 text-surface-300 border border-surface-700">
+            <span className="text-xs font-mono px-2 py-0.5 rounded-md bg-canvas text-text-muted border border-border">
               {currentLesson.class}
             </span>
-            <h1 className="font-display font-bold text-base text-surface-50">{currentLesson.title}</h1>
+            <h1 className="font-display font-bold text-base text-text-primary">{currentLesson.title}</h1>
             {isLessonCompleted && (
-              <span className="badge-circuit text-[10px] flex items-center gap-1">
+              <span className="px-2 py-0.5 rounded-full bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26] text-[10px] font-semibold flex items-center gap-1">
                 <Check className="w-3 h-3" /> Completed
               </span>
             )}
           </div>
 
           {/* Tab Selector */}
-          <div className="flex items-center bg-surface-900 p-0.5 rounded-lg border border-surface-700 text-xs">
+          <div className="flex items-center bg-canvas p-0.5 rounded-xl border border-border text-xs">
             <button
               onClick={() => setActiveTab('explanation')}
-              className={`px-3 py-1 font-semibold rounded-md transition-all ${
-                activeTab === 'explanation' ? 'bg-code-500 text-white shadow-sm' : 'text-surface-400 hover:text-white'
+              className={`px-3 py-1 font-semibold rounded-lg transition-all ${
+                activeTab === 'explanation' ? 'bg-[#6541F5] text-white shadow-sm' : 'text-text-muted hover:text-text-primary'
               }`}
             >
               📖 Concepts
             </button>
             <button
               onClick={() => setActiveTab('example')}
-              className={`px-3 py-1 font-semibold rounded-md transition-all ${
-                activeTab === 'example' ? 'bg-code-500 text-white shadow-sm' : 'text-surface-400 hover:text-white'
+              className={`px-3 py-1 font-semibold rounded-lg transition-all ${
+                activeTab === 'example' ? 'bg-[#6541F5] text-white shadow-sm' : 'text-text-muted hover:text-text-primary'
               }`}
             >
               💻 Example Code
             </button>
             <button
               onClick={() => setActiveTab('exercise')}
-              className={`px-3 py-1 font-semibold rounded-md transition-all flex items-center gap-1.5 ${
-                activeTab === 'exercise' ? 'bg-circuit-500 text-white shadow-sm' : 'text-surface-400 hover:text-white'
+              className={`px-3 py-1 font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
+                activeTab === 'exercise' ? 'bg-[#19B99A] text-white shadow-sm' : 'text-text-muted hover:text-text-primary'
               }`}
             >
               <span>🧪 Practice Exercise</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-circuit-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             </button>
           </div>
         </div>
@@ -511,25 +515,25 @@ export const CodeLearnPage: React.FC = () => {
         {/* Tab 1: Structured Explanation View */}
         {activeTab === 'explanation' && (
           <div className="flex-1 overflow-y-auto p-8 max-w-4xl mx-auto w-full space-y-6">
-            <div className="p-4 rounded-2xl bg-code-950/20 border border-code-700/40 text-xs text-code-300 leading-relaxed">
-              <strong>Learning Objective:</strong> {currentLesson.summary}
+            <div className="p-4 rounded-2xl bg-[#EAE7FF]/40 dark:bg-[#26233E]/40 border border-[#6541F5]/20 text-xs text-text-primary leading-relaxed">
+              <strong className="text-[#6541F5] dark:text-[#C4B5FD]">Learning Objective:</strong> {currentLesson.summary}
             </div>
 
-            <div className="prose prose-invert max-w-none text-surface-300 text-sm leading-relaxed space-y-4">
-              <div className="whitespace-pre-wrap font-sans">{currentLesson.explanation}</div>
+            <div className="card p-6 bg-card border border-border text-text-primary text-sm leading-relaxed space-y-4 shadow-soft">
+              <div className="whitespace-pre-wrap font-sans text-text-muted leading-relaxed">{currentLesson.explanation}</div>
             </div>
 
             <div className="pt-4 flex items-center gap-3">
               <button
                 onClick={() => setActiveTab('example')}
-                className="btn-code px-4 py-2 text-xs font-semibold rounded-xl flex items-center gap-2"
+                className="btn-primary px-4 py-2 text-xs font-semibold rounded-xl flex items-center gap-2"
               >
                 <span>View Example Code</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setActiveTab('exercise')}
-                className="btn-circuit px-4 py-2 text-xs font-semibold rounded-xl flex items-center gap-2"
+                className="px-4 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 bg-[#19B99A] hover:bg-[#159F84] text-white transition-colors shadow-sm"
               >
                 <span>Try Exercise Directly</span>
                 <Play className="w-3.5 h-3.5 fill-current" />
@@ -542,22 +546,22 @@ export const CodeLearnPage: React.FC = () => {
         {activeTab === 'example' && (
           <div className="flex-1 flex flex-col p-6 overflow-hidden">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-xs text-surface-400">
+              <div className="text-xs text-text-muted">
                 Explore the working sample code. Click "Try it in Exercise" to practice modifying it.
               </div>
               <button
                 onClick={handleCopyExample}
-                className="btn-ghost px-2.5 py-1 text-xs rounded-lg flex items-center gap-1.5"
+                className="px-2.5 py-1 text-xs rounded-lg flex items-center gap-1.5 border border-border text-text-muted hover:text-text-primary hover:bg-canvas transition-colors"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-circuit-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? <Check className="w-3.5 h-3.5 text-[#19B99A]" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? 'Copied!' : 'Copy Code'}</span>
               </button>
             </div>
 
-            <div className="flex-1 border border-surface-700 rounded-xl overflow-hidden shadow-xl">
+            <div className="flex-1 border border-border rounded-xl overflow-hidden shadow-soft">
               <Editor
                 height="100%"
-                theme="vs-dark"
+                theme={theme === 'dark' ? 'vs-dark' : 'vs'}
                 language={currentLesson.language === 'html' ? 'html' : 'python'}
                 value={currentLesson.exampleCode}
                 options={{
@@ -573,7 +577,7 @@ export const CodeLearnPage: React.FC = () => {
 
             {/* If HTML, live preview frame */}
             {currentLesson.language === 'html' && (
-              <div className="h-48 mt-4 border border-surface-700 rounded-xl overflow-hidden bg-white">
+              <div className="h-48 mt-4 border border-border rounded-xl overflow-hidden bg-white">
                 <iframe
                   srcDoc={buildHtmlSrcdoc(currentLesson.exampleCode)}
                   title="HTML Example Preview"
@@ -586,7 +590,7 @@ export const CodeLearnPage: React.FC = () => {
             <div className="mt-4 flex justify-end">
               <button
                 onClick={() => setActiveTab('exercise')}
-                className="btn-circuit px-4 py-2 text-xs font-semibold rounded-xl flex items-center gap-2"
+                className="px-4 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 bg-[#19B99A] hover:bg-[#159F84] text-white transition-colors shadow-sm"
               >
                 <span>Ready to Try the Exercise!</span>
                 <ArrowRight className="w-4 h-4" />
@@ -599,26 +603,26 @@ export const CodeLearnPage: React.FC = () => {
         {activeTab === 'exercise' && (
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Goal Card */}
-            <div className="p-4 bg-surface-900 border-b border-surface-700 shrink-0">
+            <div className="p-4 bg-card border-b border-border shrink-0">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] font-semibold text-circuit-400 uppercase tracking-wider flex items-center gap-1">
+                <span className="text-[11px] font-semibold text-[#19B99A] uppercase tracking-wider flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5" /> Exercise Mission
                 </span>
                 <button
                   onClick={() => setShowHints(!showHints)}
-                  className="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1"
+                  className="text-xs text-amber-600 dark:text-amber-400 hover:opacity-80 flex items-center gap-1 font-semibold"
                 >
                   <HelpCircle className="w-3.5 h-3.5" />
                   <span>{showHints ? 'Hide Hints' : 'Need a Hint?'}</span>
                 </button>
               </div>
-              <p className="text-xs text-surface-200">{currentLesson.exerciseGoal}</p>
+              <p className="text-xs text-text-primary">{currentLesson.exerciseGoal}</p>
 
               {/* Hints Accordion */}
               {showHints && (
-                <div className="mt-2.5 p-3 rounded-lg bg-amber-950/30 border border-amber-700/50 text-xs text-amber-200 space-y-1">
-                  <div className="font-semibold text-amber-400 mb-1">Step-by-step Hints:</div>
-                  <ul className="list-disc pl-4 space-y-1 text-surface-300">
+                <div className="mt-2.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700/50 text-xs text-amber-800 dark:text-amber-200 space-y-1">
+                  <div className="font-semibold text-amber-700 dark:text-amber-400 mb-1">Step-by-step Hints:</div>
+                  <ul className="list-disc pl-4 space-y-1 text-text-muted">
                     {currentLesson.hints.map((h, i) => (
                       <li key={i}>{h}</li>
                     ))}
@@ -632,7 +636,7 @@ export const CodeLearnPage: React.FC = () => {
               <div className="flex-1 relative min-h-[220px]">
                 <Editor
                   height="100%"
-                  theme="vs-dark"
+                  theme={theme === 'dark' ? 'vs-dark' : 'vs'}
                   language={currentLesson.language === 'html' ? 'html' : 'python'}
                   value={userExerciseCode}
                   onChange={(val) => setUserExerciseCode(val || '')}
@@ -648,8 +652,8 @@ export const CodeLearnPage: React.FC = () => {
 
               {/* If HTML, live preview frame */}
               {currentLesson.language === 'html' && (
-                <div className="w-full md:w-1/2 border-t md:border-t-0 md:border-l border-surface-700 bg-white flex flex-col">
-                  <div className="bg-surface-800 text-surface-400 px-3 py-1 text-[11px] border-b border-surface-700">
+                <div className="w-full md:w-1/2 border-t md:border-t-0 md:border-l border-border bg-white flex flex-col">
+                  <div className="bg-canvas text-text-muted px-3 py-1 text-[11px] border-b border-border">
                     Live HTML / DOM Sandbox Preview
                   </div>
                   <iframe
@@ -663,11 +667,11 @@ export const CodeLearnPage: React.FC = () => {
             </div>
 
             {/* Exercise Action Bar & Feedback */}
-            <div className="p-3 border-t border-surface-700 bg-surface-900/95 flex items-center justify-between shrink-0 text-xs">
+            <div className="p-3 border-t border-border bg-card flex items-center justify-between shrink-0 text-xs">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setUserExerciseCode(currentLesson.exerciseCode)}
-                  className="btn-ghost px-2.5 py-1 text-xs rounded-lg flex items-center gap-1 text-surface-400"
+                  className="px-2.5 py-1 text-xs rounded-lg flex items-center gap-1 border border-border text-text-muted hover:text-text-primary hover:bg-canvas transition-colors"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Reset Starter</span>
@@ -676,7 +680,7 @@ export const CodeLearnPage: React.FC = () => {
                 <button
                   onClick={handleRunExercise}
                   disabled={isRunning}
-                  className="btn-circuit px-4 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 shadow-glow-circuit disabled:opacity-50"
+                  className="px-4 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-2 bg-[#19B99A] hover:bg-[#159F84] text-white shadow-sm transition-colors disabled:opacity-50"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
                   <span>{isRunning ? 'Executing...' : 'Run & Check Answer'}</span>
@@ -688,8 +692,8 @@ export const CodeLearnPage: React.FC = () => {
                 <div
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
                     exercisePassed
-                      ? 'bg-circuit-900/80 text-circuit-300 border border-circuit-500 shadow-glow-circuit'
-                      : 'bg-red-900/80 text-red-300 border border-red-500'
+                      ? 'bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26] border border-[#19B99A]/40'
+                      : 'bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400 border border-red-500/40'
                   }`}
                 >
                   {exercisePassed ? <CheckCircle2 className="w-4 h-4" /> : <Award className="w-4 h-4" />}
@@ -700,33 +704,33 @@ export const CodeLearnPage: React.FC = () => {
 
             {/* Output Display */}
             {exerciseOutput && (
-              <div className="h-28 border-t border-surface-700 bg-surface-950 p-3 overflow-y-auto text-xs font-mono">
-                <div className="text-[10px] text-surface-500 uppercase tracking-wider mb-1">Standard Output:</div>
-                <pre className="text-surface-200 whitespace-pre-wrap">{exerciseOutput}</pre>
+              <div className="h-28 border-t border-border bg-canvas p-3 overflow-y-auto text-xs font-mono">
+                <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Standard Output:</div>
+                <pre className="text-text-primary whitespace-pre-wrap">{exerciseOutput}</pre>
               </div>
             )}
           </div>
         )}
 
         {/* 3. NAVIGATION FOOTER: NEXT / PREVIOUS */}
-        <footer className="h-12 border-t border-surface-700/80 bg-surface-800 px-6 flex items-center justify-between shrink-0">
+        <footer className="h-12 border-t border-border bg-card px-6 flex items-center justify-between shrink-0">
           <button
             onClick={() => handleSelectLesson(Math.max(0, activeLessonIndex - 1))}
             disabled={activeLessonIndex === 0}
-            className="btn-ghost px-3 py-1 text-xs rounded-lg flex items-center gap-1 disabled:opacity-30"
+            className="px-3 py-1 text-xs rounded-lg flex items-center gap-1 border border-border text-text-muted hover:text-text-primary hover:bg-canvas transition-colors disabled:opacity-30"
           >
             <ChevronLeft className="w-4 h-4" />
             <span>Previous Lesson</span>
           </button>
 
-          <span className="text-xs text-surface-400 font-mono">
+          <span className="text-xs text-text-muted font-mono">
             Lesson {activeLessonIndex + 1} of {LESSONS.length}
           </span>
 
           <button
             onClick={() => handleSelectLesson(Math.min(LESSONS.length - 1, activeLessonIndex + 1))}
             disabled={activeLessonIndex === LESSONS.length - 1}
-            className="btn-code px-3 py-1 text-xs rounded-lg flex items-center gap-1 disabled:opacity-30"
+            className="px-3 py-1 text-xs rounded-lg flex items-center gap-1 bg-[#6541F5] hover:bg-[#5230E8] text-white shadow-sm transition-colors disabled:opacity-30"
           >
             <span>Next Lesson</span>
             <ChevronRight className="w-4 h-4" />

@@ -33,6 +33,7 @@ import {
 } from '../../services/codeRunner';
 import { useAuthStore } from '../../stores/authStore';
 import { useProgressStore } from '../../stores/progressStore';
+import { useUIStore } from '../../stores/uiStore';
 
 export interface ChallengeProblem {
   id: string;
@@ -461,6 +462,7 @@ export const CodeChallengePage: React.FC = () => {
   // Stores
   const { markCompleted } = useProgressStore();
   const { addXP } = useAuthStore();
+  const { theme } = useUIStore();
 
   // Load starter code when problem or language changes (unless user has edits)
   const handleProblemSelect = (prob: ChallengeProblem) => {
@@ -593,27 +595,27 @@ export const CodeChallengePage: React.FC = () => {
   });
 
   return (
-    <div className="flex h-screen bg-surface-900 text-surface-100 font-sans overflow-hidden">
+    <div className="flex h-full w-full rounded-2xl border border-border bg-card text-text-primary font-sans overflow-hidden shadow-soft">
       {/* 1. LEFT PANEL: 1/3 WIDTH PROBLEM LIST & PROBLEM DESCRIPTION */}
-      <aside className="w-1/3 min-w-[340px] max-w-[480px] border-r border-surface-700 bg-surface-800 flex flex-col z-10">
+      <aside className="w-1/3 min-w-[340px] max-w-[480px] border-r border-border bg-card flex flex-col z-10 text-text-primary">
         {/* Search & Topic Filters */}
-        <div className="p-3 border-b border-surface-700 bg-surface-800 space-y-2">
+        <div className="p-3 border-b border-border bg-card space-y-2">
           <div className="flex items-center gap-2">
-            <span className="p-1 rounded bg-code-500/20 text-code-400 border border-code-500/30">
+            <span className="p-1 rounded-lg bg-[#EAE7FF] text-[#6541F5] dark:bg-[#26233E] dark:text-[#C4B5FD]">
               <Code className="w-4 h-4" />
             </span>
-            <span className="font-display font-bold text-sm text-surface-100">Code Challenge Arena</span>
-            <span className="badge-code text-[10px] ml-auto">10 Problems</span>
+            <span className="font-display font-bold text-sm text-text-primary">Code Challenge Arena</span>
+            <span className="badge-purple text-[10px] ml-auto">10 Problems</span>
           </div>
 
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-surface-400" />
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-text-muted" />
             <input
               type="text"
               placeholder="Search problems or topics..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-surface-900 border border-surface-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-surface-200 placeholder-surface-500 focus:outline-none focus:border-code-500"
+              className="w-full bg-canvas border border-border rounded-lg pl-8 pr-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-[#6541F5]"
             />
           </div>
 
@@ -624,14 +626,10 @@ export const CodeChallengePage: React.FC = () => {
                 <button
                   key={diff}
                   onClick={() => setDifficultyFilter(diff)}
-                  className={`px-2 py-0.5 rounded-full font-medium transition-colors ${
+                  className={`px-2 py-0.5 rounded-full font-semibold transition-colors ${
                     difficultyFilter === diff
-                      ? diff === 'Easy'
-                        ? 'bg-circuit-500 text-white'
-                        : diff === 'Medium'
-                        ? 'bg-amber-500 text-white'
-                        : 'bg-code-500 text-white'
-                      : 'bg-surface-700 text-surface-400 hover:text-surface-200'
+                      ? 'bg-[#6541F5] text-white shadow-sm'
+                      : 'bg-canvas text-text-muted hover:text-text-primary border border-border'
                   }`}
                 >
                   {diff}
@@ -642,7 +640,7 @@ export const CodeChallengePage: React.FC = () => {
             <select
               value={topicFilter}
               onChange={(e) => setTopicFilter(e.target.value)}
-              className="bg-surface-900 border border-surface-700 rounded px-2 py-0.5 text-surface-300 text-[10px] focus:outline-none focus:border-code-500"
+              className="bg-canvas border border-border rounded px-2 py-0.5 text-text-primary text-[10px] focus:outline-none focus:border-[#6541F5]"
             >
               <option value="All">All Topics</option>
               <option value="Basics">Basics</option>
@@ -657,26 +655,26 @@ export const CodeChallengePage: React.FC = () => {
         {/* Scrollable Problem List & Selected Problem Details */}
         <div className="flex-1 overflow-y-auto flex flex-col">
           {/* Quick Problem Selector Bar */}
-          <div className="p-2 border-b border-surface-700 bg-surface-900/30 flex gap-1.5 overflow-x-auto shrink-0">
+          <div className="p-2 border-b border-border bg-canvas/40 flex gap-1.5 overflow-x-auto shrink-0">
             {filteredProblems.map((p) => {
               const isSelected = selectedProblem.id === p.id;
               return (
                 <button
                   key={p.id}
                   onClick={() => handleProblemSelect(p)}
-                  className={`px-2 py-1 rounded text-[11px] font-mono shrink-0 flex items-center gap-1 border transition-all ${
+                  className={`px-2 py-1 rounded-lg text-[11px] font-mono shrink-0 flex items-center gap-1 border transition-all ${
                     isSelected
-                      ? 'bg-code-500/20 text-code-300 border-code-500 shadow-sm'
-                      : 'bg-surface-800 text-surface-400 border-surface-700 hover:border-surface-600'
+                      ? 'bg-[#6541F5]/10 text-[#6541F5] dark:text-[#C4B5FD] border-[#6541F5] font-semibold shadow-sm'
+                      : 'bg-card text-text-muted border-border hover:border-[#6541F5]/40'
                   }`}
                 >
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
                       p.difficulty === 'Easy'
-                        ? 'bg-circuit-400'
+                        ? 'bg-[#19B99A]'
                         : p.difficulty === 'Medium'
-                        ? 'bg-amber-400'
-                        : 'bg-red-400'
+                        ? 'bg-amber-500'
+                        : 'bg-red-500'
                     }`}
                   />
                   <span>P{p.id.replace('prob-', '')}</span>
@@ -692,22 +690,24 @@ export const CodeChallengePage: React.FC = () => {
                 <span
                   className={`text-[10px] px-2 py-0.5 rounded font-semibold uppercase ${
                     selectedProblem.difficulty === 'Easy'
-                      ? 'bg-circuit-900/60 text-circuit-400 border border-circuit-700/50'
+                      ? 'bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26]'
                       : selectedProblem.difficulty === 'Medium'
-                      ? 'bg-amber-900/60 text-amber-400 border border-amber-700/50'
-                      : 'bg-red-900/60 text-red-400 border border-red-700/50'
+                      ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400'
+                      : 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400'
                   }`}
                 >
                   {selectedProblem.difficulty}
                 </span>
-                <span className="text-[11px] font-mono text-circuit-400">+{selectedProblem.points} XP</span>
+                <span className="text-[11px] font-mono text-[#6541F5] dark:text-[#C4B5FD] font-semibold">
+                  +{selectedProblem.points} XP
+                </span>
               </div>
-              <h2 className="text-lg font-display font-bold text-surface-50">{selectedProblem.title}</h2>
+              <h2 className="text-lg font-display font-bold text-text-primary">{selectedProblem.title}</h2>
               <div className="flex flex-wrap gap-1 mt-1.5">
                 {selectedProblem.topics.map((t, idx) => (
                   <span
                     key={idx}
-                    className="text-[10px] px-2 py-0.5 rounded bg-surface-900 text-surface-400 border border-surface-700"
+                    className="text-[10px] px-2 py-0.5 rounded-md bg-canvas text-text-muted border border-border"
                   >
                     #{t}
                   </span>
@@ -716,19 +716,19 @@ export const CodeChallengePage: React.FC = () => {
             </div>
 
             {/* Problem Statement */}
-            <div className="text-xs text-surface-300 leading-relaxed bg-surface-900/40 p-3 rounded-xl border border-surface-700/60">
+            <div className="text-xs text-text-muted leading-relaxed bg-canvas p-3 rounded-xl border border-border">
               {selectedProblem.description}
             </div>
 
             {/* Constraints */}
             <div>
-              <div className="text-[11px] font-semibold text-surface-400 uppercase tracking-wider mb-1.5">
+              <div className="text-[11px] font-semibold text-text-primary uppercase tracking-wider mb-1.5">
                 Constraints
               </div>
-              <ul className="text-xs space-y-1 text-surface-400 font-mono bg-surface-900/40 p-2.5 rounded-lg border border-surface-700/60">
+              <ul className="text-xs space-y-1 text-text-muted font-mono bg-canvas p-2.5 rounded-lg border border-border">
                 {selectedProblem.constraints.map((c, i) => (
                   <li key={i} className="flex items-center gap-1.5">
-                    <span className="w-1 h-1 rounded-full bg-surface-500" />
+                    <span className="w-1 h-1 rounded-full bg-text-muted/60" />
                     <span>{c}</span>
                   </li>
                 ))}
@@ -737,23 +737,23 @@ export const CodeChallengePage: React.FC = () => {
 
             {/* Examples */}
             <div>
-              <div className="text-[11px] font-semibold text-surface-400 uppercase tracking-wider mb-2">
+              <div className="text-[11px] font-semibold text-text-primary uppercase tracking-wider mb-2">
                 Examples
               </div>
               <div className="space-y-2.5">
                 {selectedProblem.examples.map((ex, idx) => (
-                  <div key={idx} className="bg-surface-900/70 p-3 rounded-xl border border-surface-700 text-xs">
-                    <div className="text-[11px] font-semibold text-surface-400 mb-1">Example {idx + 1}</div>
+                  <div key={idx} className="bg-canvas p-3 rounded-xl border border-border text-xs">
+                    <div className="text-[11px] font-semibold text-text-primary mb-1">Example {idx + 1}</div>
                     <div className="space-y-1 font-mono">
-                      <div className="text-surface-300">
-                        <span className="text-surface-500">Input:</span> {ex.input}
+                      <div className="text-text-muted">
+                        <span className="text-text-muted/70">Input:</span> {ex.input}
                       </div>
-                      <div className="text-circuit-300">
-                        <span className="text-surface-500">Output:</span> {ex.output}
+                      <div className="text-[#19B99A] font-semibold">
+                        <span className="text-text-muted/70">Output:</span> {ex.output}
                       </div>
                     </div>
                     {ex.explanation && (
-                      <div className="text-[11px] text-surface-400 mt-1.5 pt-1.5 border-t border-surface-800">
+                      <div className="text-[11px] text-text-muted mt-1.5 pt-1.5 border-t border-border">
                         {ex.explanation}
                       </div>
                     )}
@@ -766,17 +766,17 @@ export const CodeChallengePage: React.FC = () => {
       </aside>
 
       {/* 2. RIGHT PANEL: 2/3 WIDTH MONACO CODE EDITOR & OUTPUT/TEST PANEL */}
-      <main className="flex-1 flex flex-col overflow-hidden bg-surface-950">
+      <main className="flex-1 flex flex-col overflow-hidden bg-canvas">
         {/* Editor Top Bar */}
-        <div className="h-12 border-b border-surface-700/80 bg-surface-800 px-4 flex items-center justify-between shrink-0">
+        <div className="h-12 border-b border-border bg-card px-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             {/* Language Selector */}
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-surface-400 font-medium">Language:</span>
+              <span className="text-xs text-text-muted font-medium">Language:</span>
               <select
                 value={selectedLanguage}
                 onChange={(e) => handleLanguageChange(e.target.value)}
-                className="bg-surface-900 border border-surface-700 rounded-lg px-2.5 py-1 text-xs font-semibold text-surface-100 focus:outline-none focus:border-code-500 cursor-pointer"
+                className="bg-canvas border border-border rounded-lg px-2.5 py-1 text-xs font-semibold text-text-primary focus:outline-none focus:border-[#6541F5] cursor-pointer"
               >
                 <option value="python">Python 3.10</option>
                 <option value="javascript">JavaScript (Node 18)</option>
@@ -790,7 +790,7 @@ export const CodeChallengePage: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleResetCode}
-              className="btn-ghost px-2.5 py-1 text-xs rounded-lg flex items-center gap-1 text-surface-400 hover:text-surface-200"
+              className="px-2.5 py-1 text-xs rounded-lg flex items-center gap-1 text-text-muted hover:text-text-primary border border-border hover:bg-canvas transition-colors"
               title="Reset code to original starter template"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -801,9 +801,9 @@ export const CodeChallengePage: React.FC = () => {
             <button
               onClick={handleRunCode}
               disabled={isRunning || isSubmitting}
-              className="btn-ghost px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 hover:border-surface-500 disabled:opacity-50"
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 border border-border text-text-primary hover:bg-canvas transition-colors disabled:opacity-50"
             >
-              <Play className="w-3.5 h-3.5 text-circuit-400 fill-current" />
+              <Play className="w-3.5 h-3.5 text-[#19B99A] fill-current" />
               <span>{isRunning ? 'Running...' : 'Run Tests'}</span>
             </button>
 
@@ -811,7 +811,7 @@ export const CodeChallengePage: React.FC = () => {
             <button
               onClick={handleSubmitCode}
               disabled={isRunning || isSubmitting}
-              className="btn-code px-4 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-glow-code disabled:opacity-50"
+              className="px-4 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 bg-[#6541F5] hover:bg-[#5230E8] text-white shadow-sm transition-colors disabled:opacity-50"
             >
               <Send className="w-3.5 h-3.5" />
               <span>{isSubmitting ? 'Evaluating...' : 'Submit'}</span>
@@ -823,7 +823,7 @@ export const CodeChallengePage: React.FC = () => {
         <div className="flex-1 relative min-h-[300px]">
           <Editor
             height="100%"
-            theme="vs-dark"
+            theme={theme === 'dark' ? 'vs-dark' : 'vs'}
             language={SUPPORTED_LANGUAGES[selectedLanguage]?.monacoId || 'python'}
             value={editorCode}
             onChange={(val) => setEditorCode(val || '')}
@@ -842,16 +842,16 @@ export const CodeChallengePage: React.FC = () => {
         </div>
 
         {/* OUTPUT & TEST RESULTS PANEL (HEIGHT ADJUSTABLE) */}
-        <div className="h-64 border-t border-surface-700 bg-surface-900 flex flex-col shrink-0">
+        <div className="h-64 border-t border-border bg-card flex flex-col shrink-0 text-text-primary">
           {/* Output Panel Header Tabs */}
-          <div className="h-10 border-b border-surface-700/80 px-4 bg-surface-800/80 flex items-center justify-between">
+          <div className="h-10 border-b border-border px-4 bg-card flex items-center justify-between">
             <div className="flex items-center gap-4 text-xs font-semibold">
               <button
                 onClick={() => setActiveTab('tests')}
                 className={`py-2 border-b-2 flex items-center gap-1.5 transition-colors ${
                   activeTab === 'tests'
-                    ? 'border-code-500 text-code-400'
-                    : 'border-transparent text-surface-400 hover:text-surface-200'
+                    ? 'border-[#6541F5] text-[#6541F5] dark:text-[#C4B5FD]'
+                    : 'border-transparent text-text-muted hover:text-text-primary'
                 }`}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -862,8 +862,8 @@ export const CodeChallengePage: React.FC = () => {
                 onClick={() => setActiveTab('console')}
                 className={`py-2 border-b-2 flex items-center gap-1.5 transition-colors ${
                   activeTab === 'console'
-                    ? 'border-code-500 text-code-400'
-                    : 'border-transparent text-surface-400 hover:text-surface-200'
+                    ? 'border-[#6541F5] text-[#6541F5] dark:text-[#C4B5FD]'
+                    : 'border-transparent text-text-muted hover:text-text-primary'
                 }`}
               >
                 <Terminal className="w-3.5 h-3.5" />
@@ -874,8 +874,8 @@ export const CodeChallengePage: React.FC = () => {
                 onClick={() => setActiveTab('history')}
                 className={`py-2 border-b-2 flex items-center gap-1.5 transition-colors ${
                   activeTab === 'history'
-                    ? 'border-code-500 text-code-400'
-                    : 'border-transparent text-surface-400 hover:text-surface-200'
+                    ? 'border-[#6541F5] text-[#6541F5] dark:text-[#C4B5FD]'
+                    : 'border-transparent text-text-muted hover:text-text-primary'
                 }`}
               >
                 <History className="w-3.5 h-3.5" />
@@ -888,8 +888,8 @@ export const CodeChallengePage: React.FC = () => {
               <div
                 className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold ${
                   verdict.status === 'Accepted'
-                    ? 'bg-circuit-900/80 text-circuit-300 border border-circuit-500/80 shadow-glow-circuit'
-                    : 'bg-red-900/80 text-red-300 border border-red-500/80'
+                    ? 'bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26] border border-[#19B99A]/40'
+                    : 'bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400 border border-red-500/40'
                 }`}
               >
                 {verdict.status === 'Accepted' ? (
@@ -898,7 +898,7 @@ export const CodeChallengePage: React.FC = () => {
                   <XCircle className="w-3.5 h-3.5" />
                 )}
                 <span>{verdict.status}</span>
-                <span className="font-mono text-[10px] text-surface-400">({verdict.runtimeMs}ms)</span>
+                <span className="font-mono text-[10px] text-text-muted">({verdict.runtimeMs}ms)</span>
               </div>
             )}
           </div>
@@ -908,7 +908,7 @@ export const CodeChallengePage: React.FC = () => {
             {activeTab === 'tests' && (
               <div>
                 {testResults.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-surface-500 py-6">
+                  <div className="h-full flex flex-col items-center justify-center text-text-muted py-6">
                     <Terminal className="w-8 h-8 mb-2 opacity-30" />
                     <p>Click "Run Tests" or "Submit" to execute your solution against test cases.</p>
                   </div>
@@ -919,38 +919,38 @@ export const CodeChallengePage: React.FC = () => {
                         key={tc.testCaseId}
                         className={`p-3 rounded-xl border ${
                           tc.passed
-                            ? 'bg-circuit-950/40 border-circuit-700/60'
-                            : 'bg-red-950/40 border-red-700/60'
+                            ? 'bg-[#DDF8EE]/20 dark:bg-[#0D2E26]/20 border-[#19B99A]/40'
+                            : 'bg-red-50 dark:bg-red-950/20 border-red-500/30'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             {tc.passed ? (
-                              <CheckCircle2 className="w-4 h-4 text-circuit-400" />
+                              <CheckCircle2 className="w-4 h-4 text-[#19B99A]" />
                             ) : (
-                              <XCircle className="w-4 h-4 text-red-400" />
+                              <XCircle className="w-4 h-4 text-red-500" />
                             )}
-                            <span className="font-semibold text-surface-200">
+                            <span className="font-semibold text-text-primary">
                               Test Case #{tc.testCaseId}: {tc.passed ? 'Passed' : 'Failed'}
                             </span>
                           </div>
-                          <span className="text-[10px] text-surface-400 font-mono">{tc.runtimeMs} ms</span>
+                          <span className="text-[10px] text-text-muted font-mono">{tc.runtimeMs} ms</span>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px]">
-                          <div className="bg-surface-900 p-2 rounded border border-surface-800">
-                            <span className="text-surface-500 block mb-0.5">Input:</span>
-                            <span className="text-surface-300 whitespace-pre-wrap">{tc.input || '(empty)'}</span>
+                          <div className="bg-card p-2 rounded-lg border border-border">
+                            <span className="text-text-muted block mb-0.5">Input:</span>
+                            <span className="text-text-primary whitespace-pre-wrap">{tc.input || '(empty)'}</span>
                           </div>
-                          <div className="bg-surface-900 p-2 rounded border border-surface-800">
-                            <span className="text-surface-500 block mb-0.5">Expected:</span>
-                            <span className="text-circuit-300 whitespace-pre-wrap">{tc.expectedOutput}</span>
+                          <div className="bg-card p-2 rounded-lg border border-border">
+                            <span className="text-text-muted block mb-0.5">Expected:</span>
+                            <span className="text-[#19B99A] font-semibold whitespace-pre-wrap">{tc.expectedOutput}</span>
                           </div>
-                          <div className="bg-surface-900 p-2 rounded border border-surface-800">
-                            <span className="text-surface-500 block mb-0.5">Your Output:</span>
+                          <div className="bg-card p-2 rounded-lg border border-border">
+                            <span className="text-text-muted block mb-0.5">Your Output:</span>
                             <span
                               className={`whitespace-pre-wrap ${
-                                tc.passed ? 'text-circuit-300' : 'text-red-300'
+                                tc.passed ? 'text-[#19B99A] font-semibold' : 'text-red-500 font-semibold'
                               }`}
                             >
                               {tc.actualOutput || (tc.error ? `[Error]: ${tc.error}` : '(empty)')}
@@ -967,11 +967,11 @@ export const CodeChallengePage: React.FC = () => {
             {activeTab === 'console' && (
               <div className="space-y-2">
                 {consoleOutput.stderr && (
-                  <div className="p-3 bg-red-950/40 border border-red-800/60 rounded-lg text-red-300 whitespace-pre-wrap">
+                  <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-500/40 rounded-xl text-red-600 dark:text-red-400 whitespace-pre-wrap">
                     {consoleOutput.stderr}
                   </div>
                 )}
-                <div className="p-3 bg-surface-950 border border-surface-800 rounded-lg text-surface-300 whitespace-pre-wrap min-h-[80px]">
+                <div className="p-3 bg-canvas border border-border rounded-xl text-text-primary whitespace-pre-wrap min-h-[80px]">
                   {consoleOutput.stdout || 'No standard output recorded.'}
                 </div>
               </div>
@@ -980,33 +980,33 @@ export const CodeChallengePage: React.FC = () => {
             {activeTab === 'history' && (
               <div>
                 {submissionHistory.length === 0 ? (
-                  <div className="text-center text-surface-500 py-6">No previous submissions recorded yet.</div>
+                  <div className="text-center text-text-muted py-6">No previous submissions recorded yet.</div>
                 ) : (
                   <div className="space-y-2">
                     {submissionHistory.map((sub) => (
                       <div
                         key={sub.id}
-                        className="flex items-center justify-between p-2.5 rounded-lg bg-surface-850 border border-surface-700/60 text-xs"
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-canvas border border-border text-xs"
                       >
                         <div className="flex items-center gap-3">
                           <span
-                            className={`px-2 py-0.5 rounded font-bold text-[10px] ${
+                            className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
                               sub.status === 'Accepted'
-                                ? 'bg-circuit-900 text-circuit-400'
-                                : 'bg-red-900 text-red-400'
+                                ? 'bg-[#DDF8EE] text-[#19B99A] dark:bg-[#0D2E26]'
+                                : 'bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400'
                             }`}
                           >
                             {sub.status}
                           </span>
-                          <span className="text-surface-200 font-medium">{sub.problemTitle}</span>
-                          <span className="text-surface-400 font-mono text-[11px]">{sub.language}</span>
+                          <span className="text-text-primary font-medium">{sub.problemTitle}</span>
+                          <span className="text-text-muted font-mono text-[11px]">{sub.language}</span>
                         </div>
-                        <div className="flex items-center gap-4 text-surface-400 text-[11px]">
+                        <div className="flex items-center gap-4 text-text-muted text-[11px]">
                           <span>
                             {sub.passedCount} / {sub.totalCount} passed
                           </span>
                           <span>{sub.runtimeMs} ms</span>
-                          <span className="text-surface-500">{sub.timestamp}</span>
+                          <span className="text-text-muted/60">{sub.timestamp}</span>
                         </div>
                       </div>
                     ))}

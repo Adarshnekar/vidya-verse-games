@@ -676,8 +676,8 @@ export const MathLudoPage: React.FC = () => {
   ]);
 
   // Turn timer ref
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const botTurnRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const botTurnRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   sfx.enabled = soundOn;
 

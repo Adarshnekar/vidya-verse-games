@@ -76,7 +76,7 @@ const QUICK_GAMES = [
     title: 'Math Ludo',
     subject: 'Mathematics',
     subjectBadge: 'text-[#42A5E8] bg-[#DDF2FC] dark:bg-[#13273D]',
-    icon: '🎲',
+    image: '/images/playlab/math-ludo.png',
     players: '1-4 Players',
   },
   {
@@ -85,7 +85,7 @@ const QUICK_GAMES = [
     title: "Newton's Carrom",
     subject: 'Physics',
     subjectBadge: 'text-[#19B99A] bg-[#DDF8EE] dark:bg-[#0D2E26]',
-    icon: '🎯',
+    image: '/images/playlab/carrom.png',
     players: 'Physics Sim',
   },
   {
@@ -94,7 +94,7 @@ const QUICK_GAMES = [
     title: 'MazeBot',
     subject: 'Algorithms',
     subjectBadge: 'text-[#6541F5] bg-[#EAE7FF] dark:bg-[#26233E] dark:text-[#C4B5FD]',
-    icon: '🤖',
+    image: '/images/playlab/mazebot.png',
     players: 'BFS / DFS / A*',
   },
   {
@@ -103,7 +103,7 @@ const QUICK_GAMES = [
     title: 'Bharat Explorer',
     subject: 'Geography',
     subjectBadge: 'text-[#F5A623] bg-[#FFF0D5] dark:bg-[#35250D]',
-    icon: '🧭',
+    image: '/images/playlab/bharat-explorer.jpg',
     players: 'Heritage Map',
   },
 ];
@@ -328,22 +328,29 @@ export function HomePage() {
                 <div
                   key={game.id}
                   onClick={() => navigate(game.path)}
-                  className="card p-4 hover:border-[#6541F5] hover:shadow-card-hover transition-all duration-150 cursor-pointer flex flex-col justify-between group"
+                  className="card overflow-hidden hover:border-[#6541F5] hover:shadow-card-hover transition-all duration-150 cursor-pointer flex flex-col justify-between group"
                 >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl">{game.icon}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${game.subjectBadge}`}>
+                  <div className="relative h-28 w-full overflow-hidden bg-canvas">
+                    <img
+                      src={game.image}
+                      alt={game.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute top-2 right-2">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm backdrop-blur-md ${game.subjectBadge}`}>
                         {game.subject}
                       </span>
                     </div>
-                    <div className="font-semibold text-sm text-text-primary group-hover:text-[#6541F5] dark:group-hover:text-[#7C5CFA] transition-colors">
+                  </div>
+                  <div className="p-3.5 space-y-1">
+                    <div className="font-bold text-sm text-text-primary group-hover:text-[#6541F5] dark:group-hover:text-[#7C5CFA] transition-colors truncate">
                       {game.title}
                     </div>
-                  </div>
-                  <div className="pt-3 flex items-center justify-between text-[11px] text-text-muted">
-                    <span>{game.players}</span>
-                    <ArrowRight className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-[#6541F5]" />
+                    <div className="flex items-center justify-between text-[11px] text-text-muted pt-1">
+                      <span>{game.players}</span>
+                      <ArrowRight className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-[#6541F5]" />
+                    </div>
                   </div>
                 </div>
               ))}
