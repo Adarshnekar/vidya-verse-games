@@ -15,6 +15,7 @@ export function AppShell() {
 
   // Full-bleed workstation detection: routes requiring maximum canvas / IDE space
   const isWorkstation =
+    location.pathname.startsWith('/playlab/solar') ||
     location.pathname.startsWith('/circuitverse') ||
     location.pathname.startsWith('/codeverse/challenge') ||
     location.pathname.startsWith('/codeverse/learn');
@@ -48,12 +49,17 @@ export function AppShell() {
 
         {/* Global Viewport: Workstation (Full-bleed) vs Document (Max-w-7xl) */}
         {isWorkstation ? (
-          <main className="flex-1 overflow-hidden p-2 sm:p-3 flex flex-col" id="main-content">
+          <main
+            className={`flex-1 overflow-hidden flex flex-col ${
+              location.pathname.startsWith('/playlab/solar') ? 'p-0' : 'p-2 sm:p-3'
+            }`}
+            id="main-content"
+          >
             <Outlet />
           </main>
         ) : (
           <main className="flex-1 overflow-y-auto" id="main-content">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-20 lg:pb-8">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={location.pathname}

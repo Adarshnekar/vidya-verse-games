@@ -106,6 +106,15 @@ const QUICK_GAMES = [
     image: '/images/playlab/bharat-explorer.jpg',
     players: 'Heritage Map',
   },
+  {
+    id: 'solar',
+    path: '/playlab/solar',
+    title: 'Solar Odyssey 3D',
+    subject: 'Space Science',
+    subjectBadge: 'text-[#06B6D4] bg-[#CFFAFE] dark:bg-[#083344] dark:text-[#67E8F9]',
+    image: '/images/playlab/solar-system.png',
+    players: '3D Celestial Sim',
+  },
 ];
 
 export function HomePage() {
