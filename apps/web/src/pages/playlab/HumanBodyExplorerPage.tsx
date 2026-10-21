@@ -29,6 +29,8 @@ import {
   ArrowRight,
   Tag,
   Sliders,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import {
@@ -78,6 +80,21 @@ export const HumanBodyExplorerPage: React.FC = () => {
     atTop: boolean;
   } | null>(null);
   const [quizSummaryOpen, setQuizSummaryOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
 
   const currentOrgan = useMemo(
     () => ANATOMY_ORGANS.find((o) => o.id === selectedOrganId) || ANATOMY_ORGANS[0],
@@ -314,6 +331,15 @@ export const HumanBodyExplorerPage: React.FC = () => {
           >
             <Globe size={15} />
             <span>{lang === 'en' ? 'English' : 'हिंदी'}</span>
+          </button>
+
+          {/* Fullscreen toggle */}
+          <button
+            onClick={toggleFullscreen}
+            className="anatomy-lang-btn"
+            title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+          >
+            {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
           </button>
         </div>
       </header>

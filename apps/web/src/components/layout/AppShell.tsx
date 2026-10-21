@@ -16,6 +16,7 @@ export function AppShell() {
   // Full-bleed workstation detection: routes requiring maximum canvas / IDE space
   const isWorkstation =
     location.pathname.startsWith('/playlab/solar') ||
+    location.pathname.startsWith('/playlab/human-body') ||
     location.pathname.startsWith('/circuitverse') ||
     location.pathname.startsWith('/codeverse/challenge') ||
     location.pathname.startsWith('/codeverse/learn');
@@ -51,7 +52,7 @@ export function AppShell() {
         {isWorkstation ? (
           <main
             className={`flex-1 overflow-hidden flex flex-col ${
-              location.pathname.startsWith('/playlab/solar') ? 'p-0' : 'p-2 sm:p-3'
+              location.pathname.startsWith('/playlab/solar') || location.pathname.startsWith('/playlab/human-body') ? 'p-0' : 'p-2 sm:p-3'
             }`}
             id="main-content"
           >
