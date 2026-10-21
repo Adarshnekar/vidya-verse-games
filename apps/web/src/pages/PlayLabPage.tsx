@@ -280,7 +280,7 @@ const SIMULATIONS: GameCardData[] = [
     subtitle: '55+ 3D interactive physics labs in Mechanics, Optics, Electricity & Quantum',
     description:
       'Immerse yourself in over 55 interactive 3D physics apparatuses. Master projectile motion, telescopes, Coulomb electrostatic fields, electromagnetic induction, Pascal hydraulic lifts, and quantum photoelectric effects with NCERT derivations.',
-    grades: 'Class 9–12',
+    grades: 'All Grades',
     offline: true,
     difficulty: 'All Levels',
     players: 'Interactive 3D Studio',
