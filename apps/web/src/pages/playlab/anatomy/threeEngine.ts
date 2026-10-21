@@ -9,10 +9,10 @@ import { HotspotItem, OrganItem } from './anatomyData';
 export const FIT_SIZE = 3.8;
 const DOT_PIXELS = 34;
 const CAMERA_FOV = 34;
-const DEPTH_PREPASS = 'depth-prepass';
-const PLINTH_Y = -2.4;
+const PLINTH_Y = -2.45;
 const PLINTH_TOP = PLINTH_Y + 0.17;
-const HOME_CAMERA = { x: 0, y: 0.9, z: 8.2 };
+// Perfectly centered camera looking straight at the heart midpoint
+const HOME_CAMERA = { x: 0, y: 0.65, z: 8.0 };
 const HOME_TARGET = { x: 0, y: 0.05, z: 0 };
 const TAU = Math.PI * 2;
 const SURFACE_LIFT = 0.02;
@@ -65,12 +65,12 @@ function dotTexture(hex: string) {
 
   ctx.beginPath();
   ctx.arc(c, c, size * 0.3, 0, TAU);
-  ctx.fillStyle = 'rgba(30, 41, 59, 0.3)';
+  ctx.fillStyle = 'rgba(48, 32, 24, 0.22)';
   ctx.fill();
 
   ctx.beginPath();
-  ctx.arc(c, c, size * 0.28, 0, TAU);
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+  ctx.arc(c, c, size * 0.285, 0, TAU);
+  ctx.fillStyle = 'rgba(255, 253, 249, 0.98)';
   ctx.fill();
 
   ctx.beginPath();
@@ -112,9 +112,9 @@ function contactShadowTexture() {
     size / 2,
     size * 0.5
   );
-  gradient.addColorStop(0, 'rgba(30, 20, 25, 0.65)');
-  gradient.addColorStop(0.45, 'rgba(30, 20, 25, 0.28)');
-  gradient.addColorStop(1, 'rgba(30, 20, 25, 0)');
+  gradient.addColorStop(0, 'rgba(94, 62, 42, 0.62)');
+  gradient.addColorStop(0.45, 'rgba(94, 62, 42, 0.26)');
+  gradient.addColorStop(1, 'rgba(94, 62, 42, 0)');
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, size, size);
   const texture = new THREE.CanvasTexture(canvas);
@@ -495,6 +495,7 @@ export class AnatomyAssetManager {
     const center = box.getCenter(new THREE.Vector3());
     const scale = FIT_SIZE / Math.max(size.x, size.y, size.z, 0.001);
     model.scale.setScalar(scale);
+    // Center bounding box exactly at (0, 0, 0)
     model.position.copy(center.multiplyScalar(-scale));
 
     const pivot = new THREE.Group();
@@ -519,11 +520,11 @@ export class AnatomyAssetManager {
         material.side = THREE.FrontSide;
 
         if (material instanceof THREE.MeshStandardMaterial) {
-          material.roughness = THREE.MathUtils.clamp(material.roughness ?? 0.5, 0.42, 0.65);
-          material.metalness = 0.05;
-          material.envMapIntensity = 0.35;
+          material.roughness = THREE.MathUtils.clamp(material.roughness ?? 0.5, 0.42, 0.62);
+          material.metalness = 0;
+          material.envMapIntensity = 0.32;
           if (material.map) material.map.colorSpace = THREE.SRGBColorSpace;
-          if (material.normalMap) material.normalScale.multiplyScalar(0.65);
+          if (material.normalMap) material.normalScale.multiplyScalar(0.62);
 
           for (const map of [
             material.map,
@@ -620,6 +621,7 @@ export class AnatomyEngine {
   public wireframe = false;
   public isolated = false;
   public clipConstant = 0;
+  public showLabels = true;
 
   private width = 1;
   private height = 1;
@@ -636,6 +638,7 @@ export class AnatomyEngine {
   private pointerStart = { x: 0, y: 0 };
   private dragged = false;
   private calloutEl: HTMLElement | null = null;
+  private labelsContainerEl: HTMLElement | null = null;
   private disposed = false;
   public quizMode = false;
 
@@ -657,7 +660,7 @@ export class AnatomyEngine {
     this.renderer.setPixelRatio(pixelRatio);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    this.renderer.toneMappingExposure = 1.02;
     this.renderer.shadowMap.enabled = false;
     this.renderer.localClippingEnabled = true;
     this.renderer.domElement.setAttribute('aria-label', 'Interactive 3D Anatomy Model');
@@ -668,7 +671,7 @@ export class AnatomyEngine {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.055;
     this.controls.enablePan = false;
-    this.controls.minDistance = 4.2;
+    this.controls.minDistance = 4.5;
     this.controls.maxDistance = 12;
     this.controls.autoRotate = true;
     this.controls.autoRotateSpeed = 0.65;
@@ -692,42 +695,46 @@ export class AnatomyEngine {
   }
 
   private buildEnvironment() {
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.45));
-    this.scene.add(new THREE.HemisphereLight(0xfff8ee, 0x221a22, 0.75));
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.42));
+    this.scene.add(new THREE.HemisphereLight(0xfff8ee, 0x33252d, 0.72));
 
-    const key = new THREE.DirectionalLight(0xfff5ea, 3.6);
+    const key = new THREE.DirectionalLight(0xfff3e7, 3.5);
     key.position.set(4.8, 6.5, 6.8);
     this.scene.add(key);
 
-    const fill = new THREE.DirectionalLight(0xe8eeff, 1.2);
+    const fill = new THREE.DirectionalLight(0xe6ecff, 1.12);
     fill.position.set(-4.5, 1.2, 5.2);
     this.scene.add(fill);
 
-    const rim = new THREE.DirectionalLight(0xffbfa8, 1.6);
+    const rim = new THREE.DirectionalLight(0xffb7a5, 1.6);
     rim.position.set(-4, 3.5, -5.5);
     this.scene.add(rim);
 
-    const glow = new THREE.PointLight(0xee7c6a, 0.6, 9, 2);
+    const warm = new THREE.PointLight(0xff8d70, 0.72, 11, 2);
+    warm.position.set(-3, -1.4, 3.5);
+    this.scene.add(warm);
+
+    const glow = new THREE.PointLight(0xee7c6a, 0.5, 8, 2);
     glow.name = 'organ-glow';
     glow.position.set(2.8, 0.4, 2.8);
     this.scene.add(glow);
 
     this.scene.environment = this.buildEnvironmentMap();
 
-    // Studio pedestal/plinth disc
+    // Studio pedestal disc
     this.plinth = new THREE.Mesh(
-      new THREE.CylinderGeometry(2.35, 2.5, 0.34, 56),
+      new THREE.CylinderGeometry(2.3, 2.48, 0.34, 56),
       new THREE.MeshStandardMaterial({
-        color: 0xecd7c1,
-        roughness: 0.8,
-        metalness: 0.05,
+        color: 0xead7c1,
+        roughness: 0.78,
+        metalness: 0,
       })
     );
     this.plinth.position.y = PLINTH_Y;
     this.scene.add(this.plinth);
 
     this.contactShadow = new THREE.Mesh(
-      new THREE.PlaneGeometry(4.4, 4.4),
+      new THREE.PlaneGeometry(4.2, 4.2),
       new THREE.MeshBasicMaterial({
         map: contactShadowTexture(),
         transparent: true,
@@ -741,9 +748,8 @@ export class AnatomyEngine {
     this.contactShadow.renderOrder = 1;
     this.scene.add(this.contactShadow);
 
-    // Subtle atmospheric bio-mote particles
-    const count = 48;
-    const positions = new Float32Array(count * 3);
+    // Subtle atmospheric dust particles
+    const positions = new Float32Array(48 * 3);
     for (let i = 0; i < positions.length; i += 3) {
       positions[i] = (Math.random() - 0.5) * 9;
       positions[i + 1] = (Math.random() - 0.5) * 6;
@@ -755,10 +761,10 @@ export class AnatomyEngine {
       new THREE.Points(
         particleGeometry,
         new THREE.PointsMaterial({
-          color: 0xe95778,
-          size: 0.015,
+          color: 0xe7a18e,
+          size: 0.013,
           transparent: true,
-          opacity: 0.22,
+          opacity: 0.16,
         })
       )
     );
@@ -807,10 +813,10 @@ export class AnatomyEngine {
       this.hotspots.clear();
       this.busy(0.7);
       await gsap.to(outgoing.pivot.scale, {
-        x: 0.65,
-        y: 0.65,
-        z: 0.65,
-        duration: 0.3,
+        x: 0.72,
+        y: 0.72,
+        z: 0.72,
+        duration: 0.34,
         ease: 'power2.in',
         onUpdate: () => (this.dirty = true),
       });
@@ -819,7 +825,7 @@ export class AnatomyEngine {
       this.dirty = true;
     }
 
-    this.tween(this.camera.position, { z: 9.0, duration: 0.4, ease: 'power2.inOut' });
+    this.tween(this.camera.position, { z: 9.0, duration: 0.42, ease: 'power2.inOut' });
 
     let organ: LoadedOrgan;
     try {
@@ -849,15 +855,15 @@ export class AnatomyEngine {
     glow?.color.set(organData.accent);
 
     organ.pivot.scale.setScalar(0.58);
-    organ.pivot.position.z = -1.2;
-    this.busy(1.2);
+    organ.pivot.position.z = -1.3;
+    this.busy(1.4);
     this.callbacks.onLoading(false, 1);
 
     gsap
       .timeline({ onUpdate: () => (this.dirty = true) })
-      .to(organ.pivot.scale, { x: 1, y: 1, z: 1, duration: 0.85, ease: 'back.out(1.25)' }, 0)
-      .to(organ.pivot.position, { z: 0, duration: 0.8, ease: 'power3.out' }, 0)
-      .to(this.camera.position, { z: 8.2, duration: 0.85, ease: 'power2.out' }, 0.08);
+      .to(organ.pivot.scale, { x: 1, y: 1, z: 1, duration: 0.9, ease: 'back.out(1.25)' }, 0)
+      .to(organ.pivot.position, { z: 0, duration: 0.85, ease: 'power3.out' }, 0)
+      .to(this.camera.position, { z: HOME_CAMERA.z, duration: 0.9, ease: 'power2.out' }, 0.08);
   }
 
   private animate = () => {
@@ -885,6 +891,7 @@ export class AnatomyEngine {
     if (now < this.busyUntil) this.dirty = true;
 
     this.positionCallout();
+    this.positionLabels();
     this.renderer.render(this.scene, this.camera);
   };
 
@@ -987,6 +994,20 @@ export class AnatomyEngine {
     this.dirty = true;
   }
 
+  public attachLabelsContainer(element: HTMLElement | null) {
+    this.labelsContainerEl = element;
+    this.positionLabels();
+    this.dirty = true;
+  }
+
+  public setShowLabels(show: boolean) {
+    this.showLabels = show;
+    if (this.labelsContainerEl) {
+      this.labelsContainerEl.style.display = show ? 'block' : 'none';
+    }
+    this.dirty = true;
+  }
+
   private positionCallout() {
     if (!this.calloutEl || !this.selectedId) return;
     const point = this.hotspots.screenPosition(
@@ -1001,6 +1022,30 @@ export class AnatomyEngine {
     this.calloutEl.dataset.behind = point.opacity < 0.28 ? 'true' : 'false';
   }
 
+  private positionLabels() {
+    if (!this.labelsContainerEl || !this.showLabels || this.quizMode) {
+      if (this.labelsContainerEl) this.labelsContainerEl.style.display = 'none';
+      return;
+    }
+    this.labelsContainerEl.style.display = 'block';
+
+    const childNodes = this.labelsContainerEl.children;
+    for (let i = 0; i < childNodes.length; i++) {
+      const el = childNodes[i] as HTMLElement;
+      const id = el.dataset.hotspotId;
+      if (!id) continue;
+
+      const point = this.hotspots.screenPosition(id, this.camera, this.width, this.height);
+      if (point && point.opacity > 0.3) {
+        el.style.transform = `translate3d(${Math.round(point.x)}px, ${Math.round(point.y)}px, 0)`;
+        el.style.opacity = `${Math.min(1, point.opacity * 1.2)}`;
+        el.style.display = 'flex';
+      } else {
+        el.style.display = 'none';
+      }
+    }
+  }
+
   public setAutoRotate(enabled: boolean) {
     this.autoRotateWanted = enabled;
     if (enabled) this.interactionUntil = 0;
@@ -1011,6 +1056,9 @@ export class AnatomyEngine {
     this.quizMode = enabled;
     this.select(null);
     this.hotspots.clearFlash();
+    if (this.labelsContainerEl) {
+      this.labelsContainerEl.style.display = enabled ? 'none' : this.showLabels ? 'block' : 'none';
+    }
     this.dirty = true;
   }
 
@@ -1041,7 +1089,7 @@ export class AnatomyEngine {
 
   public zoom(direction: 1 | -1) {
     this.tween(this.camera.position, {
-      z: THREE.MathUtils.clamp(this.camera.position.z + direction * 1.3, 4.2, 12),
+      z: THREE.MathUtils.clamp(this.camera.position.z + direction * 1.3, 4.5, 12),
       duration: 0.5,
       ease: 'power2.out',
     });
@@ -1074,7 +1122,7 @@ export class AnatomyEngine {
         break;
       case 'superior':
         targetRotX = Math.PI / 3;
-        targetCamY = 4.2;
+        targetCamY = 4.0;
         targetCamZ = 6.5;
         break;
     }
