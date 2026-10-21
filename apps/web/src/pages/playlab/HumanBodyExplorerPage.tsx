@@ -57,6 +57,7 @@ export const HumanBodyExplorerPage: React.FC = () => {
   // Core state
   const [selectedOrganId, setSelectedOrganId] = useState<OrganId>('heart');
   const [selectedHotspot, setSelectedHotspot] = useState<HotspotItem | null>(null);
+  const [partModalHotspot, setPartModalHotspot] = useState<HotspotItem | null>(null);
   const [lang, setLang] = useState<'en' | 'hi'>('en');
   const [query, setQuery] = useState('');
   const [activeTool, setActiveTool] = useState<string | null>(null);
@@ -127,6 +128,20 @@ export const HumanBodyExplorerPage: React.FC = () => {
   );
 
   const quizPickRef = useRef<(hotspot: HotspotItem) => void>(() => {});
+  const handlePartClickRef = useRef<(hotspot: HotspotItem) => void>(() => {});
+
+  useEffect(() => {
+    handlePartClickRef.current = (hotspot: HotspotItem) => {
+      if (quizActive) return;
+      setPartModalHotspot(hotspot);
+      setSelectedHotspot(hotspot);
+      if (audioEnabled) {
+        const name = lang === 'hi' ? hotspot.nameHi : hotspot.name;
+        const detail = lang === 'hi' ? hotspot.detailHi : hotspot.detail;
+        speakText(`${name}. Latin: ${hotspot.ta}. ${detail}`);
+      }
+    };
+  });
 
   // Initialize Three.js Engine
   useEffect(() => {
@@ -136,9 +151,8 @@ export const HumanBodyExplorerPage: React.FC = () => {
       onLoading: () => {},
       onSelect: (hotspot) => {
         setSelectedHotspot(hotspot);
-        if (hotspot && audioEnabled) {
-          const name = lang === 'hi' ? hotspot.nameHi : hotspot.name;
-          speakText(`${name}. Latin: ${hotspot.ta}.`);
+        if (hotspot) {
+          handlePartClickRef.current(hotspot);
         }
       },
       onPick: (hotspot) => {
@@ -162,6 +176,7 @@ export const HumanBodyExplorerPage: React.FC = () => {
   useEffect(() => {
     if (engineRef.current) {
       setSelectedHotspot(null);
+      setPartModalHotspot(null);
       engineRef.current.setOrgan(currentOrgan);
     }
   }, [currentOrgan]);
@@ -528,6 +543,7 @@ export const HumanBodyExplorerPage: React.FC = () => {
                 className="part-floating-tag pointer-events-auto"
                 onClick={() => {
                   engineRef.current?.focusHotspot(spot);
+                  handlePartClickRef.current(spot);
                 }}
                 title={`Click to inspect ${spot.name}`}
               >
@@ -540,7 +556,13 @@ export const HumanBodyExplorerPage: React.FC = () => {
 
           {/* Pinned Callout Box when a dot/label is clicked */}
           {selectedHotspot && !quizActive && (
-            <div className="hotspot-callout" ref={calloutRef} data-side="right">
+            <div
+              className="hotspot-callout cursor-pointer"
+              ref={calloutRef}
+              data-side="right"
+              onClick={() => handlePartClickRef.current(selectedHotspot)}
+              title="Click to view full details"
+            >
               <div
                 className="callout-body"
                 style={{ '--hotspot-color': selectedHotspot.color } as React.CSSProperties}
@@ -867,6 +889,100 @@ export const HumanBodyExplorerPage: React.FC = () => {
           </button>
         </article>
       </section>
+
+      {/* Part Detail Pop-up Modal (like 2nd pic) */}
+      {partModalHotspot && !quizActive && (
+        <div
+          className="modal-backdrop"
+          onClick={() => {
+            if (typeof window !== 'undefined' && window.speechSynthesis) {
+              window.speechSynthesis.cancel();
+            }
+            setPartModalHotspot(null);
+          }}
+        >
+          <section
+            className="learning-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={partModalHotspot.name}
+          >
+            {/* Top Close Button */}
+            <button
+              className="modal-close"
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.speechSynthesis) {
+                  window.speechSynthesis.cancel();
+                }
+                setPartModalHotspot(null);
+              }}
+              aria-label="Close modal"
+            >
+              <X size={17} />
+            </button>
+
+            {/* Top Audio / Play Badge */}
+            <button
+              className="modal-icon cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+              type="button"
+              title="Click to hear speech pronunciation"
+              onClick={() => {
+                const name = lang === 'hi' ? partModalHotspot.nameHi : partModalHotspot.name;
+                const detail = lang === 'hi' ? partModalHotspot.detailHi : partModalHotspot.detail;
+                speakText(`${name}. Latin: ${partModalHotspot.ta}. ${detail}`);
+              }}
+            >
+              <Play size={18} fill="currentColor" />
+            </button>
+
+            {/* Subtitle matching Pic 2 */}
+            <em>Guided Exploration</em>
+
+            {/* Big Part Name */}
+            <h2>{lang === 'hi' ? partModalHotspot.nameHi : partModalHotspot.name}</h2>
+
+            {/* Latin & System Badge */}
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="inline-block text-[11px] font-mono font-medium text-[#eb7c6b] bg-[#eb7c6b]/10 px-2.5 py-0.5 rounded-full border border-[#eb7c6b]/20">
+                TA2: {partModalHotspot.ta}
+              </span>
+              <span className="inline-block text-[11px] font-serif text-[#8d847c]">
+                {currentOrgan.name}
+              </span>
+            </div>
+
+            {/* Detailed Explanation */}
+            <p className="mt-2 text-[#5a524b] text-[13.5px] leading-relaxed">
+              {lang === 'hi' ? partModalHotspot.detailHi : partModalHotspot.detail}
+            </p>
+
+            {/* Circular Organ / Part Artwork Preview matching Pic 2 */}
+            <div className="modal-demo">
+              <img
+                src={`/anatomy/${currentOrgan.id}/organ.webp`}
+                alt={partModalHotspot.name}
+                loading="lazy"
+              />
+            </div>
+
+            {/* Continue Exploring Button */}
+            <button
+              className="lesson-button"
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.speechSynthesis) {
+                  window.speechSynthesis.cancel();
+                }
+                setPartModalHotspot(null);
+              }}
+            >
+              Continue exploring <ArrowRight size={15} />
+            </button>
+          </section>
+        </div>
+      )}
 
       {/* Interactive Guided Modals */}
       {activeModal && (

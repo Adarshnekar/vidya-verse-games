@@ -976,8 +976,8 @@ export class AnatomyEngine {
     }
   };
 
-  public select(id: string | null) {
-    if (this.selectedId === id) return;
+  public select(id: string | null, force = false) {
+    if (!force && this.selectedId === id) return;
     this.selectedId = id;
     this.busy(0.4);
     const marker = this.hotspots.markers.find((m) => m.hotspot.id === id);
@@ -1145,7 +1145,7 @@ export class AnatomyEngine {
 
   public focusHotspot(hotspot: HotspotItem) {
     if (!this.organ) return;
-    this.select(hotspot.id);
+    this.select(hotspot.id, true);
     const anchor = new THREE.Vector3(...hotspot.position).normalize();
     const targetAngle = -Math.atan2(anchor.x, anchor.z);
     this.tween(this.organ.pivot.rotation, {
