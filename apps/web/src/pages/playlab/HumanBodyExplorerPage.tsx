@@ -52,7 +52,6 @@ export const HumanBodyExplorerPage: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const labelsContainerRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<AnatomyEngine | null>(null);
-  const calloutRef = useRef<HTMLDivElement>(null);
 
   // Core state
   const [selectedOrganId, setSelectedOrganId] = useState<OrganId>('heart');
@@ -161,7 +160,6 @@ export const HumanBodyExplorerPage: React.FC = () => {
     });
 
     engineRef.current = engine;
-    engine.attachCallout(calloutRef.current);
     engine.attachLabelsContainer(labelsContainerRef.current);
     engine.setShowLabels(showLabels);
     engine.setOrgan(currentOrgan);
@@ -554,46 +552,6 @@ export const HumanBodyExplorerPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Pinned Callout Box when a dot/label is clicked */}
-          {selectedHotspot && !quizActive && (
-            <div
-              className="hotspot-callout cursor-pointer"
-              ref={calloutRef}
-              data-side="right"
-              onClick={() => handlePartClickRef.current(selectedHotspot)}
-              title="Click to view full details"
-            >
-              <div
-                className="callout-body"
-                style={{ '--hotspot-color': selectedHotspot.color } as React.CSSProperties}
-              >
-                <button
-                  className="callout-close"
-                  type="button"
-                  onClick={() => engineRef.current?.clearSelection()}
-                  aria-label="Close callout"
-                >
-                  <X size={13} />
-                </button>
-                <div className="flex items-center justify-between pr-4">
-                  <b>{lang === 'hi' ? selectedHotspot.nameHi : selectedHotspot.name}</b>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      speakText(`${lang === 'hi' ? selectedHotspot.nameHi : selectedHotspot.name}. Latin: ${selectedHotspot.ta}.`)
-                    }
-                    className="text-[#8d847c] hover:text-[#eb7c6b] transition-colors p-0.5"
-                    title="Pronounce"
-                  >
-                    <Volume2 size={13} />
-                  </button>
-                </div>
-                <span className="callout-ta">TA2: {selectedHotspot.ta}</span>
-                <small>{lang === 'hi' ? selectedHotspot.detailHi : selectedHotspot.detail}</small>
-              </div>
-            </div>
-          )}
-
           {/* 3D Labelling Quiz Bar Overlay */}
           {quizActive && quizOrder[quizStep] && (
             <div className="quiz-bar" role="status">
@@ -944,19 +902,24 @@ export const HumanBodyExplorerPage: React.FC = () => {
             <h2>{lang === 'hi' ? partModalHotspot.nameHi : partModalHotspot.name}</h2>
 
             {/* Latin & System Badge */}
-            <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
               <span className="inline-block text-[11px] font-mono font-medium text-[#eb7c6b] bg-[#eb7c6b]/10 px-2.5 py-0.5 rounded-full border border-[#eb7c6b]/20">
                 TA2: {partModalHotspot.ta}
               </span>
               <span className="inline-block text-[11px] font-serif text-[#8d847c]">
-                {currentOrgan.name}
+                {lang === 'hi' ? currentOrgan.nameHi : currentOrgan.name} • {lang === 'hi' ? currentOrgan.systemHi : currentOrgan.system}
               </span>
             </div>
 
-            {/* Detailed Explanation */}
-            <p className="mt-2 text-[#5a524b] text-[13.5px] leading-relaxed">
-              {lang === 'hi' ? partModalHotspot.detailHi : partModalHotspot.detail}
-            </p>
+            {/* Content Explanation Block */}
+            <div className="my-3 px-3.5 py-3 rounded-xl bg-[#eb7c6b]/[0.07] border-l-4 border-[#eb7c6b] text-left">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#eb7c6b] block mb-1">
+                Content Explanation & Anatomical Function
+              </span>
+              <p className="text-[#3b342f] text-[13.5px] leading-relaxed m-0 font-serif">
+                {lang === 'hi' ? partModalHotspot.detailHi : partModalHotspot.detail}
+              </p>
+            </div>
 
             {/* Circular Organ / Part Artwork Preview matching Pic 2 */}
             <div className="modal-demo">
