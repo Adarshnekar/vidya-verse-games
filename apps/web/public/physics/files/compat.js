@@ -1,4 +1,4 @@
-// VidyaVerse Physics Studio Simulation Compatibility Layer
+// VidyaVerse Physics Studio Simulation Compatibility & Dark Theme Layer
 (() => {
   let _onload = null;
   try {
@@ -24,9 +24,25 @@
     console.warn("[VidyaVerse Physics] onload interceptor failed:", err);
   }
 
-  // Prevent unwanted outer scrollbars inside iframes
-  window.addEventListener('DOMContentLoaded', () => {
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-  });
+  // Apply dark theme defaults to match VidyaVerse
+  const applyVidyaVerseTheme = () => {
+    try {
+      document.body.style.backgroundColor = '#070b14';
+      document.body.style.color = '#f1f5f9';
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+
+      // Hide redundant internal topmenu
+      const topMenu = document.getElementById('topmenu');
+      if (topMenu) {
+        topMenu.style.display = 'none';
+      }
+    } catch (e) {}
+  };
+
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', applyVidyaVerseTheme);
+  } else {
+    applyVidyaVerseTheme();
+  }
 })();

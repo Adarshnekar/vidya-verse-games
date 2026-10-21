@@ -27939,7 +27939,7 @@ class Scene extends Object3D {
 
 		this.type = 'Scene';
 
-		this.background = null;
+		this._background = null;
 		this.environment = null;
 		this.fog = null;
 
@@ -27953,6 +27953,20 @@ class Scene extends Object3D {
 
 		}
 
+	}
+
+	get background() {
+		return this._background;
+	}
+
+	set background(value) {
+		if (value && value.isColor) {
+			const hex = value.getHex();
+			if (hex === 0xbfd1e5 || hex === 0x87ceeb || hex === 0xf5f5f5 || hex === 0xf0f0f0 || hex === 0xddeeff) {
+				value.setHex(0x070b14);
+			}
+		}
+		this._background = value;
 	}
 
 	copy( source, recursive ) {

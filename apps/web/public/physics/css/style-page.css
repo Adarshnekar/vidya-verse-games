@@ -1,19 +1,34 @@
+/* ===================================================
+   VidyaVerse Modern Physics Studio Theme
+   Matches VidyaVerse Dark Workstation Design System
+   =================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 body {
   padding: 0;
   margin: 0;
-  background-color: whitesmoke;
+  background-color: #070b14 !important;
+  color: #f1f5f9;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow: hidden;
+  user-select: none;
 }
 
+/* Hide duplicate raw underlined simulation titles inside iframe */
+#topmenu {
+  display: none !important;
+}
 
 #drawing-canvas {
   position: absolute;
-  background-color: #000000;
+  background-color: #070b14;
   top: 0px;
   left: 0px;
   z-index: 3000;
@@ -21,272 +36,265 @@ body {
   touch-action: none;
 }
 
+/* Bottom and side control panels */
 #menu {
   position: fixed;
-  float: bottom;
-
-  left: 5px;
-  bottom: 5px;
-  width: 100%;
+  left: 12px;
+  bottom: 12px;
+  max-width: calc(100% - 24px);
   text-align: left;
-  padding: 10px 10px 80px 10px;
+  padding: 10px 14px;
   margin: 0;
   pointer-events: none;
+  color: #f1f5f9;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(11, 17, 32, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 100;
 }
 
-/* #menu button {
-  pointer-events:visible;
-} */
-
-#topmenu {
-  position: absolute;
-  float: top;
-  top: 5px;
-  width: 100%;
-  text-align: center;
-  font-weight: bold;
-  text-decoration: underline;
-  font-size: 125%;
-  padding-bottom: 2px;
+#menu a, #menu span, #menu label, #menu div {
+  color: #e2e8f0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 #sidemenu {
-  height: 100%;
-  width: 250pt;
   position: fixed;
-  top: 15px;
-  left: 10px;
+  top: 14px;
+  left: 14px;
+  max-width: 300px;
   box-sizing: border-box;
-  text-align: justify;
+  text-align: left;
   pointer-events: none;
+  color: #f1f5f9;
+  font-size: 12px;
+  background: rgba(11, 17, 32, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 100;
 }
 
-#sidemenu input {
-  pointer-events: visible;
+#sidemenu a, #sidemenu span, #sidemenu label, #sidemenu div {
+  color: #e2e8f0;
 }
 
-#footmenu {
+#footmenu, #footermenu {
   position: absolute;
-  bottom: 1px;
+  bottom: 8px;
   width: 100%;
   text-align: center;
+  background: transparent;
+  color: #e2e8f0;
 }
 
+/* ===================================================
+   VidyaVerse Purple / Violet Interactive Buttons
+   =================================================== */
 button {
-  color: rgba(253, 251, 251, 0.75);
-  background: rgb(3, 108, 156);
-  outline: 1px solid rgba(131, 10, 36, 0.75);
-  border: 10px;
-  margin: 5px;
-  border-radius: 5px;
-  padding: 5px 10px;
-  cursor: pointer;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  outline: none !important;
+  margin: 4px 6px 4px 0 !important;
+  border-radius: 8px !important;
+  padding: 6px 14px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
+  letter-spacing: 0.02em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 12px rgba(124, 58, 237, 0.25) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
 }
 
 button:hover {
-
-  background-color: rgba(243, 44, 87, 0.75);
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.45) !important;
 }
 
 button:active {
+  transform: translateY(0px) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
+}
 
-  background-color: rgba(131, 10, 36, 0.75);
+/* Red / Danger Action Buttons (e.g. Reset, Stop) */
+#reset-el, button[id*="reset"], button[id*="stop"] {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3) !important;
+}
+
+#reset-el:hover, button[id*="reset"]:hover, button[id*="stop"]:hover {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
+  box-shadow: 0 6px 18px rgba(244, 63, 94, 0.45) !important;
+}
+
+/* Green / Start Action Buttons */
+#shoot-el, button[id*="shoot"], button[id*="start"] {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+#shoot-el:hover, button[id*="shoot"]:hover, button[id*="start"]:hover {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45) !important;
 }
 
 #sidemenu button {
-  display: block;
-  position: relative;
-  top: 450px;
-  outline: 1px solid black;
-  float: unset;
-  padding: 1em;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: .5em;
-  font-size: 12px;
-  line-height: 1.2;
+  position: static !important;
+  float: none !important;
+  margin-top: 8px !important;
+  width: 100% !important;
 }
 
-a,
-button,
-input,
-select {
-  pointer-events: visible;
+/* ===================================================
+   Inputs, Sliders, Dropdowns
+   =================================================== */
+a, button, input, select {
+  pointer-events: auto !important;
 }
 
 select {
-  margin-bottom: 10px;
-  margin-top: 10px;
-  outline: 0;
-  background: rgb(3, 108, 156);
-  ;
-  color: #fff;
-  border: 1px solid rgba(131, 10, 36, 0.75);
-  padding: 4px;
-  border-radius: 9px;
-}
-
-input {
-  border: 2px solid #049EF4;
+  margin: 6px 0;
+  outline: none;
+  background: #0f172a;
+  color: #f8fafc;
+  border: 1px solid #6366f1;
+  padding: 5px 10px;
   border-radius: 8px;
-  text-align: center;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
 }
 
-#dot {
-  height: 25px;
-  width: 25px;
-  background-color: darkred;
-  border-radius: 50%;
-  display: inline-block;
+input[type="text"], input[type="number"] {
+  background: #0f172a !important;
+  color: #38bdf8 !important;
+  border: 1px solid #475569 !important;
+  border-radius: 6px !important;
+  padding: 3px 8px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  text-align: center !important;
+  outline: none !important;
 }
 
-#labels {
-  position: absolute;
-  /* let us position ourself inside the container */
-  left: 0;
-  /* make our position the top left of the container */
-  top: 0;
-
+input[type="text"]:focus, input[type="number"]:focus {
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3) !important;
 }
 
-.label {
-
-  margin-left: 25px;
-  font-size: 20px;
+input[type="range"] {
+  accent-color: #8b5cf6 !important;
+  cursor: pointer !important;
+  vertical-align: middle;
+  margin: 0 6px;
 }
 
-caption {
-  display: table-caption;
-  text-align: center;
+/* Data Tables */
+table {
+  background: rgba(15, 23, 42, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+  color: #f1f5f9 !important;
+  font-size: 12px !important;
 }
 
-.eqn {
-  padding: 0 2em;
-  text-align: left;
+table td {
+  padding: 4px 6px;
+  color: #e2e8f0;
 }
 
-/* display fraction */
+/* Fractions & Mathematical Equations */
 .fraction {
   display: inline-block;
   vertical-align: middle;
   margin: 0 0.2em 0.4em;
   text-align: center;
   font-size: 1em;
+  color: #c4b5fd;
+  font-family: ui-monospace, SFMono-Regular, monospace;
 }
 
-.fraction>span {
+.fraction > span {
   display: block;
   padding-top: 0.15em;
 }
 
 .fraction span.fdn {
-  border-top: thin solid black;
+  border-top: 1.5px solid #818cf8 !important;
+  color: #a5b4fc;
 }
 
 .fraction span.bar {
   display: none;
 }
 
-#footermenu {
-  padding-left: 50px;
-  visibility: visible;
-  width: 300px;
-  float: inline-end;
-  align-items: center;
-  justify-content: center;
-  background-color: whitesmoke;
-  padding-left: 50px;
+/* 3D Floating CSS2D Labels */
+.label {
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color: #f8fafc !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  background: rgba(11, 17, 32, 0.9) !important;
+  border: 1px solid rgba(139, 92, 246, 0.5) !important;
+  border-radius: 6px !important;
+  padding: 2px 7px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px) !important;
+  letter-spacing: 0.02em !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
 }
 
-/* annotation */
+/* Annotations & Popovers */
 .annotation {
   display: block;
   position: absolute;
   top: 0;
   left: 0;
   z-index: 1;
-  padding: 1em;
+  padding: 12px;
   width: 250px;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: .5em;
+  color: #f8fafc;
+  background: rgba(11, 17, 32, 0.92);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  backdrop-filter: blur(12px);
+  border-radius: 10px;
   font-size: 12px;
-  line-height: 1.2;
-  transition: opacity .5s;
-  overflow-y: auto;
-}
-
-
-#number {
-  position: absolute;
-  z-index: -1;
+  line-height: 1.4;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
 }
 
 .labelparts {
   text-align: center;
-  font-size: 14px;
-  padding: .1em;
-  border-radius: 5px;
-  color: #fff;
-  font-family: sans-serif;
-  background: rgba(0, 0, 0, .6);
-}
-
-
-@media only screen and (max-width:800px) {
-
-  #topmenu {
-    font-size: 10px;
-    float: right;
-  }
-
-  button {
-    font-size: 10px;
-    font-weight: bold;
-    border: 5px;
-    margin: 2px;
-    border-radius: 2px;
-    padding: 2px 3px;
-  }
-
-  #menu {
-    font-size: 10px;
-    float: right;
-    font-weight: bold;
-    padding: 10px 10px 120px 10px;
-  }
-
-  #sidemenu {
-    font-size: 10px;
-    float: right;
-    font-weight: bold;
-  }
-
-  .annotation {
-    display: none;
-    width: 200px;
-    background: rgb(0, 0, 0);
-    overflow-y: auto;
-    z-index: 1;
-  }
-
-  .fraction {
-    font-size: 14px;
-  }
-}
-
-@media only screen and (max-width:500px) {
-  #topmenu {
-    font-size: 10px;
-  }
-
-
-
-  .annotation {
-    display: none;
-    width: 150px;
-    background: rgb(0, 0, 0);
-    overflow-y: auto;
-    z-index: 1;
-  }
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: #ffffff;
+  font-family: inherit;
+  font-weight: 600;
+  background: rgba(11, 17, 32, 0.85);
+  border: 1px solid rgba(139, 92, 246, 0.4);
 }
