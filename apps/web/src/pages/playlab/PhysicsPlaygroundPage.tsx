@@ -380,15 +380,15 @@ export const PhysicsPlaygroundPage: React.FC = () => {
   return (
     <div
       ref={stageContainerRef}
-      className="flex flex-col h-full w-full bg-[#070b14] text-slate-100 overflow-hidden font-sans select-none"
+      className="flex flex-col h-full w-full bg-[#070b14] text-[#F0F0FA] overflow-hidden font-sans select-none"
     >
       {/* ================= UNIFIED TOP TOOLBAR (VIDYAVERSE THEME) ================= */}
-      <header className="h-12 min-h-[48px] border-b border-slate-800/80 bg-slate-900/95 backdrop-blur-md px-3 sm:px-4 flex items-center justify-between z-20 shrink-0">
+      <header className="h-12 min-h-[48px] border-b border-[#2A2A3E] bg-[#161624]/95 backdrop-blur-md px-3 sm:px-4 flex items-center justify-between z-20 shrink-0">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {/* Back to PlayLab */}
           <button
             onClick={() => navigate('/playlab')}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700/60 transition-all"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-[#9D9DB5] hover:text-white hover:bg-[#1C1C2A] border border-[#2A2A3E] transition-all"
             title="Return to PlayLab"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -400,19 +400,19 @@ export const PhysicsPlaygroundPage: React.FC = () => {
             onClick={() => setSidebarOpen((prev) => !prev)}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium transition-all ${
               sidebarOpen
-                ? 'bg-purple-600 text-white border-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.35)]'
-                : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white hover:bg-slate-750'
+                ? 'bg-[#26233E] text-[#7C5CFA] border-[#6541F5] shadow-[0_0_12px_rgba(101,65,245,0.3)]'
+                : 'bg-[#1C1C2A] text-[#9D9DB5] border-[#2A2A3E] hover:text-white hover:bg-[#26233E]/50'
             }`}
             title="Toggle Labs Directory"
           >
             <Layers className="w-3.5 h-3.5" />
             <span className="hidden md:inline">Simulations</span>
-            <span className="text-[10px] px-1 rounded bg-black/30 font-bold">
+            <span className="text-[10px] px-1 rounded bg-[#12121A] text-[#7C5CFA] font-bold border border-[#2A2A3E]">
               {PHYSICS_SIMULATIONS.length}
             </span>
           </button>
 
-          <div className="h-4 w-px bg-slate-800 hidden sm:block" />
+          <div className="h-4 w-px bg-[#2A2A3E] hidden sm:block" />
 
           {/* Active Sim Category Pill & Title */}
           <div className="flex items-center gap-2 min-w-0">
@@ -426,10 +426,10 @@ export const PhysicsPlaygroundPage: React.FC = () => {
             </span>
 
             <div className="flex items-center gap-1.5 truncate">
-              <h1 className="text-xs sm:text-sm font-bold text-white truncate">
+              <h1 className="text-xs sm:text-sm font-bold text-[#F0F0FA] truncate">
                 {selectedSim.title}
               </h1>
-              <span className="hidden lg:inline text-[11px] text-slate-400 font-normal truncate">
+              <span className="hidden lg:inline text-[11px] text-[#9D9DB5] font-normal truncate">
                 • {selectedSim.topicTag}
               </span>
             </div>
@@ -438,14 +438,14 @@ export const PhysicsPlaygroundPage: React.FC = () => {
 
         {/* Right Action Buttons */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Mode Switcher */}
-          <div className="flex bg-slate-800/90 p-0.5 rounded-lg border border-slate-700/70 text-xs">
+          {/* Mode Switcher (Selector) */}
+          <div className="flex bg-[#12121A] p-0.5 rounded-lg border border-[#2A2A3E] text-xs">
             <button
               onClick={() => setActiveTab('3d-sim')}
               className={`px-2.5 py-1 rounded-md font-medium transition-all flex items-center gap-1.5 ${
                 activeTab === '3d-sim'
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#6541F5] text-white shadow-[0_2px_8px_rgba(101,65,245,0.35)]'
+                  : 'text-[#9D9DB5] hover:text-[#F0F0FA]'
               }`}
             >
               <Atom className="w-3.5 h-3.5" />
@@ -455,8 +455,8 @@ export const PhysicsPlaygroundPage: React.FC = () => {
               onClick={() => setActiveTab('2d-sandbox')}
               className={`px-2.5 py-1 rounded-md font-medium transition-all flex items-center gap-1.5 ${
                 activeTab === '2d-sandbox'
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#6541F5] text-white shadow-[0_2px_8px_rgba(101,65,245,0.35)]'
+                  : 'text-[#9D9DB5] hover:text-[#F0F0FA]'
               }`}
             >
               <Sliders className="w-3.5 h-3.5" />
@@ -469,8 +469,8 @@ export const PhysicsPlaygroundPage: React.FC = () => {
             onClick={() => setInfoOpen((prev) => !prev)}
             className={`p-1.5 rounded-lg border text-xs transition-all ${
               infoOpen
-                ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
-                : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white'
+                ? 'bg-[#26233E] text-[#7C5CFA] border-[#6541F5]'
+                : 'bg-[#1C1C2A] text-[#9D9DB5] border-[#2A2A3E] hover:text-white'
             }`}
             title="Experiment Information & Objectives"
           >
@@ -483,7 +483,7 @@ export const PhysicsPlaygroundPage: React.FC = () => {
             className={`p-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition-all ${
               isNarrating
                 ? 'bg-pink-500/20 text-pink-300 border-pink-500/40 animate-pulse'
-                : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white'
+                : 'bg-[#1C1C2A] text-[#9D9DB5] border-[#2A2A3E] hover:text-white'
             }`}
             title="Read Experiment Briefing"
           >
@@ -500,8 +500,8 @@ export const PhysicsPlaygroundPage: React.FC = () => {
             onClick={() => setTheoryOpen((prev) => !prev)}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium transition-all ${
               theoryOpen
-                ? 'bg-indigo-600 text-white border-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.35)]'
-                : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white'
+                ? 'bg-[#26233E] text-[#7C5CFA] border-[#6541F5] shadow-[0_0_12px_rgba(101,65,245,0.3)]'
+                : 'bg-[#1C1C2A] text-[#9D9DB5] border-[#2A2A3E] hover:text-white'
             }`}
             title="View Theory & Mathematical Formulas"
           >
@@ -516,7 +516,7 @@ export const PhysicsPlaygroundPage: React.FC = () => {
                 setIsLoadingIframe(true);
                 setIframeKey((k) => k + 1);
               }}
-              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-all"
+              className="p-1.5 rounded-lg bg-[#1C1C2A] hover:bg-[#26233E] border border-[#2A2A3E] text-[#9D9DB5] hover:text-white transition-all"
               title="Reset Simulation"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -526,7 +526,7 @@ export const PhysicsPlaygroundPage: React.FC = () => {
           {/* Fullscreen Button */}
           <button
             onClick={toggleFullscreen}
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-all"
+            className="p-1.5 rounded-lg bg-[#1C1C2A] hover:bg-[#26233E] border border-[#2A2A3E] text-[#9D9DB5] hover:text-white transition-all"
             title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
           >
             {isFullscreen ? (
@@ -548,21 +548,21 @@ export const PhysicsPlaygroundPage: React.FC = () => {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -320, opacity: 0 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="absolute sm:relative top-0 left-0 bottom-0 w-80 max-w-[85vw] border-r border-slate-800/90 bg-[#0B1120]/98 backdrop-blur-xl flex flex-col z-30 shadow-2xl"
+              className="absolute sm:relative top-0 left-0 bottom-0 w-80 max-w-[85vw] border-r border-[#2A2A3E] bg-[#161624]/98 backdrop-blur-xl flex flex-col z-30 shadow-2xl"
             >
               {/* Directory Search & Filters */}
-              <div className="p-3 border-b border-slate-800/80 space-y-2.5">
+              <div className="p-3 border-b border-[#2A2A3E] space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-[#F0F0FA]">
+                    <Sparkles className="w-3.5 h-3.5 text-[#7C5CFA]" />
                     <span>Physics Laboratories</span>
-                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-purple-500/20 text-purple-300 font-bold">
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#26233E] text-[#7C5CFA] font-bold border border-[#6541F5]/40">
                       {PHYSICS_SIMULATIONS.length}
                     </span>
                   </div>
                   <button
                     onClick={() => setSidebarOpen(false)}
-                    className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800"
+                    className="p-1 rounded text-[#9D9DB5] hover:text-white hover:bg-[#1C1C2A]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -570,25 +570,25 @@ export const PhysicsPlaygroundPage: React.FC = () => {
 
                 {/* Search Bar */}
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Search className="w-3.5 h-3.5 text-[#9D9DB5] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search physics experiments..."
-                    className="w-full pl-8 pr-7 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                    className="w-full pl-8 pr-7 py-1.5 text-xs bg-[#12121A] border border-[#2A2A3E] rounded-lg text-[#F0F0FA] placeholder-[#74748C] focus:outline-none focus:border-[#7C5CFA]"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[#9D9DB5] hover:text-white p-0.5"
                     >
                       <X className="w-3 h-3" />
                     </button>
                   )}
                 </div>
 
-                {/* Category Filter Chips */}
+                {/* Category Filter Chips (Segmented Selector) */}
                 <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none text-[11px]">
                   {categories.map((cat) => (
                     <button
@@ -596,8 +596,8 @@ export const PhysicsPlaygroundPage: React.FC = () => {
                       onClick={() => setActiveCategory(cat)}
                       className={`px-2.5 py-1 rounded-md font-medium whitespace-nowrap transition-all ${
                         activeCategory === cat
-                          ? 'bg-purple-600 text-white shadow-sm'
-                          : 'bg-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                          ? 'bg-[#26233E] text-[#7C5CFA] border border-[#6541F5]/60 shadow-[0_0_12px_rgba(101,65,245,0.25)] font-semibold'
+                          : 'bg-[#1C1C2A] text-[#9D9DB5] border border-[#2A2A3E] hover:text-[#F0F0FA] hover:bg-[#26233E]/40 font-medium'
                       }`}
                     >
                       {cat}
@@ -609,14 +609,14 @@ export const PhysicsPlaygroundPage: React.FC = () => {
               {/* Simulation Cards List */}
               <div className="flex-1 overflow-y-auto p-2 space-y-1.5 custom-scrollbar">
                 {filteredSims.length === 0 ? (
-                  <div className="text-center py-10 px-4 text-xs text-slate-500">
+                  <div className="text-center py-10 px-4 text-xs text-[#9D9DB5]">
                     <p>No physics simulations match "{searchQuery}"</p>
                     <button
                       onClick={() => {
                         setSearchQuery('');
                         setActiveCategory('All');
                       }}
-                      className="mt-2 text-purple-400 hover:underline"
+                      className="mt-2 text-[#7C5CFA] hover:underline"
                     >
                       Clear search filters
                     </button>
@@ -635,8 +635,8 @@ export const PhysicsPlaygroundPage: React.FC = () => {
                         }}
                         className={`w-full text-left p-2.5 rounded-xl border transition-all relative group flex flex-col gap-1 ${
                           isSelected
-                            ? 'bg-gradient-to-r from-purple-950/80 to-indigo-950/80 border-purple-500/70 shadow-[0_0_15px_rgba(168,85,247,0.2)] ring-1 ring-purple-500/40'
-                            : 'bg-slate-900/40 hover:bg-slate-800/60 border-slate-800/80 hover:border-slate-700'
+                            ? 'bg-[#26233E]/90 border-[#6541F5] shadow-[0_0_16px_rgba(101,65,245,0.25)] ring-1 ring-[#6541F5]/50'
+                            : 'bg-[#1C1C2A]/60 hover:bg-[#1C1C2A] border-[#2A2A3E] hover:border-[#3E3E58]'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-1.5 w-full">
@@ -646,7 +646,7 @@ export const PhysicsPlaygroundPage: React.FC = () => {
                               className={`text-xs font-semibold truncate ${
                                 isSelected
                                   ? 'text-white'
-                                  : 'text-slate-300 group-hover:text-white'
+                                  : 'text-[#CBCBD9] group-hover:text-white'
                               }`}
                             >
                               {sim.title}
@@ -659,16 +659,16 @@ export const PhysicsPlaygroundPage: React.FC = () => {
                           )}
                         </div>
 
-                        <p className="text-[11px] text-slate-400 line-clamp-1">
+                        <p className="text-[11px] text-[#9D9DB5] line-clamp-1">
                           {sim.subtitle}
                         </p>
 
                         <div className="flex items-center justify-between text-[10px] pt-0.5">
-                          <span className="text-purple-400/90 font-medium">
+                          <span className="text-[#7C5CFA] font-medium">
                             {sim.topicTag}
                           </span>
                           {sim.formula && (
-                            <span className="font-mono text-slate-400 truncate max-w-[120px]">
+                            <span className="font-mono text-[#9D9DB5] truncate max-w-[120px]">
                               {sim.formula}
                             </span>
                           )}
@@ -689,8 +689,8 @@ export const PhysicsPlaygroundPage: React.FC = () => {
               {/* Simulation Iframe Loading Overlay */}
               {isLoadingIframe && (
                 <div className="absolute inset-0 bg-[#070b14] flex flex-col items-center justify-center gap-3 z-10 transition-opacity">
-                  <div className="w-8 h-8 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
-                  <p className="text-xs text-slate-400 font-medium">
+                  <div className="w-8 h-8 border-2 border-[#6541F5]/20 border-t-[#7C5CFA] rounded-full animate-spin" />
+                  <p className="text-xs text-[#9D9DB5] font-medium">
                     Loading 3D Simulation...
                   </p>
                 </div>
@@ -702,7 +702,7 @@ export const PhysicsPlaygroundPage: React.FC = () => {
                 src={`/physics/Simulations/${selectedSim.filename}`}
                 title={selectedSim.title}
                 onLoad={() => setIsLoadingIframe(false)}
-                className="w-full h-full border-none select-none bg-slate-900"
+                className="w-full h-full border-none select-none bg-[#070b14]"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               />
 
@@ -710,10 +710,10 @@ export const PhysicsPlaygroundPage: React.FC = () => {
               {!sidebarOpen && (
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="absolute top-3 left-3 z-10 px-2.5 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 shadow-lg text-xs font-medium flex items-center gap-1.5 transition-all"
+                  className="absolute top-3 left-3 z-10 px-2.5 py-1.5 rounded-lg bg-[#1C1C2A]/90 hover:bg-[#26233E] text-[#F0F0FA] border border-[#2A2A3E] hover:border-[#6541F5]/50 shadow-xl text-xs font-medium flex items-center gap-1.5 transition-all"
                   title="Open Simulations Menu"
                 >
-                  <Layers className="w-3.5 h-3.5 text-purple-400" />
+                  <Layers className="w-3.5 h-3.5 text-[#7C5CFA]" />
                   <span>Labs Menu</span>
                 </button>
               )}
@@ -820,32 +820,32 @@ export const PhysicsPlaygroundPage: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-14 left-4 z-40 w-96 max-w-[calc(100vw-32px)] bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl p-4 text-xs space-y-3"
+              className="absolute top-14 left-4 z-40 w-96 max-w-[calc(100vw-32px)] bg-[#161624]/98 backdrop-blur-xl border border-[#2A2A3E] rounded-2xl shadow-2xl p-4 text-xs space-y-3"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-purple-400 tracking-wider">
+                  <span className="text-[10px] uppercase font-bold text-[#7C5CFA] tracking-wider">
                     {selectedSim.category} • {selectedSim.topicTag}
                   </span>
-                  <h3 className="text-sm font-bold text-white mt-0.5">
+                  <h3 className="text-sm font-bold text-[#F0F0FA] mt-0.5">
                     {selectedSim.title}
                   </h3>
                 </div>
                 <button
                   onClick={() => setInfoOpen(false)}
-                  className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800"
+                  className="p-1 rounded text-[#9D9DB5] hover:text-white hover:bg-[#1C1C2A]"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <p className="text-slate-300 leading-relaxed">
+              <p className="text-[#CBCBD9] leading-relaxed">
                 {selectedSim.description}
               </p>
 
               {selectedSim.formula && (
-                <div className="p-2.5 rounded-lg bg-purple-950/40 border border-purple-500/30 flex items-center justify-between">
-                  <span className="text-[11px] text-purple-300 font-medium">
+                <div className="p-2.5 rounded-lg bg-[#26233E]/60 border border-[#6541F5]/30 flex items-center justify-between">
+                  <span className="text-[11px] text-[#C4B5FD] font-medium">
                     Governing Equation
                   </span>
                   <span className="font-mono text-xs font-bold text-white">
@@ -855,12 +855,12 @@ export const PhysicsPlaygroundPage: React.FC = () => {
               )}
 
               <div className="space-y-1.5 pt-1">
-                <span className="font-semibold text-slate-200">
+                <span className="font-semibold text-[#F0F0FA]">
                   Key Observations:
                 </span>
                 {selectedSim.learningObjectives.map((obj, i) => (
-                  <div key={i} className="flex items-start gap-1.5 text-slate-400">
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0 mt-1" />
+                  <div key={i} className="flex items-start gap-1.5 text-[#9D9DB5]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#7C5CFA] shrink-0 mt-1" />
                     <span>{obj}</span>
                   </div>
                 ))}
@@ -877,17 +877,17 @@ export const PhysicsPlaygroundPage: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
-              className="absolute top-0 right-0 bottom-0 w-full sm:w-[480px] bg-slate-900/98 backdrop-blur-xl border-l border-slate-800 shadow-2xl z-40 flex flex-col"
+              className="absolute top-0 right-0 bottom-0 w-full sm:w-[480px] bg-[#161624]/98 backdrop-blur-xl border-l border-[#2A2A3E] shadow-2xl z-40 flex flex-col"
             >
               {/* Drawer Header */}
-              <div className="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/80">
+              <div className="p-3.5 border-b border-[#2A2A3E] flex items-center justify-between bg-[#12121A]/80">
                 <div className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-indigo-400" />
+                  <BookOpen className="w-4 h-4 text-[#7C5CFA]" />
                   <h3 className="text-sm font-bold text-white">Theory & Formulas</h3>
                 </div>
                 <button
                   onClick={() => setTheoryOpen(false)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                  className="p-1 rounded-lg text-[#9D9DB5] hover:text-white hover:bg-[#1C1C2A] transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -896,19 +896,19 @@ export const PhysicsPlaygroundPage: React.FC = () => {
               {/* Drawer Content */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar text-xs">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">
+                  <span className="text-[10px] uppercase font-bold text-[#7C5CFA] tracking-wider">
                     {selectedSim.category} • {selectedSim.topicTag}
                   </span>
                   <h2 className="text-base font-bold text-white mt-0.5">
                     {selectedSim.title}
                   </h2>
-                  <p className="text-slate-400 mt-1">{selectedSim.subtitle}</p>
+                  <p className="text-[#9D9DB5] mt-1">{selectedSim.subtitle}</p>
                 </div>
 
                 {/* Formatted Governing Mathematical Expression */}
                 {selectedSim.formula && (
-                  <div className="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-500/30">
-                    <span className="text-[10px] text-indigo-300 font-semibold uppercase tracking-wider">
+                  <div className="p-3.5 rounded-xl bg-[#26233E]/50 border border-[#6541F5]/30">
+                    <span className="text-[10px] text-[#C4B5FD] font-semibold uppercase tracking-wider">
                       Governing Mathematical Formula
                     </span>
                     <div className="font-mono text-base font-bold text-white mt-1">
@@ -919,22 +919,22 @@ export const PhysicsPlaygroundPage: React.FC = () => {
 
                 {/* Conceptual Overview */}
                 <div className="space-y-1.5">
-                  <h4 className="font-bold text-slate-200">Physical Principle</h4>
-                  <p className="text-slate-300 leading-relaxed">
+                  <h4 className="font-bold text-[#F0F0FA]">Physical Principle</h4>
+                  <p className="text-[#CBCBD9] leading-relaxed">
                     {selectedSim.description}
                   </p>
                 </div>
 
                 {/* Core Learning Concepts */}
                 <div className="space-y-2">
-                  <h4 className="font-bold text-slate-200">Key Concepts & Derivations</h4>
+                  <h4 className="font-bold text-[#F0F0FA]">Key Concepts & Derivations</h4>
                   <div className="space-y-1.5">
                     {selectedSim.learningObjectives.map((obj, i) => (
                       <div
                         key={i}
-                        className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800 text-slate-300 flex items-start gap-2.5"
+                        className="p-2.5 rounded-lg bg-[#12121A]/70 border border-[#2A2A3E] text-[#CBCBD9] flex items-start gap-2.5"
                       >
-                        <span className="w-4 h-4 rounded-full bg-indigo-500/20 text-indigo-300 font-bold flex items-center justify-center shrink-0 text-[10px]">
+                        <span className="w-4 h-4 rounded-full bg-[#26233E] text-[#7C5CFA] border border-[#6541F5]/40 font-bold flex items-center justify-center shrink-0 text-[10px]">
                           {i + 1}
                         </span>
                         <span>{obj}</span>
@@ -950,7 +950,7 @@ export const PhysicsPlaygroundPage: React.FC = () => {
                       href={selectedSim.theoryPath}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+                      className="w-full py-2 px-3 rounded-lg bg-[#6541F5] hover:bg-[#7C5CFA] text-white font-medium flex items-center justify-center gap-1.5 transition-colors shadow-sm"
                     >
                       <span>Open Theory Document</span>
                       <ExternalLink className="w-3.5 h-3.5" />

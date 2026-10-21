@@ -3,20 +3,20 @@
    Matches VidyaVerse Dark Workstation Design System
    =================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 body {
   padding: 0;
   margin: 0;
   background-color: #070b14 !important;
-  color: #f1f5f9;
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #F0F0FA;
   overflow: hidden;
   user-select: none;
 }
@@ -36,55 +36,66 @@ body {
   touch-action: none;
 }
 
-/* Bottom and side control panels */
+/* Bottom and side control panels matching VidyaVerse cards */
 #menu {
   position: fixed;
-  left: 12px;
-  bottom: 12px;
-  max-width: calc(100% - 24px);
+  left: 14px;
+  bottom: 14px;
+  max-width: calc(100% - 28px);
   text-align: left;
-  padding: 10px 14px;
+  padding: 12px 16px;
   margin: 0;
   pointer-events: none;
-  color: #f1f5f9;
+  color: #F0F0FA;
   font-size: 13px;
   font-weight: 500;
-  background: rgba(11, 17, 32, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  background: rgba(22, 22, 36, 0.9) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #2A2A3E !important;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   z-index: 100;
 }
 
 #menu a, #menu span, #menu label, #menu div {
-  color: #e2e8f0;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  color: #9D9DB5;
+}
+
+#element-el, #message-el {
+  display: inline-block !important;
+  color: #F0F0FA !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  margin: 6px 0 !important;
 }
 
 #sidemenu {
   position: fixed;
   top: 14px;
   left: 14px;
-  max-width: 300px;
+  max-width: 320px;
   box-sizing: border-box;
   text-align: left;
   pointer-events: none;
-  color: #f1f5f9;
+  color: #F0F0FA;
   font-size: 12px;
-  background: rgba(11, 17, 32, 0.85);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  background: rgba(22, 22, 36, 0.9) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #2A2A3E !important;
+  border-radius: 14px;
   padding: 14px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   z-index: 100;
 }
 
+#sidemenu:empty {
+  display: none !important;
+}
+
 #sidemenu a, #sidemenu span, #sidemenu label, #sidemenu div {
-  color: #e2e8f0;
+  color: #9D9DB5;
 }
 
 #footmenu, #footermenu {
@@ -93,16 +104,16 @@ body {
   width: 100%;
   text-align: center;
   background: transparent;
-  color: #e2e8f0;
+  color: #9D9DB5;
 }
 
 /* ===================================================
-   VidyaVerse Purple / Violet Interactive Buttons
+   VidyaVerse Brand Interactive Buttons & Selectors
    =================================================== */
 button {
-  color: #ffffff !important;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #C4B5FD !important;
+  background: #26233E !important;
+  border: 1px solid rgba(124, 92, 250, 0.3) !important;
   outline: none !important;
   margin: 4px 6px 4px 0 !important;
   border-radius: 8px !important;
@@ -115,7 +126,7 @@ button {
   cursor: pointer !important;
   pointer-events: auto !important;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 12px rgba(124, 58, 237, 0.25) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -123,39 +134,77 @@ button {
 }
 
 button:hover {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
-  transform: translateY(-1.5px) !important;
-  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.45) !important;
+  background: #6541F5 !important;
+  color: #FFFFFF !important;
+  border-color: #7C5CFA !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(101, 65, 245, 0.4) !important;
 }
 
 button:active {
   transform: translateY(0px) !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Red / Danger Action Buttons (e.g. Reset, Stop) */
-#reset-el, button[id*="reset"], button[id*="stop"] {
-  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
-  border-color: rgba(244, 63, 94, 0.4) !important;
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3) !important;
+/* ACTIVE SELECTOR BUTTONS (Selected tabs in simulation controls) */
+button[data-selected="true"],
+button[style*="67, 97"],
+button[style*="rgb(3, 67, 97)"],
+button.active {
+  background: #6541F5 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #7C5CFA !important;
+  box-shadow: 0 0 16px rgba(101, 65, 245, 0.5), 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  font-weight: 700 !important;
 }
 
-#reset-el:hover, button[id*="reset"]:hover, button[id*="stop"]:hover {
-  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
-  box-shadow: 0 6px 18px rgba(244, 63, 94, 0.45) !important;
+/* INACTIVE SELECTOR BUTTONS (Unselected options) */
+button[data-selected="false"],
+button[style*="108, 156"],
+button[style*="rgb(3, 108, 156)"] {
+  background: #1C1C2A !important;
+  color: #9D9DB5 !important;
+  border: 1px solid #2A2A3E !important;
+  box-shadow: none !important;
+  font-weight: 500 !important;
 }
 
-/* Green / Start Action Buttons */
-#shoot-el, button[id*="shoot"], button[id*="start"] {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-  border-color: rgba(16, 185, 129, 0.4) !important;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+button[data-selected="false"]:hover,
+button[style*="108, 156"]:hover,
+button[style*="rgb(3, 108, 156)"]:hover {
+  background: #26233E !important;
+  color: #F0F0FA !important;
+  border-color: #6541F5 !important;
 }
 
-#shoot-el:hover, button[id*="shoot"]:hover, button[id*="start"]:hover {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45) !important;
+/* Danger / Stop Buttons (Rose) */
+#reset-el, #stop-el, button[id*="reset"], button[id*="stop"] {
+  background: rgba(244, 63, 94, 0.15) !important;
+  color: #FB7185 !important;
+  border: 1px solid rgba(244, 63, 94, 0.35) !important;
+  box-shadow: 0 2px 6px rgba(244, 63, 94, 0.15) !important;
+}
+
+#reset-el:hover, #stop-el:hover, button[id*="reset"]:hover, button[id*="stop"]:hover {
+  background: #F43F5E !important;
+  color: #FFFFFF !important;
+  border-color: #FB7185 !important;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.4) !important;
+}
+
+/* Success / Start / Action Buttons (Emerald) */
+#shoot-el, button[id*="shoot"], button[id*="start"], button[id*="play"] {
+  background: rgba(25, 185, 154, 0.15) !important;
+  color: #34D399 !important;
+  border: 1px solid rgba(25, 185, 154, 0.35) !important;
+  box-shadow: 0 2px 6px rgba(25, 185, 154, 0.15) !important;
+}
+
+#shoot-el:hover, button[id*="shoot"]:hover, button[id*="start"]:hover, button[id*="play"]:hover {
+  background: #19B99A !important;
+  color: #FFFFFF !important;
+  border-color: #34D399 !important;
+  box-shadow: 0 4px 14px rgba(25, 185, 154, 0.4) !important;
 }
 
 #sidemenu button {
@@ -173,25 +222,44 @@ a, button, input, select {
 }
 
 select {
-  margin: 6px 0;
-  outline: none;
-  background: #0f172a;
-  color: #f8fafc;
-  border: 1px solid #6366f1;
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 12px;
-  cursor: pointer;
+  margin: 6px 0 !important;
+  outline: none !important;
+  background: #1C1C2A !important;
+  color: #F0F0FA !important;
+  border: 1px solid #2A2A3E !important;
+  padding: 6px 28px 6px 12px !important;
+  border-radius: 8px !important;
+  font-family: inherit !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%237C5CFA'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 14px !important;
+}
+
+select:hover, select:focus {
+  border-color: #7C5CFA !important;
+  box-shadow: 0 0 0 2px rgba(124, 92, 250, 0.25) !important;
+}
+
+select option {
+  background: #1C1C2A !important;
+  color: #F0F0FA !important;
+  padding: 6px 10px !important;
 }
 
 input[type="text"], input[type="number"] {
-  background: #0f172a !important;
-  color: #38bdf8 !important;
-  border: 1px solid #475569 !important;
+  background: #12121A !important;
+  color: #F0F0FA !important;
+  border: 1px solid #2A2A3E !important;
   border-radius: 6px !important;
-  padding: 3px 8px !important;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+  padding: 4px 8px !important;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace !important;
   font-weight: 600 !important;
   font-size: 12px !important;
   text-align: center !important;
@@ -199,31 +267,31 @@ input[type="text"], input[type="number"] {
 }
 
 input[type="text"]:focus, input[type="number"]:focus {
-  border-color: #8b5cf6 !important;
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3) !important;
+  border-color: #7C5CFA !important;
+  box-shadow: 0 0 0 2px rgba(124, 92, 250, 0.25) !important;
 }
 
 input[type="range"] {
-  accent-color: #8b5cf6 !important;
+  accent-color: #6541F5 !important;
   cursor: pointer !important;
   vertical-align: middle;
-  margin: 0 6px;
+  margin: 0 6px !important;
 }
 
 /* Data Tables */
 table {
-  background: rgba(15, 23, 42, 0.8) !important;
+  background: rgba(22, 22, 36, 0.9) !important;
   backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid #2A2A3E !important;
   border-radius: 10px !important;
   padding: 8px 12px !important;
-  color: #f1f5f9 !important;
+  color: #F0F0FA !important;
   font-size: 12px !important;
 }
 
 table td {
   padding: 4px 6px;
-  color: #e2e8f0;
+  color: #9D9DB5;
 }
 
 /* Fractions & Mathematical Equations */
@@ -233,8 +301,8 @@ table td {
   margin: 0 0.2em 0.4em;
   text-align: center;
   font-size: 1em;
-  color: #c4b5fd;
-  font-family: ui-monospace, SFMono-Regular, monospace;
+  color: #C4B5FD;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 .fraction > span {
@@ -243,8 +311,8 @@ table td {
 }
 
 .fraction span.fdn {
-  border-top: 1.5px solid #818cf8 !important;
-  color: #a5b4fc;
+  border-top: 1.5px solid #7C5CFA !important;
+  color: #DDD6FE;
 }
 
 .fraction span.bar {
@@ -252,15 +320,15 @@ table td {
 }
 
 /* 3D Floating CSS2D Labels */
-.label {
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-  color: #f8fafc !important;
+.label, .labelparts {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color: #F0F0FA !important;
   font-size: 12px !important;
   font-weight: 600 !important;
-  background: rgba(11, 17, 32, 0.9) !important;
-  border: 1px solid rgba(139, 92, 246, 0.5) !important;
+  background: rgba(22, 22, 36, 0.9) !important;
+  border: 1px solid rgba(124, 92, 250, 0.4) !important;
   border-radius: 6px !important;
-  padding: 2px 7px !important;
+  padding: 3px 8px !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
   backdrop-filter: blur(8px) !important;
   letter-spacing: 0.02em !important;
@@ -275,26 +343,31 @@ table td {
   top: 0;
   left: 0;
   z-index: 1;
-  padding: 12px;
-  width: 250px;
-  color: #f8fafc;
-  background: rgba(11, 17, 32, 0.92);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  backdrop-filter: blur(12px);
-  border-radius: 10px;
+  padding: 14px;
+  width: 260px;
+  color: #F0F0FA;
+  background: rgba(22, 22, 36, 0.94);
+  border: 1px solid #2A2A3E;
+  backdrop-filter: blur(14px);
+  border-radius: 12px;
   font-size: 12px;
-  line-height: 1.4;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  line-height: 1.5;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
-.labelparts {
-  text-align: center;
-  font-size: 12px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  color: #ffffff;
-  font-family: inherit;
-  font-weight: 600;
-  background: rgba(11, 17, 32, 0.85);
-  border: 1px solid rgba(139, 92, 246, 0.4);
+/* lil-gui Modern Dark Palette */
+.lil-gui {
+  --background-color: #161624 !important;
+  --text-color: #F0F0FA !important;
+  --title-background-color: #1C1C2A !important;
+  --title-text-color: #F0F0FA !important;
+  --widget-color: #1C1C2A !important;
+  --hover-color: #26233E !important;
+  --focus-color: #6541F5 !important;
+  --number-color: #7C5CFA !important;
+  --string-color: #19B99A !important;
+  border: 1px solid #2A2A3E !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5) !important;
 }
