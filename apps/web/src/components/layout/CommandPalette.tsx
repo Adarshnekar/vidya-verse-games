@@ -158,6 +158,16 @@ export function CommandPalette() {
       action: () => navigate('/playlab/solar'),
     },
     {
+      id: 'human-body',
+      title: 'Human Body Explorer',
+      subtitle: '3D Anatomical Organ Observatory, Cross-Sections & Microstructure',
+      category: 'Games & Labs',
+      icon: Activity,
+      badge: 'Simulations',
+      badgeColor: 'text-[#E95778] bg-[#FCE5EB] dark:bg-[#381521]',
+      action: () => navigate('/playlab/human-body'),
+    },
+    {
       id: 'physics-playground',
       title: 'Physics Playground',
       subtitle: 'Interactive 2D Newtonian mechanics sandbox with Matter.js',
@@ -196,16 +206,6 @@ export function CommandPalette() {
       badge: 'Simulations',
       badgeColor: 'text-[#06B6D4] bg-[#CFFAFE] dark:bg-[#083344]',
       action: () => navigate('/playlab/chemistry-lab'),
-    },
-    {
-      id: 'human-body',
-      title: 'Human Body Explorer',
-      subtitle: 'Interactive cardiovascular, respiratory, digestive & nervous anatomy',
-      category: 'Games & Labs',
-      icon: Activity,
-      badge: 'Simulations',
-      badgeColor: 'text-[#E95778] bg-[#FCE5EB] dark:bg-[#381521]',
-      action: () => navigate('/playlab/human-body'),
     },
     {
       id: 'circuitverse',
