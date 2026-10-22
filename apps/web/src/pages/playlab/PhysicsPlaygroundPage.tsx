@@ -20,13 +20,11 @@ import {
   Compass,
   Flame,
   Activity,
-  Sliders,
   X,
   ExternalLink,
   CheckCircle2,
   Info,
 } from 'lucide-react';
-import Matter from 'matter-js';
 import { useAuthStore } from '../../stores/authStore';
 import {
   PHYSICS_SIMULATIONS,
@@ -54,27 +52,10 @@ export const PhysicsPlaygroundPage: React.FC = () => {
   const [theoryOpen, setTheoryOpen] = useState<boolean>(false);
   const [infoOpen, setInfoOpen] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'3d-sim' | '2d-sandbox'>('3d-sim');
   const [iframeKey, setIframeKey] = useState<number>(0);
   const [isNarrating, setIsNarrating] = useState<boolean>(false);
   const [isLoadingIframe, setIsLoadingIframe] = useState<boolean>(true);
-
-  // Matter.js 2D Sandbox state
-  const sceneRef = useRef<HTMLDivElement>(null);
-  const engineRef = useRef<Matter.Engine | null>(null);
-  const renderRef = useRef<Matter.Render | null>(null);
-  const runnerRef = useRef<Matter.Runner | null>(null);
   const stageContainerRef = useRef<HTMLDivElement>(null);
-
-  const [gravityY, setGravityY] = useState<number>(1);
-  const [restitution, setRestitution] = useState<number>(0.8);
-  const [friction, setFriction] = useState<number>(0.05);
-  const [telemetry, setTelemetry] = useState({
-    bodyCount: 0,
-    kineticEnergy: 0,
-    potentialEnergy: 0,
-    maxVelocity: 0,
-  });
 
   // Track explored simulations
   const [exploredSims, setExploredSims] = useState<Set<string>>(
@@ -182,152 +163,7 @@ export const PhysicsPlaygroundPage: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
 
-  // Matter.js 2D Sandbox lifecycle (when activeTab === '2d-sandbox')
-  useEffect(() => {
-    if (activeTab !== '2d-sandbox' || !sceneRef.current) return;
 
-    const width = sceneRef.current.clientWidth || 800;
-    const height = sceneRef.current.clientHeight || 500;
-
-    const Engine = Matter.Engine;
-    const Render = Matter.Render;
-    const Runner = Matter.Runner;
-    const Bodies = Matter.Bodies;
-    const Composite = Matter.Composite;
-    const Mouse = Matter.Mouse;
-    const MouseConstraint = Matter.MouseConstraint;
-
-    const engine = Engine.create({
-      gravity: { x: 0, y: gravityY, scale: 0.001 },
-    });
-    engineRef.current = engine;
-
-    const render = Render.create({
-      element: sceneRef.current,
-      engine: engine,
-      options: {
-        width,
-        height,
-        wireframes: false,
-        background: '#0B1120',
-      },
-    });
-    renderRef.current = render;
-    Render.run(render);
-
-    const runner = Runner.create();
-    runnerRef.current = runner;
-    Runner.run(runner, engine);
-
-    const wallOptions = { isStatic: true, render: { fillStyle: '#1E293B' } };
-    const floor = Bodies.rectangle(width / 2, height - 10, width, 20, wallOptions);
-    const leftWall = Bodies.rectangle(10, height / 2, 20, height, wallOptions);
-    const rightWall = Bodies.rectangle(width - 10, height / 2, 20, height, wallOptions);
-    const ceiling = Bodies.rectangle(width / 2, 10, width, 20, wallOptions);
-
-    Composite.add(engine.world, [floor, leftWall, rightWall, ceiling]);
-
-    const ball1 = Bodies.circle(width * 0.35, height * 0.4, 28, {
-      restitution,
-      friction,
-      render: { fillStyle: '#38BDF8' },
-    });
-    const box1 = Bodies.rectangle(width * 0.65, height * 0.6, 50, 50, {
-      restitution,
-      friction,
-      render: { fillStyle: '#8B5CF6' },
-    });
-    Composite.add(engine.world, [ball1, box1]);
-
-    const mouse = Mouse.create(render.canvas);
-    const mouseConstraint = MouseConstraint.create(engine, {
-      mouse,
-      constraint: {
-        stiffness: 0.2,
-        render: { visible: false },
-      },
-    });
-    Composite.add(engine.world, mouseConstraint);
-    render.mouse = mouse;
-
-    const updateInterval = setInterval(() => {
-      if (!engineRef.current) return;
-      const bodies = Composite.allBodies(engineRef.current.world).filter(
-        (b) => !b.isStatic
-      );
-      let ke = 0;
-      let pe = 0;
-      let maxV = 0;
-
-      bodies.forEach((b) => {
-        const speed = Math.hypot(b.velocity.x, b.velocity.y);
-        if (speed > maxV) maxV = speed;
-        ke += 0.5 * b.mass * speed * speed;
-        const h = Math.max(0, height - b.position.y);
-        pe += b.mass * gravityY * h * 0.05;
-      });
-
-      setTelemetry({
-        bodyCount: bodies.length,
-        kineticEnergy: Math.round(ke),
-        potentialEnergy: Math.round(pe),
-        maxVelocity: parseFloat(maxV.toFixed(2)),
-      });
-    }, 200);
-
-    return () => {
-      clearInterval(updateInterval);
-      if (renderRef.current) {
-        Render.stop(renderRef.current);
-        if (renderRef.current.canvas) renderRef.current.canvas.remove();
-      }
-      if (runnerRef.current) Runner.stop(runnerRef.current);
-      if (engineRef.current) Composite.clear(engineRef.current.world, false);
-    };
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (!engineRef.current) return;
-    engineRef.current.gravity.y = gravityY;
-    const bodies = Matter.Composite.allBodies(engineRef.current.world);
-    bodies.forEach((b) => {
-      if (!b.isStatic) {
-        b.restitution = restitution;
-        b.friction = friction;
-      }
-    });
-  }, [gravityY, restitution, friction]);
-
-  const spawn2dObject = (type: 'circle' | 'box') => {
-    if (!engineRef.current || !renderRef.current) return;
-    const width = renderRef.current.options.width || 800;
-    const x = width / 2 + (Math.random() * 100 - 50);
-    const y = 80;
-
-    let body: Matter.Body;
-    if (type === 'circle') {
-      body = Matter.Bodies.circle(x, y, 24, {
-        restitution,
-        friction,
-        render: {
-          fillStyle: ['#38BDF8', '#818CF8', '#34D399', '#F472B6', '#FBBF24'][
-            Math.floor(Math.random() * 5)
-          ],
-        },
-      });
-    } else {
-      body = Matter.Bodies.rectangle(x, y, 45, 45, {
-        restitution,
-        friction,
-        render: {
-          fillStyle: ['#C084FC', '#FB7185', '#38BDF8', '#4ADE80'][
-            Math.floor(Math.random() * 4)
-          ],
-        },
-      });
-    }
-    Matter.Composite.add(engineRef.current.world, body);
-  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -438,32 +274,6 @@ export const PhysicsPlaygroundPage: React.FC = () => {
 
         {/* Right Action Buttons */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Mode Switcher (Selector) */}
-          <div className="flex bg-[#12121A] p-0.5 rounded-lg border border-[#2A2A3E] text-xs">
-            <button
-              onClick={() => setActiveTab('3d-sim')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-all flex items-center gap-1.5 ${
-                activeTab === '3d-sim'
-                  ? 'bg-[#6541F5] text-white shadow-[0_2px_8px_rgba(101,65,245,0.35)]'
-                  : 'text-[#9D9DB5] hover:text-[#F0F0FA]'
-              }`}
-            >
-              <Atom className="w-3.5 h-3.5" />
-              <span>3D Lab</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('2d-sandbox')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-all flex items-center gap-1.5 ${
-                activeTab === '2d-sandbox'
-                  ? 'bg-[#6541F5] text-white shadow-[0_2px_8px_rgba(101,65,245,0.35)]'
-                  : 'text-[#9D9DB5] hover:text-[#F0F0FA]'
-              }`}
-            >
-              <Sliders className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">2D Sandbox</span>
-            </button>
-          </div>
-
           {/* Quick Info Drawer / Modal Toggle */}
           <button
             onClick={() => setInfoOpen((prev) => !prev)}
@@ -510,18 +320,16 @@ export const PhysicsPlaygroundPage: React.FC = () => {
           </button>
 
           {/* Reload Simulation Button */}
-          {activeTab === '3d-sim' && (
-            <button
-              onClick={() => {
-                setIsLoadingIframe(true);
-                setIframeKey((k) => k + 1);
-              }}
-              className="p-1.5 rounded-lg bg-[#1C1C2A] hover:bg-[#26233E] border border-[#2A2A3E] text-[#9D9DB5] hover:text-white transition-all"
-              title="Reset Simulation"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-          )}
+          <button
+            onClick={() => {
+              setIsLoadingIframe(true);
+              setIframeKey((k) => k + 1);
+            }}
+            className="p-1.5 rounded-lg bg-[#1C1C2A] hover:bg-[#26233E] border border-[#2A2A3E] text-[#9D9DB5] hover:text-white transition-all"
+            title="Reset Simulation"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
 
           {/* Fullscreen Button */}
           <button
@@ -684,132 +492,39 @@ export const PhysicsPlaygroundPage: React.FC = () => {
 
         {/* ================= MAIN CANVASES (100% UNOBSTRUCTED) ================= */}
         <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#070b14]">
-          {activeTab === '3d-sim' ? (
-            <div className="flex-1 w-full h-full relative overflow-hidden bg-[#070b14]">
-              {/* Simulation Iframe Loading Overlay */}
-              {isLoadingIframe && (
-                <div className="absolute inset-0 bg-[#070b14] flex flex-col items-center justify-center gap-3 z-10 transition-opacity">
-                  <div className="w-8 h-8 border-2 border-[#6541F5]/20 border-t-[#7C5CFA] rounded-full animate-spin" />
-                  <p className="text-xs text-[#9D9DB5] font-medium">
-                    Loading 3D Simulation...
-                  </p>
-                </div>
-              )}
-
-              {/* Edge-to-Edge 3D Simulation Frame (No Overlays Over Controls!) */}
-              <iframe
-                key={`${selectedSim.id}-${iframeKey}`}
-                src={`/physics/Simulations/${selectedSim.filename}`}
-                title={selectedSim.title}
-                onLoad={() => setIsLoadingIframe(false)}
-                className="w-full h-full border-none select-none bg-[#070b14]"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              />
-
-              {/* Floating Re-Open Sidebar Tab (When Sidebar is Closed) */}
-              {!sidebarOpen && (
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="absolute top-3 left-3 z-10 px-2.5 py-1.5 rounded-lg bg-[#1C1C2A]/90 hover:bg-[#26233E] text-[#F0F0FA] border border-[#2A2A3E] hover:border-[#6541F5]/50 shadow-xl text-xs font-medium flex items-center gap-1.5 transition-all"
-                  title="Open Simulations Menu"
-                >
-                  <Layers className="w-3.5 h-3.5 text-[#7C5CFA]" />
-                  <span>Labs Menu</span>
-                </button>
-              )}
-            </div>
-          ) : (
-            /* ================= 2D MECHANICAL SANDBOX ================= */
-            <div className="flex-1 flex flex-col h-full bg-[#070b14] overflow-hidden relative">
-              {/* 2D Sandbox Controls Header */}
-              <div className="p-3 bg-slate-900/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-400">Gravity:</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="3"
-                      step="0.1"
-                      value={gravityY}
-                      onChange={(e) => setGravityY(parseFloat(e.target.value))}
-                      className="w-20 accent-purple-500"
-                    />
-                    <span className="font-mono text-purple-400 w-8">{gravityY}g</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-400">Bounciness:</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.05"
-                      value={restitution}
-                      onChange={(e) => setRestitution(parseFloat(e.target.value))}
-                      className="w-20 accent-purple-500"
-                    />
-                    <span className="font-mono text-purple-400 w-8">{restitution}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-400">Friction:</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="0.5"
-                      step="0.01"
-                      value={friction}
-                      onChange={(e) => setFriction(parseFloat(e.target.value))}
-                      className="w-20 accent-purple-500"
-                    />
-                    <span className="font-mono text-purple-400 w-8">{friction}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => spawn2dObject('circle')}
-                    className="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded-lg font-semibold flex items-center gap-1 transition-all"
-                  >
-                    + Spawn Ball
-                  </button>
-                  <button
-                    onClick={() => spawn2dObject('box')}
-                    className="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-semibold flex items-center gap-1 transition-all"
-                  >
-                    + Spawn Box
-                  </button>
-                </div>
+          <div className="flex-1 w-full h-full relative overflow-hidden bg-[#070b14]">
+            {/* Simulation Iframe Loading Overlay */}
+            {isLoadingIframe && (
+              <div className="absolute inset-0 bg-[#070b14] flex flex-col items-center justify-center gap-3 z-10 transition-opacity">
+                <div className="w-8 h-8 border-2 border-[#6541F5]/20 border-t-[#7C5CFA] rounded-full animate-spin" />
+                <p className="text-xs text-[#9D9DB5] font-medium">
+                  Loading 3D Simulation...
+                </p>
               </div>
+            )}
 
-              {/* 2D Canvas Stage */}
-              <div
-                ref={sceneRef}
-                className="flex-1 w-full h-full relative cursor-crosshair overflow-hidden"
-              />
+            {/* Edge-to-Edge 3D Simulation Frame (No Overlays Over Controls!) */}
+            <iframe
+              key={`${selectedSim.id}-${iframeKey}`}
+              src={`/physics/Simulations/${selectedSim.filename}`}
+              title={selectedSim.title}
+              onLoad={() => setIsLoadingIframe(false)}
+              className="w-full h-full border-none select-none bg-[#070b14]"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            />
 
-              {/* Live Telemetry Footer Bar */}
-              <div className="p-2.5 bg-slate-900/90 border-t border-slate-800 flex items-center justify-around text-xs font-mono text-slate-300">
-                <div>
-                  <span className="text-slate-500">Bodies: </span>
-                  <span className="text-white font-bold">{telemetry.bodyCount}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500">Kinetic Energy: </span>
-                  <span className="text-sky-400 font-bold">{telemetry.kineticEnergy} J</span>
-                </div>
-                <div>
-                  <span className="text-slate-500">Potential Energy: </span>
-                  <span className="text-emerald-400 font-bold">{telemetry.potentialEnergy} J</span>
-                </div>
-                <div>
-                  <span className="text-slate-500">Max Velocity: </span>
-                  <span className="text-amber-400 font-bold">{telemetry.maxVelocity} m/s</span>
-                </div>
-              </div>
-            </div>
-          )}
+            {/* Floating Re-Open Sidebar Tab (When Sidebar is Closed) */}
+            {!sidebarOpen && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="absolute top-3 left-3 z-10 px-2.5 py-1.5 rounded-lg bg-[#1C1C2A]/90 hover:bg-[#26233E] text-[#F0F0FA] border border-[#2A2A3E] hover:border-[#6541F5]/50 shadow-xl text-xs font-medium flex items-center gap-1.5 transition-all"
+                title="Open Simulations Menu"
+              >
+                <Layers className="w-3.5 h-3.5 text-[#7C5CFA]" />
+                <span>Labs Menu</span>
+              </button>
+            )}
+          </div>
         </main>
 
         {/* ================= EXPERIMENT INFO MODAL ================= */}

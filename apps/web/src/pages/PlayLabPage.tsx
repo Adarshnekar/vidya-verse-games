@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Gamepad2,
-  WifiOff,
   ArrowRight,
   Clock,
   Users,
@@ -446,7 +445,7 @@ export const PlayLabPage: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
         {/* Badges Overlay */}
-        <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+        <div className="absolute top-3 left-3 pointer-events-none">
           {/* Category Pill */}
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold backdrop-blur-md shadow-sm ${item.colorTheme.badgeBg} ${item.colorTheme.badgeText}`}
@@ -454,14 +453,6 @@ export const PlayLabPage: React.FC = () => {
             <Zap className="w-3 h-3" />
             {item.category}
           </span>
-
-          {/* Offline Ready Badge */}
-          {item.offline && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-card/90 backdrop-blur-md text-[#28B987] border border-border shadow-sm">
-              <WifiOff className="w-3 h-3" />
-              <span>Offline</span>
-            </span>
-          )}
         </div>
       </div>
 
@@ -571,18 +562,24 @@ export const PlayLabPage: React.FC = () => {
       {/* ========================================================= */}
       {/* SECTION A — GAMES                                         */}
       {/* ========================================================= */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between border-b border-border/80 pb-2">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#EAE7FF] text-[#6541F5] dark:bg-[#26233E] dark:text-[#C4B5FD] flex items-center justify-center">
-              <Gamepad2 className="w-3.5 h-3.5" />
+      <section className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-border/80 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-500/10 text-[#6541F5] dark:bg-purple-500/20 dark:text-[#C4B5FD] flex items-center justify-center border border-purple-500/20 shadow-sm shrink-0">
+              <Gamepad2 className="w-5 h-5" />
             </div>
-            <h2 className="text-base sm:text-lg font-bold font-display text-text-primary">
-              Educational Games
-            </h2>
-            <span className="text-xs text-text-muted hidden sm:inline">• Curriculum challenges, algorithms & quests</span>
+            <div>
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <h2 className="text-xl sm:text-2xl font-extrabold font-display tracking-tight text-text-primary">
+                  Educational Games
+                </h2>
+                <span className="text-sm sm:text-base font-medium text-text-muted">
+                  • Curriculum challenges, algorithms & quests
+                </span>
+              </div>
+            </div>
           </div>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-card border border-border text-text-muted">
+          <span className="self-start sm:self-center text-xs sm:text-sm font-semibold px-3 py-1 rounded-full bg-purple-500/10 text-[#6541F5] dark:text-[#C4B5FD] border border-purple-500/20 shrink-0">
             {filteredGames.length} {filteredGames.length === 1 ? 'Game' : 'Games'}
           </span>
         </div>
@@ -603,18 +600,24 @@ export const PlayLabPage: React.FC = () => {
       {/* ========================================================= */}
       {/* SECTION B — SIMULATIONS                                   */}
       {/* ========================================================= */}
-      <section className="space-y-3 pt-2">
-        <div className="flex items-center justify-between border-b border-border/80 pb-2">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#CFFAFE] text-[#06B6D4] dark:bg-[#083344] dark:text-[#67E8F9] flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5" />
+      <section className="space-y-4 pt-4 sm:pt-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-border/80 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/10 text-[#0891B2] dark:bg-cyan-500/20 dark:text-[#67E8F9] flex items-center justify-center border border-cyan-500/20 shadow-sm shrink-0">
+              <Sparkles className="w-5 h-5" />
             </div>
-            <h2 className="text-base sm:text-lg font-bold font-display text-text-primary">
-              Interactive Simulations
-            </h2>
-            <span className="text-xs text-text-muted hidden sm:inline">• Astrophysics, mechanics sandboxes & anatomy</span>
+            <div>
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <h2 className="text-xl sm:text-2xl font-extrabold font-display tracking-tight text-text-primary">
+                  Interactive Simulations
+                </h2>
+                <span className="text-sm sm:text-base font-medium text-text-muted">
+                  • Astrophysics, mechanics sandboxes & anatomy
+                </span>
+              </div>
+            </div>
           </div>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-card border border-border text-text-muted">
+          <span className="self-start sm:self-center text-xs sm:text-sm font-semibold px-3 py-1 rounded-full bg-cyan-500/10 text-[#0891B2] dark:text-[#67E8F9] border border-cyan-500/20 shrink-0">
             {filteredSimulations.length} {filteredSimulations.length === 1 ? 'Simulation' : 'Simulations'}
           </span>
         </div>

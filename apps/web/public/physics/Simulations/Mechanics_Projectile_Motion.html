@@ -241,10 +241,10 @@
           // console.log(model)
           launchHeight.scale.y = 0;
           projector.position.y = 0;
-          fallPoint.position.x = 5;
+          let initialRange = Number(maxRange(params.speed, params.degree, params.launchHeight));
+          fallPoint.position.set(initialRange, 0, 0);
           projector.rotation.z = -.7854;
-          fallPoint.scale.set(.2, .2, .2);
-          fallPoint.position.set(5, 0, 0);
+          fallPoint.scale.set(.3, .3, .3);
           scene.add(model);
           base.visible = false;
         });
@@ -256,6 +256,7 @@
         timeflight = timeFlight(params.speed, params.degree, params.launchHeight);
         maxheight = maxHeight(params.speed, params.degree, params.launchHeight);
         maxrange = maxRange(params.speed, params.degree, params.launchHeight);
+        updateLandingTarget(false);
         data['Speed along x-axis'] = [vxspeed];
         data['Speed along x-axis'].push('m/s');
         data['Time of Flight'] = [timeflight];
@@ -287,11 +288,12 @@
         launchHeight.scale.y = value / 10;
         projector.position.y = value;
         setCamera(value);
+        updateLandingTarget();
         maxheight = 0;
         maxrange = 0;
         timeflight = 0;
         data = {};
-        dataCollection()
+        dataCollection();
       });
 
       angleEl.addEventListener("input", function (event) {
@@ -313,6 +315,7 @@
           VxLabel.position.copy(velX.cone.position.add(new THREE.Vector3(0, .3, 0)))
           VyLabel.position.copy(velY.cone.position.add(new THREE.Vector3(0, .3, 0)))
         }
+        updateLandingTarget();
         data = {};
         maxheight = 0;
         maxrange = 0;
@@ -339,6 +342,7 @@
           VxLabel.position.copy(velX.cone.position.add(new THREE.Vector3(0, .3, 0)))
           VyLabel.position.copy(velY.cone.position.add(new THREE.Vector3(0, .3, 0)))
         }
+        updateLandingTarget();
         data = {};
         maxheight = 0;
         maxrange = 0;
@@ -524,52 +528,41 @@
 
     }
 
-    function setCamera(a) {
+    function updateLandingTarget(animate = true) {
+      if (!fallPoint) return;
+      let r = Number(maxRange(params.speed, params.degree, params.launchHeight));
+      if (isNaN(r) || r < 0) r = 0;
+      params.fallPoint = r;
 
-      if (a <= 6) {
-        // console.log('height 2m')
+      let targetScale = Math.min(0.5, Math.max(0.2, r * 0.015 + 0.18));
+      if (animate && typeof TWEEN !== 'undefined') {
         new TWEEN.Tween(fallPoint.position)
-          .to({ x: 5 }, 1000)
+          .to({ x: r, y: 0, z: 0 }, 250)
           .easing(TWEEN.Easing.Cubic.Out)
-          .start()
-
+          .start();
         new TWEEN.Tween(fallPoint.scale)
-          .to({ x: .2, y: .2, z: .2 }, 1000)
+          .to({ x: targetScale, y: targetScale, z: targetScale }, 250)
           .easing(TWEEN.Easing.Cubic.Out)
-          .start()
-        createCamera(40, -4, 3, 20)
-        createControls(4, 2.5, 0.4);
-        // deltaT = 0.08;
-
-      } else if (a > 6 && a <= 12) {
-        // console.log('height <10m')
-        new TWEEN.Tween(fallPoint.position)
-          .to({ x: 15 }, 1000)
-          .easing(TWEEN.Easing.Cubic.Out)
-          .start()
-
-        new TWEEN.Tween(fallPoint.scale)
-          .to({ x: .5, y: .5, z: .5 }, 1000)
-          .easing(TWEEN.Easing.Cubic.Out)
-          .start()
-        createCamera(40, -3, 6, 42)
-        createControls(10, 12, -5);
-        // deltaT = 0.08;
-
+          .start();
       } else {
-        console.log('height 25m')
-        new TWEEN.Tween(fallPoint.position)
-          .to({ x: 25 }, 1000)
-          .easing(TWEEN.Easing.Cubic.Out)
-          .start()
+        fallPoint.position.set(r, 0, 0);
+        fallPoint.scale.set(targetScale, targetScale, targetScale);
+      }
+    }
 
-        new TWEEN.Tween(fallPoint.scale)
-          .to({ x: .8, y: .8, z: .8 }, 1000)
-          .easing(TWEEN.Easing.Cubic.Out)
-          .start()
-        createCamera(40, -15, 11, 55)
-        createControls(10, 15, 0);
-        // deltaT = 0.1;
+    function setCamera(a) {
+      let r = Number(maxRange(params.speed, params.degree, params.launchHeight));
+      let maxDist = Math.max(r, a * 1.5);
+
+      if (maxDist <= 10) {
+        createCamera(40, -4, 3 + a * 0.3, 20);
+        createControls(r * 0.5, 2.5 + a * 0.4, 0.4);
+      } else if (maxDist <= 25) {
+        createCamera(40, -3 - r * 0.2, 6 + a * 0.5, 30 + maxDist * 0.6);
+        createControls(r * 0.5, 5 + a * 0.4, -2);
+      } else {
+        createCamera(40, -10 - r * 0.2, 10 + a * 0.5, 40 + maxDist * 0.7);
+        createControls(r * 0.5, 8 + a * 0.4, 0);
       }
     }
 
@@ -685,13 +678,14 @@
       ball.position.y = params.launchHeight + Math.tan(a) * ball.position.x - (g / 2 * (ball.position.x * ball.position.x)) / ((params.speed * Math.cos(a)) * (params.speed * Math.cos(a)));
 
       if (ball.position.y <= 0) {
-        let cal = vyspeed - g * (ball.position.x / vxspeed);
-        ball.position.y = .1;
-        point = new THREE.Mesh(new THREE.CircleGeometry(.06, 8), new THREE.MeshBasicMaterial({ color: 0xffff00 }))
-        point.position.set(initialSpeed2.x, .01, initialSpeed2.z);
+        let finalRange = Number(maxRange(params.speed, params.degree, params.launchHeight));
+        ball.position.x = finalRange;
+        ball.position.y = 0.05;
+        let cal = vyspeed - g * (finalRange / vxspeed);
+        point = new THREE.Mesh(new THREE.CircleGeometry(.08, 12), new THREE.MeshBasicMaterial({ color: 0xffff00 }))
+        point.position.set(finalRange, .01, initialSpeed2.z);
         root.add(line, point);
         Vtable.rows[1].cells[2].innerHTML = -vxspeed.toFixed(2);
-        // velocityVisual(vxspeed, cal)
 
         cancelAnimationFrame(projectileMotion);
 
@@ -875,6 +869,7 @@
       velocityVisual(vxSpeed(params.speed, params.degree), vySpeed(params.speed, params.degree));
 
       setCamera(0);
+      updateLandingTarget(false);
       data = {};
       arrowHelper.setLength(params.speed);
       speedLabel.position.copy(arrowHelper.cone.position.add(new THREE.Vector3(0, .3, 0)));

@@ -107,10 +107,12 @@
                 labelAction();
             }
         }
-        let newMaterial = [new THREE.MeshBasicMaterial({ color: 'green' }),
-        new THREE.MeshBasicMaterial({ color: 0x00FFdd }),
-        new THREE.MeshBasicMaterial({ color: 0x0000ff }),
-        new THREE.MeshBasicMaterial({ color: 'black' })];
+        let newMaterial = [
+            new THREE.MeshBasicMaterial({ color: 0x10b981 }),
+            new THREE.MeshBasicMaterial({ color: 0x38bdf8 }),
+            new THREE.MeshBasicMaterial({ color: 0x818cf8 }),
+            new THREE.MeshBasicMaterial({ color: 0xa855f7 })
+        ];
         let params = {
             zo: -12.5,
             fo: 30,
@@ -165,7 +167,7 @@
 
         function addRays(vector1, vector2) {
             let linepoints = [vector1, vector2];
-            let lineMaterial = new THREE.LineBasicMaterial({ color: 'red' });
+            let lineMaterial = new THREE.LineBasicMaterial({ color: 0xf43f5e });
 
             let lineGeometry = new THREE.BufferGeometry().setFromPoints(linepoints);
             axis = new THREE.Line(lineGeometry, lineMaterial);
@@ -177,7 +179,7 @@
 
             let coneGeometry = new THREE.ConeGeometry(.3, .5, 6);
             coneGeometry.rotateX(Math.PI / 2);
-            arrow = new THREE.Mesh(coneGeometry, new THREE.MeshBasicMaterial({ color: 'brown' }));
+            arrow = new THREE.Mesh(coneGeometry, new THREE.MeshBasicMaterial({ color: 0xfbbf24 }));
             arrow.position.copy(vector);
             return arrow
         }
@@ -300,7 +302,7 @@
 
         function init() {
             scene = new THREE.Scene;
-            scene.background = new THREE.Color(0xbfd1e5);
+            scene.background = new THREE.Color(0x070b14);
             createCamera(50, -45, 5, -32, pointA);
             createLights();
             createRenderer();
@@ -308,19 +310,19 @@
 
             pole = initPoint({
                 vertices: new Float32Array([0, 0, 0]),
-                material: new THREE.PointsMaterial({ color: 0x8888FF, size: 1 })
+                material: new THREE.PointsMaterial({ color: 0x818cf8, size: 1 })
             });
             scene.add(pole);
 
 
             imagePoint = initPoint({
                 vertices: new Float32Array([0, 0, 0]),
-                material: new THREE.PointsMaterial({ color: 'black', size: .5 })
+                material: new THREE.PointsMaterial({ color: 0x38bdf8, size: .8 })
             });
             scene.add(imagePoint);
             // imagePoint.position.set(0,heightV,v);
 
-            const scaleHorizontal = new THREE.GridHelper(70, 70);
+            const scaleHorizontal = new THREE.GridHelper(70, 70, 0x6541f5, 0x1e293b);
             scene.add(scaleHorizontal);
             // scaleHorizontal.position.y = d
             // const scaleVertical =new THREE.GridHelper(70, 70);
@@ -350,15 +352,15 @@
 
         function makeTextSprite(message, a) {
 
-            var fontface = "Arial";
+            var fontface = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
             var fontsize = 22;
 
-            var borderThickness = 4;
+            var borderThickness = 3;
 
-            var borderColor = { r: 0, g: 0, b: 0, a: 1.0 };
+            var borderColor = { r: 101, g: 65, b: 245, a: 0.9 };
 
-            var backgroundColor = { r: 0, g: 0, b: 0, a: 0.8 };
+            var backgroundColor = { r: 22, g: 22, b: 36, a: 0.9 };
 
             // var spriteAlignment = THREE.SpriteAlignment.topLeft;
 

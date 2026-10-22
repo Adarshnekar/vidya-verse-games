@@ -1,4 +1,4 @@
-// VidyaVerse Physics Studio Simulation Compatibility Layer
+// VidyaVerse Physics Studio Simulation Compatibility Layer & Unified Design System
 (() => {
   let _onload = null;
   try {
@@ -24,9 +24,10 @@
     console.warn("[VidyaVerse Physics] onload interceptor failed:", err);
   }
 
-  // Prevent unwanted outer scrollbars inside iframes
+  // Prevent unwanted outer scrollbars inside iframes and enforce theme
   window.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
+    document.body.style.backgroundColor = '#070b14';
   });
 })();
