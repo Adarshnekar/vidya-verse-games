@@ -153,7 +153,7 @@ button:active {
 /* Glass Annotation & Info Dialog */
 .annotation,
 #detail {
-  display: block;
+  display: none;
   position: absolute;
   top: 58px;
   left: 16px;
@@ -406,6 +406,53 @@ table {
 
 table td {
   padding: 2px 4px;
+}
+
+.text-right {
+  text-align: right;
+}
+
+#Vtable {
+  font-weight: bolder;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.invisible {
+  visibility: hidden !important;
+}
+
+.text-red {
+  color: #EF4444;
+}
+
+#sidemenu.formula-sidemenu,
+.formula-sidemenu {
+  display: none;
+}
+
+/* Mathematical fractions */
+.fraction {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0.2em 0.4em;
+  text-align: center;
+  font-size: 1em;
+}
+
+.fraction > span {
+  display: block;
+  padding-top: 0.15em;
+}
+
+.fraction span.fdn {
+  border-top: 1px solid currentColor;
+}
+
+.fraction span.bar {
+  display: none;
 }
 
 /* lil-gui & dat.gui Modern VidyaVerse Theme Overrides */

@@ -5,7 +5,7 @@
   <script src="../files/compat.js"></script>
   <meta charset="utf-8">
   <title>Projectile Motion</title>
-  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="../files/favicon_white.ico" media="(prefers-color-scheme: dark)" />
   <link rel="shortcut icon" href="../files/favicon.ico" media="(prefers-color-scheme: light)" />
   <link rel="stylesheet" type="text/css" href="../css/style-page.css">
@@ -29,59 +29,59 @@
   </div>
   <div id="sidemenu">
     <table id="caltable">
-      <!-- <caption style="font-size: 24px; text-decoration: underline;">Projectile Data</caption> -->
+      <!-- <caption>Projectile Data</caption> -->
       <tr>
         <td>Launch Height (y<sub>o</sub> ) </td>
         <td> = </td>
-        <td style="text-align: right;"> 0 </td>
+        <td class="text-right"> 0 </td>
         <td> m </td>
       </tr>
 
       <tr>
         <td> Launch Velocity (v<sub>0</sub> ) </td>
         <td> = </td>
-        <td style="text-align: right;"> 7 </td>
+        <td class="text-right"> 7 </td>
         <td> m/s</td>
       </tr>
 
       <tr>
         <td>Launch Angle (&#952; ) </td>
         <td> = </td>
-        <td style="text-align: right;"> 45</td>
+        <td class="text-right"> 45</td>
         <td> &#176 </td>
       </tr>
 
       <tr>
         <td>v<sub>0</sub> cos&#952; </td>
         <td> = </td>
-        <td style="text-align: right;"> __ </td>
+        <td class="text-right"> __ </td>
         <td> m/s </td>
       </tr>
 
       <tr>
         <td>v<sub>0</sub> sin&#952; </td>
         <td> = </td>
-        <td style="text-align: right;"> __</td>
+        <td class="text-right"> __</td>
         <td> m/s </td>
       </tr>
 
       <tr>
         <td>Maximum Height</td>
         <td> = </td>
-        <td style="text-align: right;"> __ </td>
+        <td class="text-right"> __ </td>
         <td> m </td>
       </tr>
       <tr>
         <td>Maximum Range</td>
         <td> = </td>
-        <td style="text-align: right;"> __ </td>
+        <td class="text-right"> __ </td>
         <td> m </td>
 
       </tr>
       <tr>
         <td>Time of Flight</td>
         <td> = </td>
-        <td style="text-align: right;"> __ </td>
+        <td class="text-right"> __ </td>
         <td> s </td>
 
       </tr>
@@ -94,15 +94,15 @@
   <div id="menu">
 
     <div>
-      <a><input type="range" id="height" name="height" min="0" max="25" value="0" step="1">
+      <a><input type="range" id="height" name="height" min="0" max="25" value="0" step="1" title="Launch Height">
         <label for="height">Launch Height = </label><a id="heightDisplay"> 0 </a> m<br>
       </a>
 
-      <a><input type="range" id="velocity" name="velocity" min="0" max="25" value="7" step="0.5">
+      <a><input type="range" id="velocity" name="velocity" min="0" max="25" value="7" step="0.5" title="Launch Velocity">
         <label for="velocity">Launch Velocity = </label><a id="velocityDisplay"> 7 </a> m/s<br>
       </a>
 
-      <a> <input type="range" id="angle" name="angle" min="0" max="90" value="45" step="5">
+      <a> <input type="range" id="angle" name="angle" min="0" max="90" value="45" step="5" title="Launch Angle">
 
         <label for="angle">Launch Angle = </label><a id="angleDisplay"> 45 </a> <sup>o</sup><br>
 
@@ -111,25 +111,25 @@
     </div>
 
     <div>
-      <input type="checkbox" id="grid" name="grid" value="false" />
+      <input type="checkbox" id="grid" name="grid" value="false" title="Grid" />
       <label for="grid">GRID</label>
-      <input type="checkbox" id="vector" name="vector" value="true" checked />
-      <label for="velocity">VECTOR</label>
-      <input type="checkbox" id="components" name="components" value="false" />
+      <input type="checkbox" id="vector" name="vector" value="true" checked title="Vector" />
+      <label for="vector">VECTOR</label>
+      <input type="checkbox" id="components" name="components" value="false" title="Components" />
       <label for="components">COMPONENTS</label>
     </div>
     <div>
-      <table style="font-weight: bolder;" id="Vtable">
+      <table id="Vtable">
         <tr>
           <td>v<sub>x</sub> </td>
           <td> = </td>
-          <td style="text-align: right;"> __ </td>
+          <td class="text-right"> __ </td>
           <td> m/s </td>
         </tr>
         <tr>
           <td>v<sub>y</sub></td>
           <td> = </td>
-          <td style="text-align: right;"> __</td>
+          <td class="text-right"> __</td>
           <td> m/s </td>
         </tr>
       </table>

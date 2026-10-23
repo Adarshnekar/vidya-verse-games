@@ -5,7 +5,7 @@
   <script src="../files/compat.js"></script>
     <meta charset="utf-8">
     <title>Astronomical telescope</title>
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../files/favicon_white.ico" media="(prefers-color-scheme: dark)" />
     <link rel="shortcut icon" href="../files/favicon.ico" media="(prefers-color-scheme: light)" />
     <link rel="stylesheet" type="text/css" href="../css/style-page.css">
@@ -31,7 +31,7 @@
     </div>
 
 
-    <div id="detail" style="display: none;" class="annotation">
+    <div id="detail" class="annotation">
         <div id="message-el">
             <p>
                 A telescope makes use of two positive (convex) lenses: </p>
@@ -44,7 +44,7 @@
             <p>Angular magnification, M=-f<sub>o</sub>/f<sub>e</sub>, giving an inverted image.</p>
 
         </div>
-        <a style="visibility: hidden;" id=" part-el"></a>
+        <a id="part-el" class="invisible"></a>
     </div>
     <div id="menu">
         <button  id="menuButton"  onclick="displayLabel()">Show Description</button>

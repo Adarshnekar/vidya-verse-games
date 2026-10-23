@@ -5,7 +5,7 @@
   <script src="../files/compat.js"></script>
     <meta charset="utf-8">
     <title>Image Formation with Converging Lens</title>
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../files/favicon_white.ico" media="(prefers-color-scheme: dark)" />
     <link rel="shortcut icon" href="../files/favicon.ico" media="(prefers-color-scheme: light)" />
     <link rel="stylesheet" type="text/css" href="../css/style-page.css">
@@ -30,7 +30,7 @@
 
         </div>
 
-        <div style="display: none;" id="sidemenu">
+        <div id="sidemenu" class="formula-sidemenu">
             <a> Lens Formula: </a><br>           
                     <div class="fraction">
                         <span class="fup">1</span>
@@ -87,11 +87,11 @@
            
                 <a id="message-el"> Focal length, (f) = <b id="fmessage-el">5 </b> cm <br>
                     Object Distance, (u) = <b id="umessage-el"> -10 </b> cm<br>
-                    Image Distance, (v) = <b style="color:red;" id="vmessage-el"> 10 </b> cm <br>
+                    Image Distance, (v) = <b class="text-red" id="vmessage-el"> 10 </b> cm <br>
                 </a>
             <!-- calculation values to be updated here                 -->
             <a>
-                <div style="color:red;" class="fraction">
+                <div class="fraction text-red">
                     <span class="fup">1</span>
                     <span class="bar">/</span>
                     <span id="v-el" class="fdn">10</span>
@@ -113,7 +113,7 @@
                 <a> &nbsp;</a>
                 <a>m =</a>
                 <div class="fraction">
-                    <span style="color:red;" id="mv-el" class="fup">10</span>
+                    <span id="mv-el" class="fup text-red">10</span>
                     <span class="bar">/</span>
                     <span id="mu-el" class="fdn">-10</span>
                 </div>
