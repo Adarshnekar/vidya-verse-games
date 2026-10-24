@@ -9,10 +9,10 @@
     "services/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace=apps/web\" \"npm run dev --workspace=apps/api\"",
-    "dev:web": "npm run dev --workspace=apps/web",
-    "dev:api": "npm run dev --workspace=apps/api",
-    "build": "npm run build --workspace=apps/web",
+    "dev": "concurrently \"npm run dev --workspace=@vidyaverse/web\" \"npm run dev --workspace=@vidyaverse/api\"",
+    "dev:web": "npm run dev --workspace=@vidyaverse/web",
+    "dev:api": "npm run dev --workspace=@vidyaverse/api",
+    "build": "npm run build --workspace=@vidyaverse/web",
     "lint": "eslint ."
   },
   "devDependencies": {
