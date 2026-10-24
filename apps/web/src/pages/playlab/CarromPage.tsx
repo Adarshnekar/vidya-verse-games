@@ -1,1031 +1,720 @@
+// =========================================================
+// VIDYAVERSE NEWTON'S CARROM — GAMEPLAY & PHYSICS LAB
+// =========================================================
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Matter from 'matter-js';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   RotateCcw,
   Volume2,
   VolumeX,
-  Play,
-  Bot,
-  User,
-  Sliders,
   Sparkles,
-  HelpCircle,
+  Sliders,
   Trophy,
   Activity,
-  Flame,
-  Zap,
+  Layers,
+  HelpCircle,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuthStore } from '../../stores/authStore';
+import {
+  CarromPlayMode,
+  CarromSubMode,
+  BotDifficulty,
+  PlayerSlot,
+  CarromPhysicsConfig,
+  CarromMatchState,
+  ShotTelemetry,
+  CoinType,
+} from './carrom/types';
+import { CarromPhysicsEngine } from './carrom/carromPhysics';
+import { evaluateCarromShot, checkMatchWinner } from './carrom/carromRules';
+import { computeAIShot } from './carrom/carromAI';
+import {
+  saveCarromMatch,
+  loadCarromMatch,
+  clearCarromMatch,
+  saveSoundPreference,
+  loadSoundPreference,
+} from './carrom/carromStorage';
+import { generateShotPhysicsExplanation } from './carrom/physicsLabData';
+import { carromSocketClient } from './carrom/carromSocketClient';
 
-// ==========================================
-// TYPES & CONSTANTS
-// ==========================================
-
-export interface PocketPosition {
-  x: number;
-  y: number;
-  radius: number;
-}
-
-export interface CoinBodyData {
-  type: 'queen' | 'white' | 'black' | 'striker';
-  color: string;
-  radius: number;
-  points: number;
-}
-
-const BOARD_SIZE = 800;
-const POCKET_RADIUS = 34;
-
-const POCKETS: PocketPosition[] = [
-  { x: 62, y: 62, radius: POCKET_RADIUS },
-  { x: 738, y: 62, radius: POCKET_RADIUS },
-  { x: 62, y: 738, radius: POCKET_RADIUS },
-  { x: 738, y: 738, radius: POCKET_RADIUS },
-];
+import { CarromSetupView } from './carrom/components/CarromSetupView';
+import { CarromBoardView } from './carrom/components/CarromBoardView';
+import { CarromControlsBar } from './carrom/components/CarromControlsBar';
+import { CarromScoreboard } from './carrom/components/CarromScoreboard';
+import { CarromPhysicsLabPanel } from './carrom/components/CarromPhysicsLabPanel';
+import { CarromVictoryModal } from './carrom/components/CarromVictoryModal';
 
 export const CarromPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, addXP, addCoins } = useAuthStore();
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // Navigation View State: 'setup' (lobby) vs 'match' (board)
+  const [viewState, setViewState] = useState<'setup' | 'match'>('setup');
 
-  // Game Engine Refs
-  const engineRef = useRef<Matter.Engine | null>(null);
-  const runnerRef = useRef<Matter.Runner | null>(null);
-  const strikerRef = useRef<Matter.Body | null>(null);
-  const coinsRef = useRef<Matter.Body[]>([]);
+  // Match Config & Modes
+  const [playMode, setPlayMode] = useState<CarromPlayMode>('solo');
+  const [subMode, setSubMode] = useState<CarromSubMode>('classic');
+  const [botDifficulty, setBotDifficulty] = useState<BotDifficulty>('intermediate');
+  const [targetScore, setTargetScore] = useState<number>(25);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => loadSoundPreference());
+  const [roomCode, setRoomCode] = useState<string>('CARROM');
+  const [hasSavedGame, setHasSavedGame] = useState<boolean>(() => !!loadCarromMatch());
 
-  // Aiming Interaction Refs
-  const isDraggingAimRef = useRef<boolean>(false);
-  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
-  const currentDragRef = useRef<{ x: number; y: number } | null>(null);
+  // Players Lineup
+  const [players, setPlayers] = useState<PlayerSlot[]>([
+    {
+      id: 'p1',
+      name: user?.name || 'Player 1',
+      isBot: false,
+      score: 0,
+      coinsPocketed: { white: 0, black: 0, queen: 0 },
+      side: 'south',
+      isActive: true,
+    },
+    {
+      id: 'p2_bot',
+      name: 'Newton AI',
+      isBot: true,
+      botDifficulty: 'intermediate',
+      score: 0,
+      coinsPocketed: { white: 0, black: 0, queen: 0 },
+      side: 'north',
+      isActive: true,
+    },
+  ]);
 
-  // Game State
-  const [currentTurn, setCurrentTurn] = useState<'player' | 'bot'>('player');
-  const [gameMode, setGameMode] = useState<'vs_bot' | 'two_player'>('vs_bot');
-  const [playerScore, setPlayerScore] = useState<number>(0);
-  const [botScore, setBotScore] = useState<number>(0);
-  const [strikerBaselineX, setStrikerBaselineX] = useState<number>(400);
+  // Match Lifecycle State
+  const [matchState, setMatchState] = useState<CarromMatchState>({
+    matchId: 'init',
+    mode: 'solo',
+    subMode: 'classic',
+    players: [],
+    activePlayerIndex: 0,
+    turnNumber: 1,
+    queenState: 'on_board',
+    isShotInMotion: false,
+    targetScore: 25,
+    winner: null,
+    lastShotTelemetry: null,
+    config: {
+      frictionAir: 0.016,
+      restitution: 0.85,
+      strikerMass: 8.0,
+      coinMass: 2.0,
+      powerMultiplier: 1.0,
+    },
+    status: 'lobby',
+  });
+
+  // Aiming & Controls State
+  const [strikerBaselinePos, setStrikerBaselinePos] = useState<number>(400);
+  const [aimAngleRad, setAimAngleRad] = useState<number>(-Math.PI / 2); // Pointing upwards by default
+  const [shotPower, setShotPower] = useState<number>(65);
   const [isShotInMotion, setIsShotInMotion] = useState<boolean>(false);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
-  const [turnMessage, setTurnMessage] = useState<string>('Drag from striker to set vector and release to shoot!');
-
-  // Physics Lab Parameters
-  const [frictionAir, setFrictionAir] = useState<number>(0.018); // Air/board friction
-  const [restitution, setRestitution] = useState<number>(0.85); // Bounciness
-  const [powerScale, setPowerScale] = useState<number>(1.0); // Power multiplier
-
-  // Telemetry Metrics
   const [strikerSpeed, setStrikerSpeed] = useState<number>(0);
-  const [pocketedLog, setPocketedLog] = useState<string[]>([]);
+  const [turnMessage, setTurnMessage] = useState<string>('Your turn! Position striker and aim.');
 
-  // Sound Synthesizer (Web Audio API)
-  const playSfx = useCallback((type: 'hit' | 'pocket' | 'strike') => {
-    if (!soundEnabled || typeof window === 'undefined') return;
-    try {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+  // Physics Engine Ref
+  const physicsEngineRef = useRef<CarromPhysicsEngine | null>(null);
 
-      if (type === 'hit') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(450, now);
-        osc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.08);
-      } else if (type === 'strike') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(260, now);
-        osc.frequency.exponentialRampToValueAtTime(70, now + 0.15);
-        gain.gain.setValueAtTime(0.5, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.15);
-      } else if (type === 'pocket') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(520, now);
-        osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
-        gain.gain.setValueAtTime(0.4, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.2);
-      }
-    } catch {
-      // AudioContext policy fallback
-    }
-  }, [soundEnabled]);
+  // ---------------------------------------------------------
+  // SOUND EFFECTS (Web Audio API Synthesizer)
+  // ---------------------------------------------------------
+  const playSfx = useCallback(
+    (type: 'hit' | 'pocket' | 'strike' | 'win') => {
+      if (!soundEnabled || typeof window === 'undefined') return;
+      try {
+        const AudioCtx =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
 
-  // ------------------------------------------
-  // CREATE MATTER.JS CARROM BOARD & BODIES
-  // ------------------------------------------
-  const setupPhysicsWorld = useCallback(() => {
-    // Clean up previous engine if any
-    if (runnerRef.current) Matter.Runner.stop(runnerRef.current);
-    if (engineRef.current) Matter.Composite.clear(engineRef.current.world, false);
-
-    const engine = Matter.Engine.create({
-      gravity: { x: 0, y: 0, scale: 0 }, // Top-down 2D zero gravity
-    });
-    engineRef.current = engine;
-
-    const wallThickness = 40;
-    const wallOptions: Matter.IChamferableBodyDefinition = {
-      isStatic: true,
-      restitution: restitution,
-      friction: 0.05,
-    };
-
-    // 4 Wooden Cushion Borders
-    const topWall = Matter.Bodies.rectangle(400, 20, 800, wallThickness, wallOptions);
-    const bottomWall = Matter.Bodies.rectangle(400, 780, 800, wallThickness, wallOptions);
-    const leftWall = Matter.Bodies.rectangle(20, 400, wallThickness, 800, wallOptions);
-    const rightWall = Matter.Bodies.rectangle(780, 400, wallThickness, 800, wallOptions);
-
-    // Striker: Radius 25, mass higher than coins
-    const striker = Matter.Bodies.circle(400, 630, 25, {
-      mass: 8,
-      frictionAir: frictionAir,
-      restitution: restitution,
-      render: { fillStyle: '#0284c7' },
-      label: 'striker',
-    });
-    strikerRef.current = striker;
-
-    // Coins Formation in Center (Honey-comb / circle arrangement)
-    const coins: Matter.Body[] = [];
-    const coinRadius = 15;
-    const center = { x: 400, y: 400 };
-
-    // 1. Red Queen at exact center
-    const queen = Matter.Bodies.circle(center.x, center.y, coinRadius, {
-      mass: 2.2,
-      frictionAir: frictionAir,
-      restitution: restitution,
-      label: 'coin_queen',
-    });
-    (queen as unknown as { coinData: CoinBodyData }).coinData = {
-      type: 'queen',
-      color: '#dc2626',
-      radius: coinRadius,
-      points: 25,
-    };
-    coins.push(queen);
-
-    // 2. Inner Ring of 6 Coins (Alternating White and Black) at radius ~32px
-    const innerRadius = 32;
-    for (let i = 0; i < 6; i++) {
-      const angle = (i * Math.PI) / 3;
-      const x = center.x + Math.cos(angle) * innerRadius;
-      const y = center.y + Math.sin(angle) * innerRadius;
-      const isWhite = i % 2 === 0;
-
-      const body = Matter.Bodies.circle(x, y, coinRadius, {
-        mass: 2.0,
-        frictionAir: frictionAir,
-        restitution: restitution,
-        label: isWhite ? 'coin_white' : 'coin_black',
-      });
-      (body as unknown as { coinData: CoinBodyData }).coinData = {
-        type: isWhite ? 'white' : 'black',
-        color: isWhite ? '#f8fafc' : '#1e293b',
-        radius: coinRadius,
-        points: isWhite ? 10 : 5,
-      };
-      coins.push(body);
-    }
-
-    // 3. Outer Ring of 12 Coins (Alternating White and Black) at radius ~64px
-    const outerRadius = 64;
-    for (let i = 0; i < 12; i++) {
-      const angle = (i * Math.PI) / 6 + Math.PI / 12;
-      const x = center.x + Math.cos(angle) * outerRadius;
-      const y = center.y + Math.sin(angle) * outerRadius;
-      const isWhite = i % 2 !== 0;
-
-      const body = Matter.Bodies.circle(x, y, coinRadius, {
-        mass: 2.0,
-        frictionAir: frictionAir,
-        restitution: restitution,
-        label: isWhite ? 'coin_white' : 'coin_black',
-      });
-      (body as unknown as { coinData: CoinBodyData }).coinData = {
-        type: isWhite ? 'white' : 'black',
-        color: isWhite ? '#f8fafc' : '#1e293b',
-        radius: coinRadius,
-        points: isWhite ? 10 : 5,
-      };
-      coins.push(body);
-    }
-
-    coinsRef.current = coins;
-
-    Matter.Composite.add(engine.world, [
-      topWall,
-      bottomWall,
-      leftWall,
-      rightWall,
-      striker,
-      ...coins,
-    ]);
-
-    // Collision sound event
-    Matter.Events.on(engine, 'collisionStart', () => {
-      playSfx('hit');
-    });
-
-    const runner = Matter.Runner.create();
-    runnerRef.current = runner;
-    Matter.Runner.run(runner, engine);
-
-    setStrikerBaselineX(400);
-    setIsShotInMotion(false);
-  }, [frictionAir, restitution, playSfx]);
-
-  // Initialize on mount
-  useEffect(() => {
-    setupPhysicsWorld();
-
-    return () => {
-      if (runnerRef.current) Matter.Runner.stop(runnerRef.current);
-    };
-  }, [setupPhysicsWorld]);
-
-  // Update restitution and friction on existing bodies when sliders move
-  useEffect(() => {
-    if (!engineRef.current) return;
-    const allBodies = Matter.Composite.allBodies(engineRef.current.world);
-    allBodies.forEach((b) => {
-      if (!b.isStatic) {
-        b.frictionAir = frictionAir;
-        b.restitution = restitution;
-      }
-    });
-  }, [frictionAir, restitution]);
-
-  // ------------------------------------------
-  // TICK LOOP: POCKET DETECTION & MOTION CHECK
-  // ------------------------------------------
-  useEffect(() => {
-    let animId: number;
-
-    const checkPhysicsState = () => {
-      const engine = engineRef.current;
-      const striker = strikerRef.current;
-      if (!engine || !striker) {
-        animId = requestAnimationFrame(checkPhysicsState);
-        return;
-      }
-
-      // Check speed of striker for telemetry
-      const sSpeed = Math.hypot(striker.velocity.x, striker.velocity.y);
-      setStrikerSpeed(Number(sSpeed.toFixed(2)));
-
-      // Check if any coins entered pockets
-      const allBodies = Matter.Composite.allBodies(engine.world);
-      const coinsInPlay = allBodies.filter((b) => b.label.startsWith('coin_'));
-
-      coinsInPlay.forEach((coin) => {
-        for (const pocket of POCKETS) {
-          const dist = Math.hypot(coin.position.x - pocket.x, coin.position.y - pocket.y);
-          if (dist < pocket.radius) {
-            // Coin sink into pocket!
-            const data = (coin as unknown as { coinData: CoinBodyData }).coinData;
-            playSfx('pocket');
-
-            // Award points
-            if (currentTurn === 'player') {
-              setPlayerScore((prev) => prev + data.points);
-              setPocketedLog((prev) => [
-                `🎯 Player pocketed ${data.type.toUpperCase()} (+${data.points} pts)`,
-                ...prev.slice(0, 9),
-              ]);
-            } else {
-              setBotScore((prev) => prev + data.points);
-              setPocketedLog((prev) => [
-                `🤖 Bot pocketed ${data.type.toUpperCase()} (+${data.points} pts)`,
-                ...prev.slice(0, 9),
-              ]);
-            }
-
-            Matter.Composite.remove(engine.world, coin);
-            break;
-          }
+        if (type === 'hit') {
+          // Sharp wooden click
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(140, now + 0.06);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.06);
+        } else if (type === 'strike') {
+          // Thump release impulse
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(280, now);
+          osc.frequency.exponentialRampToValueAtTime(80, now + 0.12);
+          gain.gain.setValueAtTime(0.5, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } else if (type === 'pocket') {
+          // Pleasant drop chime
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(580, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } else if (type === 'win') {
+          // Fanfare
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(554.37, now + 0.1);
+          osc.frequency.setValueAtTime(659.25, now + 0.2);
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.4);
         }
+      } catch {
+        // Fallback
+      }
+    },
+    [soundEnabled]
+  );
+
+  // Toggle sound
+  const handleToggleSound = (enabled: boolean) => {
+    setSoundEnabled(enabled);
+    saveSoundPreference(enabled);
+  };
+
+  // ---------------------------------------------------------
+  // INITIALIZE / START MATCH
+  // ---------------------------------------------------------
+  const startNewMatch = useCallback(
+    (customPlayers?: PlayerSlot[], customSubMode?: CarromSubMode) => {
+      const activePlayers = customPlayers || players;
+      const activeSubMode = customSubMode || subMode;
+
+      // Clean up previous engine if any
+      if (physicsEngineRef.current) {
+        physicsEngineRef.current.destroy();
+        physicsEngineRef.current = null;
+      }
+
+      const initialConfig: CarromPhysicsConfig = {
+        frictionAir: 0.016,
+        restitution: 0.85,
+        strikerMass: 8.0,
+        coinMass: 2.0,
+        powerMultiplier: 1.0,
+      };
+
+      const engine = new CarromPhysicsEngine(initialConfig);
+      physicsEngineRef.current = engine;
+
+      // Register collision sound
+      engine.onCollision(() => {
+        playSfx('hit');
       });
 
-      // Check if all bodies have settled to a stop
-      const nonStaticBodies = allBodies.filter((b) => !b.isStatic);
-      const isStillMoving = nonStaticBodies.some(
-        (b) => Math.hypot(b.velocity.x, b.velocity.y) > 0.12
-      );
+      // Register pocket sound
+      engine.onPocket(() => {
+        playSfx('pocket');
+      });
 
-      if (isShotInMotion && !isStillMoving) {
-        // Shot completed! Reset striker to baseline & switch turn
-        setIsShotInMotion(false);
+      const initialMatchState: CarromMatchState = {
+        matchId: `match_${Date.now()}`,
+        mode: playMode,
+        subMode: activeSubMode,
+        players: activePlayers.map((p) => ({
+          ...p,
+          score: 0,
+          coinsPocketed: { white: 0, black: 0, queen: 0 },
+        })),
+        activePlayerIndex: 0,
+        turnNumber: 1,
+        queenState: 'on_board',
+        isShotInMotion: false,
+        targetScore,
+        winner: null,
+        lastShotTelemetry: null,
+        config: initialConfig,
+        status: 'active',
+      };
 
-        // Reset Striker to baseline
-        const nextTurn = currentTurn === 'player' ? 'bot' : 'player';
-        setCurrentTurn(nextTurn);
+      setMatchState(initialMatchState);
+      setStrikerBaselinePos(400);
+      setAimAngleRad(-Math.PI / 2);
+      setShotPower(65);
+      setIsShotInMotion(false);
+      setTurnMessage(`${activePlayers[0]?.name || 'Player 1'}’s turn! Aim and shoot.`);
+      setViewState('match');
+    },
+    [players, subMode, playMode, targetScore, playSfx]
+  );
 
-        const newBaselineY = nextTurn === 'player' ? 630 : 170;
-        Matter.Body.setPosition(striker, { x: 400, y: newBaselineY });
-        Matter.Body.setVelocity(striker, { x: 0, y: 0 });
-        Matter.Body.setAngularVelocity(striker, 0);
+  // Resume Saved Game
+  const resumeSavedMatch = () => {
+    const saved = loadCarromMatch();
+    if (!saved) return;
 
-        setTurnMessage(
-          nextTurn === 'player'
-            ? 'Your turn! Position striker and aim.'
-            : 'Bot is analyzing trajectories and lining up shot...'
+    if (physicsEngineRef.current) {
+      physicsEngineRef.current.destroy();
+      physicsEngineRef.current = null;
+    }
+
+    const engine = new CarromPhysicsEngine(saved.matchState.config);
+    physicsEngineRef.current = engine;
+
+    engine.initCoins(saved.coinPositions);
+    const activePlayer = saved.matchState.players[saved.matchState.activePlayerIndex];
+    engine.initStriker(activePlayer?.side || 'south', saved.strikerPosition.x);
+
+    engine.onCollision(() => playSfx('hit'));
+    engine.onPocket(() => playSfx('pocket'));
+
+    setMatchState(saved.matchState);
+    setStrikerBaselinePos(saved.strikerPosition.x);
+    setIsShotInMotion(false);
+    setViewState('match');
+  };
+
+  // ---------------------------------------------------------
+  // EXECUTE VALIDATED SHOT
+  // ---------------------------------------------------------
+  const executeShot = useCallback(
+    (angleRad: number, powerPercent: number) => {
+      const engine = physicsEngineRef.current;
+      if (!engine || isShotInMotion || matchState.winner) return;
+
+      playSfx('strike');
+
+      // Execute on Matter.js physics engine
+      const telemetry = engine.executeShot(angleRad, powerPercent);
+
+      setIsShotInMotion(true);
+      setTurnMessage('Striker launched! Simulating collisions & momentum transfer...');
+
+      // Broadcast shot to socket if in online multiplayer
+      if (playMode === 'friends') {
+        carromSocketClient.broadcastShot(
+          matchState.activePlayerIndex,
+          angleRad,
+          powerPercent,
+          strikerBaselinePos
         );
       }
 
-      animId = requestAnimationFrame(checkPhysicsState);
-    };
+      setMatchState((prev) => ({
+        ...prev,
+        isShotInMotion: true,
+        lastShotTelemetry: telemetry,
+      }));
+    },
+    [isShotInMotion, matchState.winner, matchState.activePlayerIndex, playMode, strikerBaselinePos, playSfx]
+  );
 
-    animId = requestAnimationFrame(checkPhysicsState);
-    return () => cancelAnimationFrame(animId);
-  }, [isShotInMotion, currentTurn, playSfx]);
+  // Baseline position change handler
+  const handleBaselinePosChange = useCallback(
+    (newPos: number) => {
+      if (isShotInMotion || !physicsEngineRef.current) return;
+      const activePlayer = matchState.players[matchState.activePlayerIndex];
+      if (!activePlayer || activePlayer.isBot) return;
 
-  // ------------------------------------------
-  // BOT AUTOMATION SHOT
-  // ------------------------------------------
+      setStrikerBaselinePos(newPos);
+      physicsEngineRef.current.setStrikerBaselinePosition(activePlayer.side, newPos);
+    },
+    [isShotInMotion, matchState.players, matchState.activePlayerIndex]
+  );
+
+  // ---------------------------------------------------------
+  // GAME LOOP TICK: POCKETS, SETTLING & TURN RESOLUTION
+  // ---------------------------------------------------------
   useEffect(() => {
-    if (currentTurn !== 'bot' || isShotInMotion || gameMode !== 'vs_bot') return;
-
-    const botTimer = setTimeout(() => {
-      const engine = engineRef.current;
-      const striker = strikerRef.current;
-      if (!engine || !striker) return;
-
-      // Find closest coin to any pocket
-      const allBodies = Matter.Composite.allBodies(engine.world);
-      const availableCoins = allBodies.filter((b) => b.label.startsWith('coin_'));
-
-      if (availableCoins.length === 0) {
-        setTurnMessage('No coins left! Game finished.');
-        return;
-      }
-
-      // Find best target coin
-      let bestCoin = availableCoins[0];
-      let minDistance = 9999;
-      let targetPocket = POCKETS[0];
-
-      availableCoins.forEach((coin) => {
-        POCKETS.forEach((p) => {
-          const d = Math.hypot(coin.position.x - p.x, coin.position.y - p.y);
-          if (d < minDistance) {
-            minDistance = d;
-            bestCoin = coin;
-            targetPocket = p;
-          }
-        });
-      });
-
-      // Position bot striker on top baseline (y = 170)
-      const botStartX = Math.max(200, Math.min(600, bestCoin.position.x - 30));
-      Matter.Body.setPosition(striker, { x: botStartX, y: 170 });
-
-      // Aim vector from striker to coin
-      const angle = Math.atan2(
-        bestCoin.position.y - 170,
-        bestCoin.position.x - botStartX
-      );
-
-      const botImpulse = 0.045 * powerScale;
-      playSfx('strike');
-
-      setTimeout(() => {
-        Matter.Body.applyForce(striker, striker.position, {
-          x: Math.cos(angle) * botImpulse,
-          y: Math.sin(angle) * botImpulse,
-        });
-        setIsShotInMotion(true);
-      }, 500);
-    }, 1200);
-
-    return () => clearTimeout(botTimer);
-  }, [currentTurn, isShotInMotion, gameMode, powerScale, playSfx]);
-
-  // ------------------------------------------
-  // CANVASES & RENDER LOOP
-  // ------------------------------------------
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (viewState !== 'match') return;
 
     let animId: number;
 
-    const render = () => {
-      ctx.clearRect(0, 0, BOARD_SIZE, BOARD_SIZE);
+    const gameLoop = () => {
+      const engine = physicsEngineRef.current;
+      if (!engine) {
+        animId = requestAnimationFrame(gameLoop);
+        return;
+      }
 
-      // 1. Draw Wooden Outer Frame
-      ctx.fillStyle = '#78350f';
-      ctx.fillRect(0, 0, BOARD_SIZE, BOARD_SIZE);
+      // Update pockets suction and settling
+      const { isStillMoving, pocketedThisTick, strikerSpeed: currentSpeed, collisionCount } =
+        engine.updatePocketsAndSettling();
 
-      // Frame inner bevel
-      ctx.strokeStyle = '#451a03';
-      ctx.lineWidth = 6;
-      ctx.strokeRect(3, 3, BOARD_SIZE - 6, BOARD_SIZE - 6);
+      setStrikerSpeed(currentSpeed);
 
-      // 2. Draw Lacquer Playing Surface
-      ctx.fillStyle = '#fef3c7'; // Warm ivory plywood
-      ctx.fillRect(40, 40, BOARD_SIZE - 80, BOARD_SIZE - 80);
+      // Settle shot when all pieces stop moving
+      if (isShotInMotion && !isStillMoving) {
+        setIsShotInMotion(false);
 
-      // Surface inner border
-      ctx.strokeStyle = '#d97706';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(40, 40, BOARD_SIZE - 80, BOARD_SIZE - 80);
+        // Gather all pocketed coins in this shot
+        const pocketedCoins = engine.getPocketedInLastShot();
 
-      // 3. Draw 4 Corner Pockets with mesh netting effect
-      POCKETS.forEach((pocket) => {
-        // Deep pocket hole
-        ctx.beginPath();
-        ctx.arc(pocket.x, pocket.y, pocket.radius, 0, Math.PI * 2);
-        ctx.fillStyle = '#0f172a';
-        ctx.fill();
-        ctx.strokeStyle = '#78350f';
-        ctx.lineWidth = 4;
-        ctx.stroke();
+        // Evaluate shot rules
+        const result = evaluateCarromShot(matchState, pocketedCoins);
 
-        // Mesh Net lines
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(pocket.x, pocket.y, pocket.radius - 8, 0, Math.PI * 2);
-        ctx.stroke();
-      });
+        // Re-spot queen if required
+        if (result.queenReturnedToCenter) {
+          engine.respotCoin('queen');
+        }
 
-      // 4. Draw Baselines & Circles
-      // Bottom Baseline (Player 1)
-      ctx.strokeStyle = '#dc2626';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(180, 615);
-      ctx.lineTo(620, 615);
-      ctx.moveTo(180, 645);
-      ctx.lineTo(620, 645);
-      ctx.stroke();
-
-      // Bottom Baseline Red Circles
-      [180, 620].forEach((x) => {
-        ctx.beginPath();
-        ctx.arc(x, 630, 16, 0, Math.PI * 2);
-        ctx.fillStyle = '#fef3c7';
-        ctx.fill();
-        ctx.strokeStyle = '#dc2626';
-        ctx.lineWidth = 1.8;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(x, 630, 8, 0, Math.PI * 2);
-        ctx.fillStyle = '#ef4444';
-        ctx.fill();
-      });
-
-      // Top Baseline (Player 2 / Bot)
-      ctx.beginPath();
-      ctx.moveTo(180, 155);
-      ctx.lineTo(620, 155);
-      ctx.moveTo(180, 185);
-      ctx.lineTo(620, 185);
-      ctx.stroke();
-
-      [180, 620].forEach((x) => {
-        ctx.beginPath();
-        ctx.arc(x, 170, 16, 0, Math.PI * 2);
-        ctx.fillStyle = '#fef3c7';
-        ctx.fill();
-        ctx.strokeStyle = '#dc2626';
-        ctx.lineWidth = 1.8;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(x, 170, 8, 0, Math.PI * 2);
-        ctx.fillStyle = '#ef4444';
-        ctx.fill();
-      });
-
-      // 5. Draw Center Concentric Circles and 8-petal mandala
-      ctx.strokeStyle = '#b45309';
-      ctx.lineWidth = 1.5;
-
-      ctx.beginPath();
-      ctx.arc(400, 400, 90, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(400, 400, 32, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(400, 400, 8, 0, Math.PI * 2);
-      ctx.fillStyle = '#dc2626';
-      ctx.fill();
-
-      // Corner arrow diagonals
-      const diagonals = [
-        { x1: 90, y1: 90, x2: 240, y2: 240 },
-        { x1: 710, y1: 90, x2: 560, y2: 240 },
-        { x1: 90, y1: 710, x2: 240, y2: 560 },
-        { x1: 710, y1: 710, x2: 560, y2: 560 },
-      ];
-      diagonals.forEach((d) => {
-        ctx.beginPath();
-        ctx.moveTo(d.x1, d.y1);
-        ctx.lineTo(d.x2, d.y2);
-        ctx.strokeStyle = '#d97706';
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
-      });
-
-      // 6. Draw Matter.js Physics Bodies
-      if (engineRef.current) {
-        const bodies = Matter.Composite.allBodies(engineRef.current.world);
-
-        bodies.forEach((body) => {
-          if (body.isStatic) return;
-
-          ctx.save();
-          ctx.translate(body.position.x, body.position.y);
-          ctx.rotate(body.angle);
-
-          // Body Drop Shadow
-          ctx.beginPath();
-          ctx.arc(2, 3, (body.circleRadius || 15), 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-          ctx.fill();
-
-          // Body Render
-          if (body.label === 'striker') {
-            // Striker: Acrylic blue disc
-            ctx.beginPath();
-            ctx.arc(0, 0, body.circleRadius || 25, 0, Math.PI * 2);
-            ctx.fillStyle = '#0284c7';
-            ctx.fill();
-            ctx.strokeStyle = '#bae6fd';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            // Inner engraving
-            ctx.beginPath();
-            ctx.arc(0, 0, 14, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(0, 0, 4, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffffff';
-            ctx.fill();
-          } else {
-            // Coins
-            const data = (body as unknown as { coinData: CoinBodyData }).coinData;
-            const r = body.circleRadius || 15;
-
-            ctx.beginPath();
-            ctx.arc(0, 0, r, 0, Math.PI * 2);
-            ctx.fillStyle = data ? data.color : '#ffffff';
-            ctx.fill();
-            ctx.strokeStyle = data?.type === 'white' ? '#94a3b8' : '#0f172a';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-
-            // Coin center accent
-            ctx.beginPath();
-            ctx.arc(0, 0, 5, 0, Math.PI * 2);
-            ctx.fillStyle =
-              data?.type === 'queen'
-                ? '#fef08a'
-                : data?.type === 'white'
-                ? '#cbd5e1'
-                : '#334155';
-            ctx.fill();
+        // Apply score and turn changes
+        const updatedPlayers = matchState.players.map((p, idx) => {
+          if (idx === matchState.activePlayerIndex) {
+            return {
+              ...p,
+              score: Math.max(0, p.score + result.pointsAwarded),
+            };
           }
-
-          ctx.restore();
+          return p;
         });
+
+        const nextPlayer = updatedPlayers[result.nextPlayerIndex];
+
+        // Reset striker to next player's baseline
+        if (nextPlayer) {
+          engine.initStriker(nextPlayer.side, 400);
+          setStrikerBaselinePos(400);
+          // Set default aim facing inwards towards center
+          const defaultAngle =
+            nextPlayer.side === 'south'
+              ? -Math.PI / 2
+              : nextPlayer.side === 'north'
+              ? Math.PI / 2
+              : nextPlayer.side === 'west'
+              ? 0
+              : Math.PI;
+          setAimAngleRad(defaultAngle);
+        }
+
+        // Check winner
+        const remainingCount = engine.coins.filter((c) => !engine.isPocketed(c)).length;
+        const winner = checkMatchWinner(updatedPlayers, remainingCount, matchState.targetScore);
+
+        if (winner) {
+          playSfx('win');
+          addXP(50);
+          addCoins(25);
+          clearCarromMatch();
+          setHasSavedGame(false);
+        }
+
+        // Update physics explanation
+        let dynamicTelemetry = matchState.lastShotTelemetry;
+        if (dynamicTelemetry) {
+          dynamicTelemetry = {
+            ...dynamicTelemetry,
+            collisionCount,
+            coinsPocketedInShot: pocketedCoins,
+          };
+          const explanationObj = generateShotPhysicsExplanation(dynamicTelemetry);
+          dynamicTelemetry.newtonExplanation = explanationObj.explanation;
+          dynamicTelemetry.lawReferenced = explanationObj.law;
+        }
+
+        const newMatchState: CarromMatchState = {
+          ...matchState,
+          players: updatedPlayers,
+          activePlayerIndex: result.nextPlayerIndex,
+          turnNumber: matchState.turnNumber + 1,
+          queenState: result.queenClaimed
+            ? 'covered'
+            : pocketedCoins.includes('queen')
+            ? 'pocketed_uncovered'
+            : result.queenReturnedToCenter
+            ? 'on_board'
+            : matchState.queenState,
+          queenCoverPlayerIndex: pocketedCoins.includes('queen')
+            ? matchState.activePlayerIndex
+            : result.queenReturnedToCenter
+            ? undefined
+            : matchState.queenCoverPlayerIndex,
+          isShotInMotion: false,
+          winner,
+          lastShotTelemetry: dynamicTelemetry,
+        };
+
+        setMatchState(newMatchState);
+        setTurnMessage(result.message || `${nextPlayer?.name}’s turn!`);
+
+        // Auto-save active match state
+        if (!winner) {
+          saveCarromMatch({
+            matchState: newMatchState,
+            coinPositions: engine.coins.map((c) => ({
+              id: (c as unknown as { coinData: { id: string } }).coinData.id,
+              type: (c as unknown as { coinData: { type: CoinType } }).coinData.type,
+              x: c.position.x,
+              y: c.position.y,
+              vx: c.velocity.x,
+              vy: c.velocity.y,
+              pocketed: engine.isPocketed(c),
+            })),
+            strikerPosition: { x: 400, y: 630 },
+            timestamp: Date.now(),
+          });
+          setHasSavedGame(true);
+        }
       }
 
-      // 7. Draw Aiming Line & Trajectory Vector
-      if (
-        isDraggingAimRef.current &&
-        dragStartRef.current &&
-        currentDragRef.current &&
-        strikerRef.current &&
-        !isShotInMotion
-      ) {
-        const sx = strikerRef.current.position.x;
-        const sy = strikerRef.current.position.y;
-
-        const dx = currentDragRef.current.x - dragStartRef.current.x;
-        const dy = currentDragRef.current.y - dragStartRef.current.y;
-
-        // Slingshot inverted vector or direct vector
-        const targetX = sx - dx * 1.5;
-        const targetY = sy - dy * 1.5;
-
-        // Draw dotted trajectory line
-        ctx.save();
-        ctx.setLineDash([6, 4]);
-        ctx.strokeStyle = '#0ea5e9';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(sx, sy);
-        ctx.lineTo(targetX, targetY);
-        ctx.stroke();
-
-        // Draw trajectory arrowhead / endpoint
-        ctx.setLineDash([]);
-        ctx.beginPath();
-        ctx.arc(targetX, targetY, 6, 0, Math.PI * 2);
-        ctx.fillStyle = '#38bdf8';
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-      }
-
-      animId = requestAnimationFrame(render);
+      animId = requestAnimationFrame(gameLoop);
     };
 
-    animId = requestAnimationFrame(render);
+    animId = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animId);
-  }, [isShotInMotion]);
+  }, [viewState, isShotInMotion, matchState, playSfx, addXP, addCoins]);
 
-  // ------------------------------------------
-  // MOUSE & TOUCH AIMING HANDLERS
-  // ------------------------------------------
-  const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = BOARD_SIZE / rect.width;
-    const scaleY = BOARD_SIZE / rect.height;
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
-    };
+  // ---------------------------------------------------------
+  // BOT AI TURN AUTOMATION
+  // ---------------------------------------------------------
+  useEffect(() => {
+    if (viewState !== 'match' || isShotInMotion || matchState.winner) return;
+
+    const activePlayer = matchState.players[matchState.activePlayerIndex];
+    if (!activePlayer?.isBot) return;
+
+    const botTimer = setTimeout(() => {
+      const engine = physicsEngineRef.current;
+      if (!engine || !engine.striker) return;
+
+      const aiPlan = computeAIShot(
+        engine.engine,
+        engine.striker,
+        activePlayer.side,
+        activePlayer.botDifficulty || botDifficulty,
+        matchState.queenState === 'on_board'
+      );
+
+      if (aiPlan) {
+        // Move striker to AI planned baseline position
+        engine.setStrikerBaselinePosition(activePlayer.side, aiPlan.baselinePosition);
+        setStrikerBaselinePos(aiPlan.baselinePosition);
+        setAimAngleRad(aiPlan.angleRad);
+        setShotPower(aiPlan.powerPercent);
+
+        setTimeout(() => {
+          executeShot(aiPlan.angleRad, aiPlan.powerPercent);
+        }, 500);
+      }
+    }, 1100);
+
+    return () => clearTimeout(botTimer);
+  }, [
+    viewState,
+    isShotInMotion,
+    matchState.activePlayerIndex,
+    matchState.players,
+    matchState.queenState,
+    matchState.winner,
+    botDifficulty,
+    executeShot,
+  ]);
+
+  // Physics Lab Config Change Handler
+  const handleConfigChange = (newConfig: Partial<CarromPhysicsConfig>) => {
+    if (physicsEngineRef.current) {
+      physicsEngineRef.current.updateConfig(newConfig);
+    }
+    setMatchState((prev) => ({
+      ...prev,
+      config: { ...prev.config, ...newConfig },
+    }));
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (isShotInMotion || currentTurn !== 'player' || !strikerRef.current) return;
-    const coords = getCanvasCoords(e);
-    const dist = Math.hypot(
-      coords.x - strikerRef.current.position.x,
-      coords.y - strikerRef.current.position.y
+  // Compute Remaining Coins on Board
+  const engine = physicsEngineRef.current;
+  const remainingCoins = {
+    white: engine?.coins.filter((c) => c.label === 'coin_white' && !engine.isPocketed(c)).length ?? 9,
+    black: engine?.coins.filter((c) => c.label === 'coin_black' && !engine.isPocketed(c)).length ?? 9,
+    queen: engine?.coins.some((c) => c.label === 'coin_queen' && !engine.isPocketed(c)) ?? true,
+  };
+
+  // If in Lobby / Setup View
+  if (viewState === 'setup') {
+    return (
+      <CarromSetupView
+        playMode={playMode}
+        setPlayMode={setPlayMode}
+        subMode={subMode}
+        setSubMode={setSubMode}
+        players={players}
+        setPlayers={setPlayers}
+        botDifficulty={botDifficulty}
+        setBotDifficulty={setBotDifficulty}
+        targetScore={targetScore}
+        setTargetScore={setTargetScore}
+        soundEnabled={soundEnabled}
+        setSoundEnabled={handleToggleSound}
+        hasSavedGame={hasSavedGame}
+        onResumeSavedGame={resumeSavedMatch}
+        onStartMatch={() => startNewMatch()}
+        onNavigateBack={() => navigate('/playlab')}
+        roomCode={roomCode}
+        setRoomCode={setRoomCode}
+        onCreateRoom={() => {
+          const code = carromSocketClient.createRoom(players[0]);
+          setRoomCode(code);
+        }}
+        onJoinRoom={() => {
+          carromSocketClient.joinRoom(roomCode, players[0]);
+          startNewMatch();
+        }}
+      />
     );
+  }
 
-    // If click within 60px of striker, start aiming
-    if (dist < 60) {
-      isDraggingAimRef.current = true;
-      dragStartRef.current = coords;
-      currentDragRef.current = coords;
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDraggingAimRef.current) return;
-    currentDragRef.current = getCanvasCoords(e);
-  };
-
-  const handleMouseUp = () => {
-    if (
-      !isDraggingAimRef.current ||
-      !dragStartRef.current ||
-      !currentDragRef.current ||
-      !strikerRef.current
-    ) {
-      isDraggingAimRef.current = false;
-      return;
-    }
-
-    const dx = currentDragRef.current.x - dragStartRef.current.x;
-    const dy = currentDragRef.current.y - dragStartRef.current.y;
-    const dragDistance = Math.hypot(dx, dy);
-
-    isDraggingAimRef.current = false;
-    dragStartRef.current = null;
-    currentDragRef.current = null;
-
-    if (dragDistance < 15) return; // Too small drag, ignore
-
-    // Fire Striker!
-    const forceMagnitude = Math.min(dragDistance * 0.00045 * powerScale, 0.08);
-    const angle = Math.atan2(-dy, -dx); // Invert for slingshot pull
-
-    playSfx('strike');
-
-    Matter.Body.applyForce(strikerRef.current, strikerRef.current.position, {
-      x: Math.cos(angle) * forceMagnitude,
-      y: Math.sin(angle) * forceMagnitude,
-    });
-
-    setIsShotInMotion(true);
-    setTurnMessage('Shot executed! Simulating momentum transfer...');
-  };
-
-  // Move Striker along baseline
-  const handleBaselinePositionChange = (newX: number) => {
-    if (isShotInMotion || currentTurn !== 'player' || !strikerRef.current) return;
-    setStrikerBaselineX(newX);
-    Matter.Body.setPosition(strikerRef.current, { x: newX, y: 630 });
-    Matter.Body.setVelocity(strikerRef.current, { x: 0, y: 0 });
-  };
+  const activePlayer = matchState.players[matchState.activePlayerIndex] || players[0];
 
   return (
-    <div className="min-h-screen bg-surface-900 text-surface-100 selection:bg-emerald-500/30 selection:text-emerald-200">
-      {/* Top Header */}
-      <header className="border-b border-surface-800 bg-surface-850/80 backdrop-blur-md px-4 sm:px-6 py-3 sticky top-0 z-30 flex items-center justify-between">
+    <div className="h-full min-h-screen bg-canvas text-text-primary flex flex-col font-sans select-none overflow-x-hidden">
+      {/* 1. TOP HEADER */}
+      <header className="h-14 border-b border-border bg-card/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between shrink-0 z-30">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate('/playlab')}
-            className="p-2 rounded-xl bg-surface-800 hover:bg-surface-700 text-surface-300 hover:text-white transition-colors"
+            onClick={() => setViewState('setup')}
+            className="p-2 rounded-xl bg-card hover:bg-canvas text-text-muted hover:text-text-primary transition-colors border border-border cursor-pointer"
+            title="Return to Match Setup"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
+
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold font-display text-white">
-                Carrom Physics Lab
+              <h1 className="text-base font-bold font-display text-text-primary tracking-tight">
+                Newton’s Carrom
               </h1>
-              <span className="badge-circuit text-[10px]">Matter.js 2D Rigid Body</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                {subMode === 'classic' ? 'Classic Carrom' : 'Physics Lab'}
+              </span>
             </div>
-            <p className="text-xs text-surface-400 hidden sm:block">
-              Explore Newton’s laws, momentum conservation, and elastic collisions
-            </p>
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Controls */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="p-2 rounded-xl bg-surface-800 hover:bg-surface-700 text-surface-300 hover:text-white transition-colors"
+            onClick={() => handleToggleSound(!soundEnabled)}
+            className="p-2 rounded-xl bg-card hover:bg-canvas text-text-muted hover:text-text-primary transition-colors border border-border cursor-pointer"
             title={soundEnabled ? 'Mute' : 'Enable sound'}
           >
             {soundEnabled ? (
-              <Volume2 className="w-5 h-5 text-emerald-400" />
+              <Volume2 className="w-4 h-4 text-amber-500" />
             ) : (
-              <VolumeX className="w-5 h-5" />
+              <VolumeX className="w-4 h-4" />
             )}
           </button>
 
           <button
-            onClick={setupPhysicsWorld}
-            className="p-2 rounded-xl bg-surface-800 hover:bg-surface-700 text-surface-300 hover:text-white transition-colors"
-            title="Reset Board"
+            onClick={() => startNewMatch()}
+            className="p-2 rounded-xl bg-card hover:bg-canvas text-text-muted hover:text-text-primary transition-colors border border-border cursor-pointer"
+            title="Reset Game Board"
           >
-            <RotateCcw className="w-5 h-5" />
+            <RotateCcw className="w-4 h-4" />
           </button>
         </div>
       </header>
 
-      {/* Main Grid */}
-      <main className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* ========================================================= */}
-        {/* LEFT COLUMN: Score & Controls (3 Cols) */}
-        {/* ========================================================= */}
-        <div className="lg:col-span-3 space-y-4">
-          {/* Scoreboard Card */}
-          <div className="card p-5 space-y-4 bg-surface-800 border-surface-700/80">
-            <h2 className="text-xs font-semibold text-surface-400 uppercase tracking-wider flex items-center justify-between">
-              <span>Match Scores</span>
-              <span className="text-emerald-400 font-mono text-[11px]">Race to 25 pts</span>
-            </h2>
-
-            <div className="grid grid-cols-2 gap-3">
-              {/* Player 1 Card */}
-              <div
-                className={clsx(
-                  'p-3 rounded-xl border text-center transition-all',
-                  currentTurn === 'player'
-                    ? 'bg-emerald-500/10 border-emerald-500/40 ring-2 ring-emerald-500/20'
-                    : 'bg-surface-900/50 border-surface-700'
-                )}
-              >
-                <div className="text-xs text-surface-300 font-semibold mb-1">
-                  {user?.name || 'Player 1'}
-                </div>
-                <div className="text-2xl font-bold font-display text-white">
-                  {playerScore}
-                </div>
-                <div className="text-[10px] text-emerald-400 mt-1">Bottom Line</div>
-              </div>
-
-              {/* Bot Card */}
-              <div
-                className={clsx(
-                  'p-3 rounded-xl border text-center transition-all',
-                  currentTurn === 'bot'
-                    ? 'bg-purple-500/10 border-purple-500/40 ring-2 ring-purple-500/20'
-                    : 'bg-surface-900/50 border-surface-700'
-                )}
-              >
-                <div className="text-xs text-surface-300 font-semibold mb-1">
-                  Newton Bot
-                </div>
-                <div className="text-2xl font-bold font-display text-white">
-                  {botScore}
-                </div>
-                <div className="text-[10px] text-purple-400 mt-1">Top Line</div>
-              </div>
-            </div>
-
-            {/* Turn Announcement */}
-            <div className="p-3 bg-surface-900/80 rounded-xl border border-surface-700/60 text-xs text-surface-300 space-y-1">
-              <div className="flex items-center gap-2 font-bold text-white">
-                <span
-                  className={clsx(
-                    'w-2 h-2 rounded-full',
-                    currentTurn === 'player' ? 'bg-emerald-400' : 'bg-purple-400'
-                  )}
-                />
-                <span>Turn: {currentTurn === 'player' ? 'You (Player 1)' : 'Newton Bot'}</span>
-              </div>
-              <p className="text-[11px] text-surface-400">{turnMessage}</p>
-            </div>
-          </div>
-
-          {/* Striker Baseline Slider */}
-          <div className="card p-4 space-y-3 bg-surface-800 border-surface-700/80">
-            <div className="flex justify-between items-center text-xs">
-              <span className="font-semibold text-surface-300">Striker Placement:</span>
-              <span className="font-mono text-emerald-400 font-bold">{strikerBaselineX}px</span>
-            </div>
-            <input
-              type="range"
-              min="200"
-              max="600"
-              value={strikerBaselineX}
-              disabled={isShotInMotion || currentTurn !== 'player'}
-              onChange={(e) => handleBaselinePositionChange(Number(e.target.value))}
-              className="w-full accent-emerald-500 cursor-pointer disabled:opacity-50"
+      {/* 2. MAIN CARROM GAMEPLAY GRID */}
+      <main className="flex-1 w-full max-w-[1680px] mx-auto p-3 sm:p-5 flex flex-col justify-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+          
+          {/* ========================================================= */}
+          {/* LEFT COLUMN: Scoreboard & Live Telemetry HUD (3 Cols)     */}
+          {/* ========================================================= */}
+          <div className="lg:col-span-3 space-y-4 order-2 lg:order-1">
+            <CarromScoreboard
+              matchState={matchState}
+              remainingCoins={remainingCoins}
+              turnMessage={turnMessage}
             />
-            <p className="text-[10px] text-surface-400">
-              Slide striker horizontally along the baseline before pulling back to aim.
-            </p>
-          </div>
 
-          {/* Pocketed Coins History Log */}
-          <div className="card p-3 space-y-2 bg-surface-800/80 border-surface-700/60 max-h-44 overflow-y-auto">
-            <h3 className="text-xs font-semibold text-surface-400 uppercase tracking-wider">
-              Pocket Log
-            </h3>
-            {pocketedLog.length === 0 ? (
-              <p className="text-xs text-surface-500 italic">No coins pocketed yet.</p>
-            ) : (
-              <div className="space-y-1 text-xs font-mono">
-                {pocketedLog.map((log, i) => (
-                  <div key={i} className="text-[11px] text-surface-300">
-                    {log}
-                  </div>
-                ))}
+            {/* Quick Tips Box */}
+            <div className="card p-3 bg-card border border-border shadow-xs text-xs space-y-1.5">
+              <div className="flex items-center gap-1.5 font-bold text-text-primary">
+                <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
+                <span>Controls & Pro Tips</span>
               </div>
-            )}
+              <ul className="text-[11px] text-text-muted space-y-1 list-disc list-inside leading-relaxed">
+                <li><strong className="text-text-primary">Drag Baseline:</strong> Slide the striker horizontally along your baseline.</li>
+                <li><strong className="text-text-primary">Drag-to-Shoot:</strong> Pull back from the striker like a slingshot to set power and release to shoot.</li>
+                <li><strong className="text-text-primary">Shoot Button:</strong> Or use the sliders below and click the prominent SHOOT button!</li>
+              </ul>
+            </div>
           </div>
-        </div>
 
-        {/* ========================================================= */}
-        {/* CENTER COLUMN: CARROM BOARD CANVAS (6 Cols) */}
-        {/* ========================================================= */}
-        <div className="lg:col-span-6 flex flex-col items-center justify-center">
-          <div className="relative w-full max-w-[560px] aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-amber-950 bg-amber-950">
-            <canvas
-              ref={canvasRef}
-              width={BOARD_SIZE}
-              height={BOARD_SIZE}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              className="w-full h-full cursor-crosshair select-none"
+          {/* ========================================================= */}
+          {/* CENTER COLUMN: CARROM BOARD CANVAS (6 Cols)               */}
+          {/* ========================================================= */}
+          <div className="lg:col-span-6 flex flex-col items-center justify-center space-y-3 order-1 lg:order-2">
+            <CarromBoardView
+              physicsEngine={physicsEngineRef.current}
+              activePlayer={activePlayer}
+              isShotInMotion={isShotInMotion}
+              strikerBaselinePos={strikerBaselinePos}
+              onBaselinePosChange={handleBaselinePosChange}
+              aimAngleRad={aimAngleRad}
+              onAimAngleChange={setAimAngleRad}
+              shotPower={shotPower}
+              onShotPowerChange={setShotPower}
+              onExecuteShot={executeShot}
+              aimGuideEnabled={true}
+            />
+
+            {/* Striker Slider & Shoot Controls Bar */}
+            <div className="w-full max-w-[620px]">
+              <CarromControlsBar
+                activePlayer={activePlayer}
+                isShotInMotion={isShotInMotion}
+                strikerBaselinePos={strikerBaselinePos}
+                onBaselinePosChange={handleBaselinePosChange}
+                aimAngleRad={aimAngleRad}
+                onAimAngleChange={setAimAngleRad}
+                shotPower={shotPower}
+                onShotPowerChange={setShotPower}
+                onShoot={() => executeShot(aimAngleRad, shotPower)}
+              />
+            </div>
+          </div>
+
+          {/* ========================================================= */}
+          {/* RIGHT COLUMN: Physics Lab & Telemetry Insights (3 Cols)   */}
+          {/* ========================================================= */}
+          <div className="lg:col-span-3 space-y-4 order-3">
+            <CarromPhysicsLabPanel
+              subMode={subMode}
+              config={matchState.config}
+              onConfigChange={handleConfigChange}
+              lastTelemetry={matchState.lastShotTelemetry}
+              strikerSpeed={strikerSpeed}
             />
           </div>
-        </div>
 
-        {/* ========================================================= */}
-        {/* RIGHT COLUMN: Physics Sandbox Lab & Telemetry (3 Cols) */}
-        {/* ========================================================= */}
-        <div className="lg:col-span-3 space-y-4">
-          {/* Physics Parameters Card */}
-          <div className="card p-4 space-y-4 bg-surface-800 border-surface-700/80">
-            <h2 className="text-xs font-semibold text-surface-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Sliders className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Physics Lab Sliders</span>
-            </h2>
-
-            {/* Restitution (Elasticity) Slider */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs text-surface-300">
-                <span>Restitution (e):</span>
-                <span className="font-mono text-emerald-400 font-bold">
-                  {restitution.toFixed(2)}
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0.4"
-                max="0.95"
-                step="0.05"
-                value={restitution}
-                onChange={(e) => setRestitution(Number(e.target.value))}
-                className="w-full accent-emerald-500 cursor-pointer"
-              />
-              <span className="text-[10px] text-surface-400 block">
-                Higher = bouncier cushion rebounds ($v_2 - v_1 / u_1 - u_2$)
-              </span>
-            </div>
-
-            {/* Surface Friction (Boric Powder) */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs text-surface-300">
-                <span>Board Friction:</span>
-                <span className="font-mono text-emerald-400 font-bold">
-                  {frictionAir.toFixed(3)}
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0.005"
-                max="0.05"
-                step="0.005"
-                value={frictionAir}
-                onChange={(e) => setFrictionAir(Number(e.target.value))}
-                className="w-full accent-emerald-500 cursor-pointer"
-              />
-              <span className="text-[10px] text-surface-400 block">
-                Lower = fine boric powder, coins glide longer
-              </span>
-            </div>
-
-            {/* Impulse Power Multiplier */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs text-surface-300">
-                <span>Impulse Power:</span>
-                <span className="font-mono text-emerald-400 font-bold">
-                  {powerScale.toFixed(1)}x
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0.5"
-                max="2.0"
-                step="0.1"
-                value={powerScale}
-                onChange={(e) => setPowerScale(Number(e.target.value))}
-                className="w-full accent-emerald-500 cursor-pointer"
-              />
-            </div>
-          </div>
-
-          {/* Real-time Physics Telemetry */}
-          <div className="card p-4 space-y-3 bg-surface-850 border-surface-700/80">
-            <h3 className="text-xs font-semibold text-surface-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Collision Telemetry</span>
-            </h3>
-
-            <div className="space-y-2 text-xs font-mono">
-              <div className="flex justify-between p-2 rounded-lg bg-surface-900 border border-surface-800">
-                <span className="text-surface-400">Striker Speed:</span>
-                <span className="text-emerald-400 font-bold">{strikerSpeed} px/s</span>
-              </div>
-              <div className="flex justify-between p-2 rounded-lg bg-surface-900 border border-surface-800">
-                <span className="text-surface-400">Momentum p:</span>
-                <span className="text-white font-bold">
-                  {(strikerSpeed * 8).toFixed(1)} kg·px/s
-                </span>
-              </div>
-            </div>
-
-            {/* Physics Principle Callout */}
-            <div className="p-3 bg-surface-900/70 rounded-xl border border-emerald-500/30 text-xs space-y-1">
-              <p className="font-bold text-emerald-300">Newton’s 3rd Law in Carrom</p>
-              <p className="text-[11px] text-surface-300 leading-relaxed">
-                When the striker impacts a stationary coin, the forces exerted between them are
-                equal in magnitude and opposite in direction ($F_1 = -F_2$).
-              </p>
-            </div>
-          </div>
         </div>
       </main>
+
+      {/* 3. VICTORY CELEBRATION MODAL */}
+      {matchState.winner && (
+        <CarromVictoryModal
+          winner={matchState.winner}
+          players={matchState.players}
+          onRematch={() => startNewMatch()}
+          onBackToLobby={() => setViewState('setup')}
+        />
+      )}
     </div>
   );
 };
