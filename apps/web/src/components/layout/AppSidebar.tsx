@@ -272,17 +272,30 @@ export function AppSidebar() {
         {/* User Profile Footer */}
         {user && (
           <div className="p-3 border-t border-border bg-canvas/30">
-            <div
-              className={`flex items-center gap-2.5 p-2 rounded-xl bg-card border border-border shadow-soft ${
+            <NavLink
+              to="/login"
+              className={`flex items-center gap-2.5 p-2 rounded-xl bg-card border border-border shadow-soft hover:border-blue-500/40 transition-colors ${
                 isSidebarCollapsed ? 'justify-center p-1.5' : ''
               }`}
+              title={user.isGuest ? 'Sign in with your Student ID' : `Logged in as ${user.name || user.username} - Click to switch account`}
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6541F5] to-[#5230E8] flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-                <User className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm font-bold text-xs">
+                {user.name ? user.name[0].toUpperCase() : <User className="w-4 h-4" />}
               </div>
               {!isSidebarCollapsed && (
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs font-bold text-text-primary truncate">{user.username}</div>
+                  <div className="flex items-center justify-between gap-1">
+                    <div className="text-xs font-bold text-text-primary truncate">{user.name || user.username}</div>
+                    {user.isGuest ? (
+                      <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-1.5 py-0.2 rounded-md">
+                        Sign In
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-semibold text-text-muted">
+                        {user.role || 'Class ' + user.grade}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
                     <span className="font-mono text-[#F5A623] font-semibold">{user.xp.toLocaleString()} XP</span>
                     <span>·</span>
@@ -290,7 +303,7 @@ export function AppSidebar() {
                   </div>
                 </div>
               )}
-            </div>
+            </NavLink>
           </div>
         )}
       </aside>

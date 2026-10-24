@@ -9,8 +9,13 @@ const DB_PATH = process.env.DATABASE_URL || path.join(__dirname, '../../../../da
 interface User {
   id: string;
   username: string;
+  studentId?: string;
+  name?: string;
+  role?: string;
   email?: string;
   passwordHash?: string;
+  pinHash?: string;
+  board?: string;
   grade: number;
   xp: number;
   level: number;
@@ -82,9 +87,15 @@ export async function setupDatabase() {
   console.log('✅ Database initialized at', DB_PATH);
 }
 
-// Helper: find user by username
-export function findUserByUsername(username: string): User | undefined {
-  return db.data.users.find(u => u.username === username);
+// Helper: find user by username, studentId, or email
+export function findUserByUsername(identifier: string): User | undefined {
+  if (!identifier) return undefined;
+  const clean = identifier.trim().toLowerCase();
+  return db.data.users.find(u =>
+    u.username.toLowerCase() === clean ||
+    (u.studentId && u.studentId.toLowerCase() === clean) ||
+    (u.email && u.email.toLowerCase() === clean)
+  );
 }
 
 // Helper: find user by id

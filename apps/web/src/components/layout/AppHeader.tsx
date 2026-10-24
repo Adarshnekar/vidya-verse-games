@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Menu,
   Search,
@@ -13,6 +14,10 @@ import {
   UserCheck,
   ChevronDown,
   Sparkles,
+  LogIn,
+  LogOut,
+  User as UserIcon,
+  Shield,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useProgressStore } from '../../stores/progressStore';
@@ -22,7 +27,7 @@ const LANGUAGES: AppLanguage[] = ['English', 'हिन्दी', 'தமிழ
 const ROLES: AppRole[] = ['Student', 'Teacher', 'Explorer'];
 
 export function AppHeader() {
-  const { user, isOnline } = useAuthStore();
+  const { user, isOnline, logout } = useAuthStore();
   const { streak } = useProgressStore();
   const {
     theme,
@@ -39,9 +44,11 @@ export function AppHeader() {
 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const langRef = useRef<HTMLDivElement>(null);
   const roleRef = useRef<HTMLDivElement>(null);
+  const userRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -51,6 +58,9 @@ export function AppHeader() {
       }
       if (roleRef.current && !roleRef.current.contains(e.target as Node)) {
         setRoleMenuOpen(false);
+      }
+      if (userRef.current && !userRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -231,6 +241,72 @@ export function AppHeader() {
               <Sun className="w-4 h-4 text-[#F5A623]" />
             )}
           </button>
+
+          {/* Authentication State: User Menu or Sign In Button */}
+          {user && !user.isGuest ? (
+            <div className="relative" ref={userRef}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-canvas border border-border hover:border-blue-500/50 transition-colors focus-visible:ring-2 focus-visible:ring-blue-600"
+                title="Account menu"
+              >
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                  {user.name ? user.name[0].toUpperCase() : 'U'}
+                </div>
+                <div className="hidden sm:block text-left max-w-[100px] truncate">
+                  <div className="text-xs font-bold text-text-primary truncate">{user.name || user.username}</div>
+                  <div className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold truncate">{user.role || 'Student'}</div>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-text-muted opacity-70" />
+              </button>
+
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-2xl shadow-game py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-4 py-2 border-b border-border/80">
+                    <div className="font-bold text-sm text-text-primary">{user.name || user.username}</div>
+                    <div className="text-xs text-text-muted mt-0.5 font-mono">{user.studentId || user.username}</div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                        {user.role || 'Student'}
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                        Class {user.grade}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="py-1">
+                    <Link
+                      to="/login"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="w-full px-4 py-2 text-left text-xs text-text-primary hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2 font-medium"
+                    >
+                      <UserIcon className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Switch Account / Sign In</span>
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setUserMenuOpen(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2 font-medium"
+                    >
+                      <LogOut className="w-3.5 h-3.5 text-red-500" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-xs font-bold shadow-md shadow-blue-600/25 transition-all"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </Link>
+          )}
         </div>
       </div>
     </header>
